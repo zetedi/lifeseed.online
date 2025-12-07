@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is signed in
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Lifetrees: Anyone can read, only signed-in users can create/update
+    match /lifetrees/{treeId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // Presents: Anyone can read, signed-in users can create
+    match /presents/{presentId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      // Only allow updating likes/comments logic (simplified for now)
+      allow update: if isSignedIn(); 
+      
+      // Subcollections (comments, loves)
+      match /loves/{userId} {
+        allow read, write: if isSignedIn();
+      }
+      match /comments/{commentId} {
+        allow read, write: if isSignedIn();
+      }
+    }
+  }
+}
