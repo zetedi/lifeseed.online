@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { useConfig } from "@/context/ConfigContext";
 import { useAuth } from "@/context/AuthContext";
 import { SimpleButton } from "@/components/SimpleButton";
 import { Icons } from "@/components/LucideIcons";
@@ -9,7 +8,6 @@ import { DotMenu } from "@/components/utils/nav/dot-menu";
 import { LogIn, LogOut } from "lucide-react";
 
 export function SiteHeader() {
-  const { mainNav } = useConfig();
   const { lightseed, signIn, signOut } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -26,8 +24,8 @@ export function SiteHeader() {
 
   return (
     <header className="bg-background/90 sticky top-0 z-40 w-full border-b backdrop-blur-sm">
-      <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
-        <MainNav items={mainNav || []} />
+      <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0 px-4">
+        <MainNav />
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-2">
             {lightseed ? (
@@ -61,7 +59,7 @@ export function SiteHeader() {
             ) : (
               <SimpleButton variant="ghost" size="sm" onClick={signIn}>
                 <LogIn className="mr-2 h-4 w-4" />
-                Login
+                <span className="hidden sm:inline ml-2">Login</span>
               </SimpleButton>
             )}
 

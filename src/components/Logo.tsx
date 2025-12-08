@@ -1,3 +1,4 @@
+
 import React, { useId } from 'react';
 
 interface LogoProps {
@@ -10,9 +11,6 @@ const Logo: React.FC<LogoProps> = ({ className, width = 64, height = 64 }) => {
   const uniqueId = useId();
   const clipPathId = `clean-${uniqueId}`;
 
-  // Dark Mode: White strokes, Black fills (inverse of Light mode usually)
-  // Light Mode: Dark strokes, White fills
-  
   return (
     <svg 
       width={width} 
@@ -27,37 +25,67 @@ const Logo: React.FC<LogoProps> = ({ className, width = 64, height = 64 }) => {
         </clipPath>
       </defs>
       <g>
-        {/* Main Circle: White in Light mode, Black in Dark mode */}
-        <circle cx="131" cy="131" r="131" className="fill-white stroke-slate-700 dark:fill-slate-900 dark:stroke-slate-100" strokeWidth="7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="131" r="131" fill="white" stroke="#334155" strokeWidth="7" clipPath={`url(#${clipPathId})`} />
 
-        {/* Small Circles: Stroke only */}
-        {[
-            // Left Column
-            [-35.28, -29], [-35.28, 35], [-35.28, 99], [-35.28, 163], [-35.28, 227], [-35.28, 291],
-            // Mid-Left
-            [20.15, 3], [20.15, 67], [20.15, 131], [20.15, 195], [20.15, 259],
-            // Center
-            [75.57, -29], [75.57, 35], [75.57, 99], [75.57, 163], [75.57, 227], [75.57, 291],
-            // Mid-Right
-            [131, 3], [131, 67], [131, 131], [131, 195], [131, 259],
-            // Right
-            [186.43, -29], [186.43, 35], [186.43, 99], [186.43, 163], [186.43, 227], [186.43, 291],
-            // Far Right
-            [241.85, 3], [241.85, 67], [241.85, 131], [241.85, 195], [241.85, 259],
-            // Outer Right
-            [297.28, -29], [297.28, 35], [297.28, 99], [297.28, 163], [297.28, 227], [297.28, 291]
-        ].map(([cx, cy], i) => (
-            <circle key={i} cx={cx} cy={cy} r="64" fill="none" className="stroke-slate-700 dark:stroke-slate-100" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
-        ))}
+        {/* Left Column */}
+        <circle cx="-35.28" cy="-29" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="-35.28" cy="35" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="-35.28" cy="99" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="-35.28" cy="163" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="-35.28" cy="227" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="-35.28" cy="291" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
 
-        {/* Inner Seed Circles: Filled */}
-        {[
-            [75.57, 99], [75.57, 163],
-            [131, 67], [131, 131], [131, 195],
-            [186.43, 99], [186.43, 163]
-        ].map(([cx, cy], i) => (
-            <circle key={`inner-${i}`} cx={cx} cy={cy} r="16" className="fill-white stroke-slate-700 dark:fill-slate-900 dark:stroke-slate-100" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
-        ))}
+        {/* Mid-Left Column */}
+        <circle cx="20.15" cy="3" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="20.15" cy="67" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="20.15" cy="131" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="20.15" cy="195" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="20.15" cy="259" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+
+        {/* Center Column */}
+        <circle cx="75.57" cy="-29" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="75.57" cy="35" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="75.57" cy="99" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="75.57" cy="163" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="75.57" cy="227" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="75.57" cy="291" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+
+        {/* Mid-Right Column */}
+        <circle cx="131" cy="3" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="67" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="131" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="195" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="259" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+
+        {/* Right Columns */}
+        <circle cx="186.43" cy="-29" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="35" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="99" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="163" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="227" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="291" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+
+        <circle cx="241.85" cy="3" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="241.85" cy="67" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="241.85" cy="131" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="241.85" cy="195" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="241.85" cy="259" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+
+        <circle cx="297.28" cy="-29" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="297.28" cy="35" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="297.28" cy="99" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="297.28" cy="163" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="297.28" cy="227" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="297.28" cy="291" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+
+        {/* Inner Seed Circles */}
+        <circle cx="75.57" cy="99" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
+        <circle cx="75.57" cy="163" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="67" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="131" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="195" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="99" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="163" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
       </g>
     </svg>
   );

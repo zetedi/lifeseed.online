@@ -7,8 +7,13 @@ let aiClient: GoogleGenAI | null = null;
 
 const getAiClient = () => {
     if (!aiClient) {
-        // According to guidelines: The API key must be obtained exclusively from the environment variable process.env.API_KEY.
-        aiClient = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        // Access env variables exclusively via process.env.API_KEY as per guidelines
+        const apiKey = process.env.API_KEY;
+        if (!apiKey) {
+            console.warn("LifeSeed: API_KEY is missing in process.env");
+            return null;
+        }
+        aiClient = new GoogleGenAI({ apiKey });
     }
     return aiClient;
 }
@@ -18,7 +23,6 @@ export const generateLifetreeBio = async (seed: string): Promise<string> => {
   
   const ai = getAiClient();
   if (!ai) {
-      console.warn("Gemini API Key missing");
       return "Roots run deep... (AI key missing)";
   }
 

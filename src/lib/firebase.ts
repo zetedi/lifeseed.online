@@ -1,3 +1,4 @@
+
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
@@ -31,7 +32,7 @@ import {
 import { type Pulse, type PulseType, type Lifetree, type MatchProposal, type Vision } from '../types/Types';
 import { createBlock } from './crypto';
 
-// Access Vite env variables directly via cast to avoid TS errors
+// Access Vite env variables directly
 const env = (import.meta as any).env;
 const apiKey = env.VITE_FIREBASE_API_KEY;
 const authDomain = env.VITE_FIREBASE_AUTH_DOMAIN;
@@ -253,6 +254,7 @@ export const acceptMatch = async (proposalId: string) => {
     return runTransaction(db, async (t) => {
         const p = (await t.get(matchRef)).data() as MatchProposal;
         if(p.status !== 'PENDING') throw new Error("Processed");
+        // Simplified for brevity in refactor - full logic assumes trees exist
         t.update(matchRef, { status: 'ACCEPTED' });
     });
 }
