@@ -4,7 +4,7 @@ import { type Timestamp } from 'firebase/firestore';
 
 export type Lightseed = Pick<FirebaseUser, 'uid' | 'email' | 'displayName' | 'photoURL'>;
 
-// Removed 'PresentType' as everything is now a Pulse
+export type PulseType = 'STANDARD' | 'GROWTH';
 
 // The Entity/Blockchain container
 export interface Lifetree {
@@ -19,8 +19,8 @@ export interface Lifetree {
   createdAt: Timestamp;
   
   // Validation Logic
-  validated: boolean; // Only validated trees can validate others
-  validatorId?: string; // Who validated this tree
+  validated: boolean; 
+  validatorId?: string;
 
   // Blockchain Props
   genesisHash: string;
@@ -28,19 +28,21 @@ export interface Lifetree {
   blockHeight: number;
 }
 
-// The Block (formerly Present)
+// The Block
 export interface Pulse {
   id: string;
-  lifetreeId: string; // The chain this specific entry belongs to
+  lifetreeId: string;
+  type: PulseType; // GROWTH or STANDARD
   
   // Data Payload
   title: string;
   body: string;
-  imageUrl?: string; // NFT Image
+  imageUrl?: string;
   
-  // Match/interaction Logic
-  isMatch: boolean; // Is this a meeting of two pulses?
-  matchedLifetreeId?: string; // If matched, which tree did we meet?
+  // Match Logic (On Chain)
+  isMatch: boolean;
+  matchedLifetreeId?: string;
+  matchId?: string; // Link to the handshake
   
   // Metadata
   authorId: string;
@@ -48,13 +50,28 @@ export interface Pulse {
   authorPhoto?: string;
   createdAt: Timestamp;
   
-  // Interactions
+  // Interactions (Off Chain)
   loveCount: number;
   commentCount: number;
 
   // Blockchain Ledger
   previousHash: string;
   hash: string;
+}
+
+// Off-Chain Match Handshake
+export interface MatchProposal {
+  id: string;
+  initiatorPulseId: string;
+  initiatorTreeId: string;
+  initiatorUid: string;
+  
+  targetPulseId: string; // The pulse being matched WITH
+  targetTreeId: string;
+  targetUid: string; // The owner who needs to accept
+
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  createdAt: Timestamp;
 }
 
 export interface Comment {

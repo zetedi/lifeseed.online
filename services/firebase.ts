@@ -20,7 +20,8 @@ import {
   runTransaction,
   getDoc,
   where,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from 'firebase/firestore';
 import { 
   getStorage, 
@@ -28,10 +29,9 @@ import {
   uploadBytes, 
   getDownloadURL 
 } from 'firebase/storage';
-import { type Pulse, type Comment, type Lifetree } from '../types';
+import { type Pulse, type PulseType, type Lifetree, type MatchProposal } from '../types';
 import { createBlock } from '../utils/crypto';
 
-// Load config from Environment Variables (.env)
 const env = (import.meta as any).env;
 
 const firebaseConfig = {
@@ -76,7 +76,7 @@ export const uploadImage = async (file: File, path: string): Promise<string> => 
   } catch (error) { console.error(error); throw error; }
 };
 
-// --- LIFETREE (BLOCKCHAIN ENTITY) ---
+// --- LIFETREES ---
 const lifetreesCollection = collection(db, 'lifetrees');
 
 export const plantLifetree = async (data: {
@@ -88,11 +88,9 @@ export const plantLifetree = async (data: {
   lng?: number,
   locName?: string
 }) => {
-  // 1. Check existing trees for this owner
   const q = query(lifetreesCollection, where('ownerId', '==', data.ownerId));
   const snapshot = await getDocs(q);
   
-  // Rule: Can only plant new tree if ALL existing trees are validated.
   if (!snapshot.empty) {
       const trees = snapshot.docs.map(d => d.data() as Lifetree);
       const allValidated = trees.every(t => t.validated);
@@ -101,10 +99,7 @@ export const plantLifetree = async (data: {
       }
   }
 
-  // 2. Genesis Logic: "Phoenix" is the First Valid Tree
   const isValid = data.name.trim().toLowerCase() === "phoenix";
-
-  // 3. Create Genesis Block Hash
   const genesisData = { message: "Genesis Pulse", owner: data.ownerId, timestamp: Date.now() };
   const genesisHash = await createBlock("0", genesisData, Date.now());
 
@@ -158,25 +153,31 @@ export const getMyLifetrees = async (userId: string): Promise<Lifetree[]> => {
     return snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Lifetree));
 };
 
-// --- PULSES (THE BLOCKS) ---
-// Replaces "Presents"
+// --- PULSES & MATCHING ---
 const pulsesCollection = collection(db, 'pulses');
+const matchesCollection = collection(db, 'matches');
 
 export const fetchPulses = async (): Promise<Pulse[]> => {
-  // Show all pulses, sorted by time
   const q = query(pulsesCollection, orderBy('createdAt', 'desc'));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Pulse));
 };
 
-/**
- * Creates a Pulse (NFT Block).
- * If targetLifetreeId is provided, this is a MATCH/MEETING.
- * It creates entries on BOTH blockchains transactionally.
- */
-export const createPulse = async (pulseData: {
-  lifetreeId: string, // My tree
-  targetLifetreeId?: string, // The tree I am pulsing at (Matching)
+export const fetchGrowthPulses = async (treeId: string): Promise<Pulse[]> => {
+    const q = query(
+        pulsesCollection, 
+        where('lifetreeId', '==', treeId), 
+        where('type', '==', 'GROWTH'),
+        orderBy('createdAt', 'asc')
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Pulse));
+}
+
+// Mint a single Pulse (Growth or Standard)
+export const mintPulse = async (pulseData: {
+  lifetreeId: string,
+  type: PulseType,
   title: string,
   body: string,
   imageUrl?: string,
@@ -187,7 +188,6 @@ export const createPulse = async (pulseData: {
   return runTransaction(db, async (transaction) => {
     const timestamp = Date.now();
     
-    // 1. Process Source Tree (My Tree)
     const sourceTreeRef = doc(db, 'lifetrees', pulseData.lifetreeId);
     const sourceTreeDoc = await transaction.get(sourceTreeRef);
     if (!sourceTreeDoc.exists()) throw new Error("Source tree missing");
@@ -195,25 +195,22 @@ export const createPulse = async (pulseData: {
     const sourceTree = sourceTreeDoc.data() as Lifetree;
     const prevHashSource = sourceTree.latestHash || sourceTree.genesisHash || "0";
     
-    // Hash Payload
+    // Hash Payload (excludes comments)
     const blockData = {
       title: pulseData.title,
       body: pulseData.body,
       image: pulseData.imageUrl || "",
       author: pulseData.authorId,
-      target: pulseData.targetLifetreeId || "SELF"
+      type: pulseData.type
     };
     
     const newHash = await createBlock(prevHashSource, blockData, timestamp);
-    
-    // Create Source Pulse
     const newPulseRef = doc(pulsesCollection);
+    
     transaction.set(newPulseRef, {
       ...pulseData,
       id: newPulseRef.id,
-      lifetreeId: pulseData.lifetreeId,
-      isMatch: !!pulseData.targetLifetreeId,
-      matchedLifetreeId: pulseData.targetLifetreeId || null,
+      isMatch: false,
       loveCount: 0,
       commentCount: 0,
       createdAt: serverTimestamp(),
@@ -221,49 +218,103 @@ export const createPulse = async (pulseData: {
       hash: newHash,
     });
 
-    // Update Source Tree
     transaction.update(sourceTreeRef, {
       latestHash: newHash,
-      blockHeight: (sourceTree.blockHeight || 0) + 1
+      blockHeight: (sourceTree.blockHeight || 0) + 1,
+      // If growth, maybe update tree image? Optional.
+      ...(pulseData.type === 'GROWTH' && pulseData.imageUrl ? { imageUrl: pulseData.imageUrl } : {})
     });
-
-    // 2. Process Target Tree (If Match)
-    if (pulseData.targetLifetreeId && pulseData.targetLifetreeId !== pulseData.lifetreeId) {
-        const targetTreeRef = doc(db, 'lifetrees', pulseData.targetLifetreeId);
-        const targetTreeDoc = await transaction.get(targetTreeRef);
-        
-        if (targetTreeDoc.exists()) {
-            const targetTree = targetTreeDoc.data() as Lifetree;
-            const prevHashTarget = targetTree.latestHash || targetTree.genesisHash || "0";
-            
-            // The matched pulse on the other tree (Linked by ID or content, but technically a new block on their chain)
-            const matchedPulseRef = doc(pulsesCollection);
-            // Hash payload for target (includes reference to source)
-            const matchHash = await createBlock(prevHashTarget, { ...blockData, origin: pulseData.lifetreeId }, timestamp);
-
-            transaction.set(matchedPulseRef, {
-                ...pulseData,
-                id: matchedPulseRef.id,
-                title: `Match: ${pulseData.title}`,
-                lifetreeId: pulseData.targetLifetreeId, // It lives on their tree now
-                isMatch: true,
-                matchedLifetreeId: pulseData.lifetreeId, // Points back to me
-                loveCount: 0,
-                commentCount: 0,
-                createdAt: serverTimestamp(),
-                previousHash: prevHashTarget,
-                hash: matchHash
-            });
-
-            // Update Target Tree Ledger
-            transaction.update(targetTreeRef, {
-                latestHash: matchHash,
-                blockHeight: (targetTree.blockHeight || 0) + 1
-            });
-        }
-    }
   });
 };
+
+// --- MATCHING SYSTEM ---
+
+export const proposeMatch = async (data: {
+    initiatorPulseId: string,
+    initiatorTreeId: string,
+    initiatorUid: string,
+    targetPulseId: string,
+    targetTreeId: string, // Requires us to look up the pulse's tree first usually
+    targetUid: string
+}) => {
+    return addDoc(matchesCollection, {
+        ...data,
+        status: 'PENDING',
+        createdAt: serverTimestamp()
+    });
+}
+
+export const getPendingMatches = async (userId: string): Promise<MatchProposal[]> => {
+    const q = query(matchesCollection, where('targetUid', '==', userId), where('status', '==', 'PENDING'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({id: d.id, ...d.data() as any} as MatchProposal));
+}
+
+// Accepts match and writes to blockchain
+export const acceptMatch = async (proposalId: string) => {
+    const matchRef = doc(db, 'matches', proposalId);
+    
+    return runTransaction(db, async (t) => {
+        const matchDoc = await t.get(matchRef);
+        if (!matchDoc.exists()) throw new Error("Match expired");
+        const proposal = matchDoc.data() as MatchProposal;
+
+        if (proposal.status !== 'PENDING') throw new Error("Match already processed");
+
+        // Mint Match Block on Initiator Tree
+        const initTreeRef = doc(db, 'lifetrees', proposal.initiatorTreeId);
+        const initTree = (await t.get(initTreeRef)).data() as Lifetree;
+        const initHash = await createBlock(initTree.latestHash, { match: proposal.id, with: proposal.targetPulseId }, Date.now());
+        
+        const pulseRef1 = doc(pulsesCollection);
+        t.set(pulseRef1, {
+            lifetreeId: proposal.initiatorTreeId,
+            type: 'STANDARD',
+            title: 'Pulse Match',
+            body: 'Two pulses met and connected.',
+            isMatch: true,
+            matchedLifetreeId: proposal.targetTreeId,
+            matchId: proposal.id,
+            authorId: proposal.initiatorUid,
+            authorName: 'System', 
+            createdAt: serverTimestamp(),
+            previousHash: initTree.latestHash,
+            hash: initHash,
+            loveCount: 0,
+            commentCount: 0
+        });
+        t.update(initTreeRef, { latestHash: initHash, blockHeight: initTree.blockHeight + 1 });
+
+        // Mint Match Block on Target Tree
+        const targetTreeRef = doc(db, 'lifetrees', proposal.targetTreeId);
+        const targetTree = (await t.get(targetTreeRef)).data() as Lifetree;
+        const targetHash = await createBlock(targetTree.latestHash, { match: proposal.id, with: proposal.initiatorPulseId }, Date.now());
+
+        const pulseRef2 = doc(pulsesCollection);
+        t.set(pulseRef2, {
+            lifetreeId: proposal.targetTreeId,
+            type: 'STANDARD',
+            title: 'Pulse Match',
+            body: 'Two pulses met and connected.',
+            isMatch: true,
+            matchedLifetreeId: proposal.initiatorTreeId,
+            matchId: proposal.id,
+            authorId: proposal.targetUid,
+            authorName: 'System',
+            createdAt: serverTimestamp(),
+            previousHash: targetTree.latestHash,
+            hash: targetHash,
+            loveCount: 0,
+            commentCount: 0
+        });
+        t.update(targetTreeRef, { latestHash: targetHash, blockHeight: targetTree.blockHeight + 1 });
+
+        // Close Proposal
+        t.update(matchRef, { status: 'ACCEPTED' });
+    });
+}
+
+// --- INTERACTIONS (Off Chain) ---
 
 export const isPulseLoved = async (pulseId: string, userId: string): Promise<boolean> => {
     if (!userId) return false;
