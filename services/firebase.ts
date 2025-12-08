@@ -1,5 +1,6 @@
 
 
+
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
@@ -22,7 +23,8 @@ import {
   getDoc,
   where,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  limit
 } from 'firebase/firestore';
 import { 
   getStorage, 
@@ -89,6 +91,7 @@ export const plantLifetree = async (data: {
   lng?: number,
   locName?: string
 }) => {
+  // Check if user already has an unvalidated tree
   const q = query(lifetreesCollection, where('ownerId', '==', data.ownerId));
   const snapshot = await getDocs(q);
   
@@ -100,7 +103,12 @@ export const plantLifetree = async (data: {
       }
   }
 
-  const isValid = data.name.trim().toLowerCase() === "phoenix";
+  // Check if this is the FIRST tree in the entire system (Genesis)
+  const allTreesQuery = query(lifetreesCollection, limit(1));
+  const allTreesSnap = await getDocs(allTreesQuery);
+  const isFirstTree = allTreesSnap.empty;
+
+  const isValid = isFirstTree || data.name.trim().toLowerCase() === "phoenix";
   const genesisData = { message: "Genesis Pulse", owner: data.ownerId, timestamp: Date.now() };
   const genesisHash = await createBlock("0", genesisData, Date.now());
 
@@ -117,7 +125,7 @@ export const plantLifetree = async (data: {
     latestHash: genesisHash,
     blockHeight: 0,
     validated: isValid,
-    validatorId: isValid ? "SYSTEM" : null
+    validatorId: isValid ? (isFirstTree ? "GENESIS" : "SYSTEM") : null
   });
 };
 
