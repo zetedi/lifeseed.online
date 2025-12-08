@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Query, getDocs, limit, startAfter, query } from 'firebase/firestore';
 
@@ -8,7 +7,6 @@ export function useInfiniteQuery<T>(baseQuery: Query) {
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     
-    // Reset when query changes
     useEffect(() => {
         setData([]);
         setLastDoc(null);
@@ -39,7 +37,6 @@ export function useInfiniteQuery<T>(baseQuery: Query) {
         }
     }, [baseQuery, lastDoc, loading, hasMore]);
 
-    // Intersection Observer Helper
     const observer = useRef<IntersectionObserver | null>(null);
     const lastElementRef = useCallback((node: HTMLDivElement | null) => {
         if (loading) return;

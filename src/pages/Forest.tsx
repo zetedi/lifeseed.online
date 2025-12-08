@@ -1,37 +1,25 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Lifetree } from '../types';
+import { useAuth } from '../context/AuthContext';
+import { Lifetree } from '../types/Types';
 import { LifetreeCard } from '../components/LifetreeCard';
 import { Icons } from '../components/Icons';
 import { useInfiniteQuery } from '../hooks/useInfiniteQuery';
 import { collection, query, orderBy } from 'firebase/firestore';
-import { db, validateLifetree, uploadImage, mintPulse } from '../services/firebase';
+import { db, validateLifetree, uploadImage, mintPulse } from '../lib/firebase';
 
-// Since we separated ForestMap in App.tsx (or if you want to move it here, you can), 
-// For this refactor, I'll assume the Map view logic is passed down or handled here if simple.
-// But to keep it modular, let's keep it clean.
-
-interface ForestPageProps {
-    myActiveTree: Lifetree | null;
-    lightseed: any;
-    onViewTree: (tree: Lifetree) => void;
-    setShowGrowthPlayer: (id: string) => void;
-    // Map view props or components would be passed here or imported
-}
-
-export const Forest = ({ myActiveTree, lightseed, onViewTree, setShowGrowthPlayer }: ForestPageProps) => {
+export default function Forest() {
     const { t } = useLanguage();
+    const { lightseed, myTrees } = useAuth();
+    const myActiveTree = myTrees.length > 0 ? myTrees[0] : null;
     const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
     
-    // Performance: Use Infinite Scroll
     const forestQuery = query(collection(db, 'lifetrees'), orderBy('createdAt', 'desc'));
     const { data: trees, loading, lastElementRef } = useInfiniteQuery<Lifetree>(forestQuery);
 
     const handleQuickSnap = async (treeId: string, file: File) => {
          if (!lightseed) return;
          try {
-            // Upload logic here or passed from parent context
             const url = await uploadImage(file, `growth/${treeId}/${Date.now()}`);
              await mintPulse({
                 lifetreeId: treeId,
@@ -44,13 +32,24 @@ export const Forest = ({ myActiveTree, lightseed, onViewTree, setShowGrowthPlaye
                 authorPhoto: lightseed.photoURL || undefined,
             });
             alert("Snapshot minted!");
-         } catch(e) {
+         } catch(e: any) {
              console.error(e);
+             alert("Error: " + e.message);
          }
     };
 
+    const handleValidate = async (id: string) => {
+        if (!myActiveTree) return;
+        try {
+            await validateLifetree(id, myActiveTree.id);
+            alert("Validated!");
+        } catch (e: any) {
+            alert(e.message);
+        }
+    };
+
     return (
-        <div>
+        <div className="p-4 max-w-7xl mx-auto">
              <div className="flex justify-end mb-4">
                 <div className="bg-white p-1 rounded-lg border border-slate-200 flex shadow-sm shrink-0">
                     <button onClick={() => setViewMode('grid')} className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewMode === 'grid' ? 'bg-slate-800 text-white shadow' : 'text-slate-500 hover:text-slate-800'}`}>
@@ -71,10 +70,10 @@ export const Forest = ({ myActiveTree, lightseed, onViewTree, setShowGrowthPlaye
                                 <LifetreeCard 
                                     tree={tree} 
                                     myActiveTree={myActiveTree}
-                                    onValidate={(id) => validateLifetree(id, myActiveTree!.id)}
-                                    onPlayGrowth={setShowGrowthPlayer}
+                                    onValidate={handleValidate}
+                                    onPlayGrowth={(id) => console.log('Play growth', id)}
                                     onQuickSnap={handleQuickSnap}
-                                    onView={onViewTree}
+                                    onView={() => console.log('View tree', tree.id)}
                                 />
                             </div>
                         );
@@ -83,8 +82,7 @@ export const Forest = ({ myActiveTree, lightseed, onViewTree, setShowGrowthPlaye
                 </div>
             ) : (
                 <div className="bg-slate-100 h-[600px] rounded-xl flex items-center justify-center text-slate-400">
-                    {/* Placeholder for Map Component - ideally imported from components/ForestMap.tsx */}
-                    Map View (Refactored to separate component)
+                    Map View
                 </div>
             )}
         </div>

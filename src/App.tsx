@@ -1,13 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage, LanguageProvider } from './contexts/LanguageContext';
 import Logo from './components/Logo';
 import { Icons } from './components/Icons';
-import { Forest } from './pages/Forest';
-import { Visions } from './pages/Visions';
+import Forest from './pages/Forest';
+import Visions from './pages/Visions';
 import { PulseCard } from './components/PulseCard';
 import { Modal } from './components/Modal';
-import { Pulse, Lifetree } from './types';
+import { Pulse, Lifetree } from './types/Types';
 import { useInfiniteQuery } from './hooks/useInfiniteQuery';
 import { db, signInWithGoogle, logout, onAuthChange, getMyLifetrees, plantLifetree, uploadImage, mintPulse } from './services/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
@@ -83,7 +82,7 @@ const AppContent = () => {
 
             {/* --- MAIN CONTENT --- */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                {tab === 'forest' && <Forest myActiveTree={activeTree} lightseed={lightseed} onViewTree={() => {}} setShowGrowthPlayer={() => {}} />}
+                {tab === 'forest' && <Forest />}
                 
                 {tab === 'visions' && <Visions />}
 

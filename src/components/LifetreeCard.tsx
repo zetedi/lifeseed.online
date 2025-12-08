@@ -1,6 +1,5 @@
-
 import React, { useRef, useState, ChangeEvent } from 'react';
-import { Lifetree } from '../types';
+import { Lifetree } from '../types/Types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Icons } from './Icons';
 import Logo from './Logo';

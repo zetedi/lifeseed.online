@@ -1,0 +1,27 @@
+{
+  "app": {
+    "type": "main",
+    "title": "Lightseed • Main Application",
+    "slug": "main",
+    "imageGlob": "../../../assets/photography/*.{png,jpg,jpeg,svg,gif}"
+  },
+  "theme": {
+    "accent": "#6c5ce7",
+    "mode": "light",
+    "backgroundImage": "/harmony.svg",
+    "logo": "/lifeseed.svg"
+  },
+  "features": {
+    "mastodonBridge": false,
+    "map": true,
+    "filmstrip": true
+  },
+  "mainNav": [
+    { "title": "Home", "href": "/" },
+    { "title": "Forest", "href": "/forest" },
+    { "title": "Pulses", "href": "/pulses" },
+    { "title": "Visions", "href": "/visions" },
+    { "title": "The Secret Sun", "href": "/thesecretsun" },
+    { "title": "White Paper", "href": "/white" }
+  ]
+}

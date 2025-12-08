@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
-import { Pulse, Lightseed } from '../types';
+import { Pulse, Lightseed } from '../types/Types';
 import { Icons } from './Icons';
-import { isPulseLoved, lovePulse } from '../services/firebase';
+import { isPulseLoved, lovePulse } from '../lib/firebase';
 
 interface PulseCardProps {
     pulse: Pulse;
