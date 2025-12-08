@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils"
 import Logo from "@/components/Logo"
 import { Link, useLocation } from "react-router-dom";
@@ -9,6 +10,7 @@ export function MainNav() {
     { title: "Forest", href: "/forest" },
     { title: "Pulses", href: "/pulses" },
     { title: "Visions", href: "/visions" },
+    { title: "Matches", href: "/matches" },
     { title: "Secret Sun", href: "/thesecretsun" },
     { title: "White Paper", href: "/white" },
   ];

@@ -1,10 +1,11 @@
+
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { SimpleButton } from "@/components/SimpleButton";
-import { Icons } from "@/components/LucideIcons";
-import { MainNav } from "@/components/utils/MainNav";
-import { ModeToggle } from "@/components/utils/ModeToggle";
-import { DotMenu } from "@/components/utils/nav/dot-menu";
+import { SimpleButton } from "../../SimpleButton"; // Fixed relative import
+import { Icons } from "../../LucideIcons"; // Fixed relative import
+import { MainNav } from "../MainNav"; // Fixed relative import
+import { ModeToggle } from "../ModeToggle"; // Fixed relative import
+import { DotMenu } from "../nav/dot-menu"; // Fixed relative import
 import { LogIn, LogOut } from "lucide-react";
 
 export function SiteHeader() {
