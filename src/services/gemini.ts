@@ -2,19 +2,13 @@
 import { GoogleGenAI } from "@google/genai";
 import { type GenerateContentResponse } from "@google/genai";
 
-// Read API Key from Vite Environment Variables safely
-const API_KEY = (import.meta as any).env.VITE_API_KEY;
-
 // Lazy initialization to prevent top-level crash
 let aiClient: GoogleGenAI | null = null;
 
 const getAiClient = () => {
     if (!aiClient) {
-        if (!API_KEY) {
-            console.warn("LifeSeed: VITE_API_KEY is missing in .env");
-            return null;
-        }
-        aiClient = new GoogleGenAI({ apiKey: API_KEY });
+        // According to guidelines: The API key must be obtained exclusively from the environment variable process.env.API_KEY.
+        aiClient = new GoogleGenAI({ apiKey: process.env.API_KEY });
     }
     return aiClient;
 }

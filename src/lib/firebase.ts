@@ -1,4 +1,3 @@
-
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
@@ -32,9 +31,8 @@ import {
 import { type Pulse, type PulseType, type Lifetree, type MatchProposal, type Vision } from '../types/Types';
 import { createBlock } from './crypto';
 
-// Access Vite env variables directly
+// Access Vite env variables directly via cast to avoid TS errors
 const env = (import.meta as any).env;
-
 const apiKey = env.VITE_FIREBASE_API_KEY;
 const authDomain = env.VITE_FIREBASE_AUTH_DOMAIN;
 const projectId = env.VITE_FIREBASE_PROJECT_ID;
