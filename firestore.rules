@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -8,22 +9,20 @@ service cloud.firestore {
     }
 
     // LIFETREES
-    // - Anyone can read.
-    // - Any signed-in user can plant a tree.
-    // - Updates allowed for:
-    //    1. The Owner (planting new pulses/blocks).
-    //    2. Other Users (Pulse Matching/Syncing blocks to your chain).
-    //    3. Validators (Marking tree as validated).
     match /lifetrees/{treeId} {
       allow read: if true;
       allow create: if isSignedIn();
       allow update: if isSignedIn(); 
     }
 
-    // PULSES (The Blockchain Blocks)
-    // - Anyone can read.
-    // - Signed-in users can mint pulses.
-    // - Signed-in users can update (for loves/interactions).
+    // VISIONS (New)
+    match /visions/{visionId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+    }
+
+    // PULSES
     match /pulses/{pulseId} {
       allow read: if true;
       allow create: if isSignedIn();
@@ -33,6 +32,13 @@ service cloud.firestore {
       match /loves/{userId} {
         allow read, write: if isSignedIn();
       }
+    }
+    
+    // MATCHES
+    match /matches/{matchId} {
+        allow read: if true;
+        allow create: if isSignedIn();
+        allow update: if isSignedIn();
     }
   }
 }

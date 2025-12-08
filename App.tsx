@@ -12,16 +12,20 @@ import {
   plantLifetree,
   getMyLifetrees,
   uploadImage,
+  uploadBase64Image,
   validateLifetree,
   proposeMatch,
   getPendingMatches,
   acceptMatch,
   fetchGrowthPulses,
   getMyPulses,
-  getMyMatchesHistory
+  getMyMatchesHistory,
+  fetchVisions,
+  createVision,
+  getMyVisions
 } from './services/firebase';
-import { generateLifetreeBio } from './services/gemini';
-import { type Lightseed, type Pulse, type Lifetree, type MatchProposal } from './types';
+import { generateLifetreeBio, generateVisionImage } from './services/gemini';
+import { type Lightseed, type Pulse, type Lifetree, type MatchProposal, type Vision } from './types';
 import Logo from './components/Logo';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { type Language } from './utils/translations';
@@ -32,6 +36,7 @@ const colors = {
   earth: "bg-[#92400E]", 
   grass: "bg-[#65A30D]",
   snow: "bg-[#F8FAFC]",
+  sun: "bg-[#F59E0B]", // Amber 500
 };
 
 // --- ANIMATIONS ---
@@ -55,12 +60,14 @@ const Icons = {
   Map: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" /></svg>,
   List: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>,
   Camera: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>,
-  ShieldCheck: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-emerald-500"><path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" /></svg>,
+  ShieldCheck: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-emerald-500"><path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.1-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" /></svg>,
   Play: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" /></svg>,
   Link: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>,
   ArrowLeft: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>,
   FingerPrint: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M7.875 14.25l1.214 1.942a2.25 2.25 0 001.908 1.058h2.006c.776 0 1.497-.4 1.908-1.058l1.214-1.942M2.41 9a4.5 4.5 0 016.398-3.412 6 6 0 014.866 2.318A6 6 0 0118.665 4.5 6 6 0 0121.75 9v12a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 012.25 21V9z" /></svg>,
-  Search: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+  Search: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>,
+  Sparkles: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>,
+  Globe: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>
 };
 
 const useLifeseed = () => {
@@ -98,27 +105,38 @@ const useLifeseed = () => {
     return { lightseed, myTrees, activeTree, loading, refreshTrees };
 };
 
-const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout, onProfile }: any) => {
+const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout, onProfile, onCreateVision }: any) => {
     const { t, language, setLanguage } = useLanguage();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    
+    // Helper to get active button style
+    const getTabStyle = (key: string) => {
+        if (activeTab === key) {
+            if (key === 'visions') return `bg-amber-500 text-white shadow-lg shadow-amber-500/30`;
+            if (key === 'forest') return `bg-emerald-600 text-white shadow-lg shadow-emerald-500/30`;
+            if (key === 'pulses') return `bg-sky-600 text-white shadow-lg shadow-sky-500/30`;
+            return `bg-slate-700 text-white`;
+        }
+        return `text-slate-300 hover:text-white hover:bg-white/5`;
+    }
 
     return (
-        <nav className={`sticky top-0 z-30 ${colors.sky} text-white shadow-lg backdrop-blur-md bg-opacity-95`}>
+        <nav className={`sticky top-0 z-30 bg-slate-900 border-b border-slate-800 text-white backdrop-blur-md bg-opacity-95`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-20 items-center">
                     <div className="flex items-center space-x-3 cursor-pointer rtl:space-x-reverse" onClick={() => setTab('forest')}>
                         <div className="bg-white p-1 rounded-full shadow-inner animate-[pulse_3s_ease-in-out_infinite]">
                              <Logo width={40} height={40} />
                         </div>
-                        <span className="font-light text-2xl tracking-wide lowercase hidden sm:block">lifeseed</span>
+                        <span className="font-light text-2xl tracking-wide lowercase hidden sm:block text-white">lifeseed</span>
                     </div>
 
-                    <div className="hidden md:flex space-x-6 rtl:space-x-reverse">
-                        {['forest', 'pulses', 'matches'].map((tabKey) => (
+                    <div className="hidden md:flex space-x-3 rtl:space-x-reverse">
+                        {['forest', 'pulses', 'visions', 'matches'].map((tabKey) => (
                             <button 
                                 key={tabKey}
                                 onClick={() => setTab(tabKey)}
-                                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${activeTab === tabKey ? 'bg-white/10 text-white shadow-inner' : 'text-slate-300 hover:text-white'}`}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${getTabStyle(tabKey)}`}
                             >
                                 {tabKey === 'matches' ? 'Matches' : t(tabKey as any)}
                             </button>
@@ -129,7 +147,7 @@ const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, o
                          <select 
                             value={language} 
                             onChange={(e) => setLanguage(e.target.value as Language)}
-                            className="bg-slate-700 text-white text-xs rounded border-none py-1 pl-2 pr-6 cursor-pointer"
+                            className="bg-black/20 text-white text-xs rounded border-none py-1 pl-2 pr-6 cursor-pointer"
                         >
                             <option value="en">EN</option>
                             <option value="es">ES</option>
@@ -142,17 +160,24 @@ const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, o
 
                         {lightseed ? (
                             <>
-                                <button onClick={onPulse} className={`hidden sm:flex ${colors.earth} hover:bg-[#78350f] text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
-                                    <PulsatingDot />
-                                    {t('emit_pulse')}
-                                </button>
+                                {activeTab === 'visions' ? (
+                                     <button onClick={onCreateVision} className={`hidden sm:flex ${colors.earth} hover:bg-[#78350f] text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
+                                        {t('create_vision')}
+                                    </button>
+                                ) : (
+                                    <button onClick={onPulse} className={`hidden sm:flex ${colors.earth} hover:bg-[#78350f] text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
+                                        <PulsatingDot />
+                                        {t('emit_pulse')}
+                                    </button>
+                                )}
+                                
                                 <img 
                                     src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} 
-                                    className="w-9 h-9 rounded-full border-2 border-slate-400 cursor-pointer hover:border-white transition-colors" 
+                                    className="w-9 h-9 rounded-full border-2 border-white/50 cursor-pointer hover:border-white transition-colors" 
                                     alt="Seed" 
                                     onClick={onProfile}
                                 />
-                                <button onClick={onLogout} className="text-slate-300 hover:text-white text-sm">{t('sign_out')}</button>
+                                <button onClick={onLogout} className="text-white/80 hover:text-white text-sm">{t('sign_out')}</button>
                             </>
                         ) : (
                             <button onClick={onLogin} className={`flex items-center space-x-2 rtl:space-x-reverse bg-white text-slate-900 px-5 py-2 rounded-full text-sm font-bold shadow-md hover:bg-slate-100 transition-colors`}>
@@ -165,7 +190,7 @@ const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, o
                         <select 
                             value={language} 
                             onChange={(e) => setLanguage(e.target.value as Language)}
-                            className="bg-slate-700 text-white text-xs rounded border-none py-1 pl-1 pr-1 cursor-pointer w-12"
+                            className="bg-black/20 text-white text-xs rounded border-none py-1 pl-1 pr-1 cursor-pointer w-12"
                         >
                             <option value="en">EN</option>
                             <option value="es">ES</option>
@@ -179,19 +204,19 @@ const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, o
             </div>
 
             {isMenuOpen && (
-                 <div className="md:hidden bg-slate-800 border-t border-slate-700 pb-4 px-4">
+                 <div className="md:hidden bg-slate-900 border-t border-slate-800 pb-4 px-4">
                     <div className="flex flex-col space-y-2 mt-4">
                          {lightseed && (
-                             <button onClick={() => { onProfile(); setIsMenuOpen(false); }} className="flex items-center space-x-3 px-3 py-3 rounded-md bg-slate-700/50">
+                             <button onClick={() => { onProfile(); setIsMenuOpen(false); }} className="flex items-center space-x-3 px-3 py-3 rounded-md bg-slate-800">
                                 <img src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} className="w-8 h-8 rounded-full" />
                                 <span className="text-white font-medium">{t('profile')}</span>
                              </button>
                          )}
-                        {['forest', 'pulses', 'matches'].map((tabKey) => (
+                        {['forest', 'pulses', 'visions', 'matches'].map((tabKey) => (
                             <button 
                                 key={tabKey}
                                 onClick={() => { setTab(tabKey); setIsMenuOpen(false); }}
-                                className={`text-left px-3 py-3 rounded-md text-base font-medium ${activeTab === tabKey ? 'bg-white/10 text-white' : 'text-slate-300'}`}
+                                className={`text-left px-3 py-3 rounded-md text-base font-medium ${activeTab === tabKey ? 'bg-slate-800 text-white' : 'text-slate-400'}`}
                             >
                                 {tabKey === 'matches' ? 'Matches' : t(tabKey as any)}
                             </button>
@@ -218,10 +243,11 @@ const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, o
     );
 };
 
-const LightseedProfile = ({ lightseed, myTrees, onPulseSelect, onViewTree }: any) => {
+const LightseedProfile = ({ lightseed, myTrees, onViewTree }: any) => {
     const { t } = useLanguage();
-    const [activeTab, setActiveTab] = useState<'trees' | 'pulses' | 'history'>('trees');
+    const [activeTab, setActiveTab] = useState<'trees' | 'pulses' | 'visions' | 'history'>('trees');
     const [pulses, setPulses] = useState<Pulse[]>([]);
+    const [visions, setVisions] = useState<Vision[]>([]);
     const [history, setHistory] = useState<MatchProposal[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -232,6 +258,9 @@ const LightseedProfile = ({ lightseed, myTrees, onPulseSelect, onViewTree }: any
             if (activeTab === 'pulses') {
                 const data = await getMyPulses(lightseed.uid);
                 setPulses(data);
+            } else if (activeTab === 'visions') {
+                const data = await getMyVisions(lightseed.uid);
+                setVisions(data);
             } else if (activeTab === 'history') {
                 const data = await getMyMatchesHistory(lightseed.uid);
                 setHistory(data);
@@ -269,22 +298,28 @@ const LightseedProfile = ({ lightseed, myTrees, onPulseSelect, onViewTree }: any
 
             <div className="max-w-4xl mx-auto px-4 -mt-12">
                 <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden min-h-[500px]">
-                    <div className="flex border-b border-slate-100">
+                    <div className="flex border-b border-slate-100 overflow-x-auto">
                         <button 
                             onClick={() => setActiveTab('trees')} 
-                            className={`flex-1 py-4 text-sm font-medium transition-colors ${activeTab === 'trees' ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50' : 'text-slate-500 hover:text-slate-800'}`}
+                            className={`flex-1 min-w-[100px] py-4 text-sm font-medium transition-colors ${activeTab === 'trees' ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50' : 'text-slate-500 hover:text-slate-800'}`}
                         >
                             {t('my_trees')}
                         </button>
                         <button 
                             onClick={() => setActiveTab('pulses')} 
-                            className={`flex-1 py-4 text-sm font-medium transition-colors ${activeTab === 'pulses' ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50' : 'text-slate-500 hover:text-slate-800'}`}
+                            className={`flex-1 min-w-[100px] py-4 text-sm font-medium transition-colors ${activeTab === 'pulses' ? 'text-sky-600 border-b-2 border-sky-500 bg-sky-50/50' : 'text-slate-500 hover:text-slate-800'}`}
                         >
                             {t('my_pulses')}
                         </button>
                         <button 
+                            onClick={() => setActiveTab('visions')} 
+                            className={`flex-1 min-w-[100px] py-4 text-sm font-medium transition-colors ${activeTab === 'visions' ? 'text-amber-600 border-b-2 border-amber-500 bg-amber-50/50' : 'text-slate-500 hover:text-slate-800'}`}
+                        >
+                            {t('visions')}
+                        </button>
+                        <button 
                             onClick={() => setActiveTab('history')} 
-                            className={`flex-1 py-4 text-sm font-medium transition-colors ${activeTab === 'history' ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50' : 'text-slate-500 hover:text-slate-800'}`}
+                            className={`flex-1 min-w-[100px] py-4 text-sm font-medium transition-colors ${activeTab === 'history' ? 'text-slate-600 border-b-2 border-slate-500 bg-slate-50/50' : 'text-slate-500 hover:text-slate-800'}`}
                         >
                             {t('my_matches')}
                         </button>
@@ -313,20 +348,22 @@ const LightseedProfile = ({ lightseed, myTrees, onPulseSelect, onViewTree }: any
                                 )}
                             </div>
                         )}
-
                         {activeTab === 'pulses' && (
                             loading ? <p className="text-center py-10 text-slate-400">Loading...</p> : (
-                                <div className="space-y-4">
-                                    {pulses.length === 0 ? <p className="text-slate-400 text-center py-10">No pulses emitted yet.</p> : pulses.map((pulse) => (
-                                        <div key={pulse.id} className="border border-slate-100 rounded-lg p-4 flex items-start space-x-4">
-                                            {pulse.imageUrl && <img src={pulse.imageUrl} className="w-12 h-12 rounded object-cover bg-slate-100" />}
-                                            <div>
-                                                <h4 className="font-bold text-sm text-slate-800">{pulse.title}</h4>
-                                                <p className="text-xs text-slate-500 line-clamp-1">{pulse.body}</p>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    {pulses.length === 0 ? <p className="col-span-full text-slate-400 text-center py-10">No pulses emitted yet.</p> : pulses.map((pulse) => (
+                                        <div key={pulse.id} className="border border-slate-100 rounded-lg overflow-hidden group">
+                                            <div className="h-24 bg-slate-100 relative">
+                                                {pulse.imageUrl ? (
+                                                    <img src={pulse.imageUrl} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-slate-300"><Icons.Hash /></div>
+                                                )}
+                                            </div>
+                                            <div className="p-3">
+                                                <h4 className="font-bold text-sm text-slate-800 line-clamp-1">{pulse.title}</h4>
                                                 <div className="mt-1 flex items-center space-x-3 text-[10px] text-slate-400">
-                                                    <span>{new Date(pulse.createdAt?.toMillis()).toLocaleDateString()}</span>
-                                                    <span>• {pulse.loveCount} Loves</span>
-                                                    {pulse.type === 'GROWTH' && <span className="text-emerald-600 font-bold">• Growth</span>}
+                                                    <span>{pulse.loveCount} Loves</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -334,23 +371,14 @@ const LightseedProfile = ({ lightseed, myTrees, onPulseSelect, onViewTree }: any
                                 </div>
                             )
                         )}
-
-                        {activeTab === 'history' && (
-                            loading ? <p className="text-center py-10 text-slate-400">Loading...</p> : (
-                                <div className="space-y-4">
-                                    {history.length === 0 ? <p className="text-slate-400 text-center py-10">No matches found.</p> : history.map((match) => (
-                                        <div key={match.id} className="bg-slate-50 p-4 rounded-lg border border-slate-100 flex justify-between items-center">
-                                            <div>
-                                                <p className="text-sm font-bold text-slate-700">Matched successfully</p>
-                                                <p className="text-xs text-slate-500">
-                                                    {match.initiatorUid === lightseed.uid ? "You initiated" : "You accepted"}
-                                                </p>
-                                            </div>
-                                            <span className="text-xs font-mono text-emerald-600 bg-emerald-100 px-2 py-1 rounded">ACCEPTED</span>
-                                        </div>
+                         {activeTab === 'visions' && (
+                             loading ? <p className="text-center py-10 text-slate-400">Loading...</p> : (
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    {visions.length === 0 ? <p className="col-span-full text-slate-400 text-center py-10">No visions created yet.</p> : visions.map((vision) => (
+                                        <VisionCard key={vision.id} vision={vision} />
                                     ))}
                                 </div>
-                            )
+                             )
                         )}
                     </div>
                 </div>
@@ -359,6 +387,7 @@ const LightseedProfile = ({ lightseed, myTrees, onPulseSelect, onViewTree }: any
     );
 };
 
+// ... ForestMap, LifetreeCard, VisionCard components remain the same ...
 const ForestMap = ({ trees }: { trees: Lifetree[] }) => {
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapInstance = useRef<any>(null);
@@ -459,6 +488,7 @@ const ForestMap = ({ trees }: { trees: Lifetree[] }) => {
 };
 
 const LifetreeCard = ({ tree, myActiveTree, onValidate, onPlayGrowth, onQuickSnap, onView }: any) => {
+    // ... Existing LifetreeCard implementation
     const { t } = useLanguage();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
@@ -556,7 +586,35 @@ const LifetreeCard = ({ tree, myActiveTree, onValidate, onPlayGrowth, onQuickSna
     );
 };
 
+const VisionCard = ({ vision }: { vision: Vision }) => {
+    return (
+        <div className="bg-white rounded-xl shadow-sm border border-amber-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
+            <div className="relative h-48 bg-amber-50 overflow-hidden">
+                {vision.imageUrl ? (
+                    <img src={vision.imageUrl} alt={vision.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-amber-300">
+                        <Icons.Sparkles />
+                    </div>
+                )}
+                {vision.link && (
+                    <a href={vision.link} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 bg-white/90 p-2 rounded-full text-amber-600 hover:text-amber-800 hover:scale-110 transition-all shadow-sm">
+                        <Icons.Globe />
+                    </a>
+                )}
+            </div>
+            <div className="p-5">
+                <h3 className="text-lg font-bold text-slate-800 mb-2">{vision.title}</h3>
+                <p className="text-slate-600 text-sm font-light leading-relaxed line-clamp-3">
+                    {vision.body}
+                </p>
+            </div>
+        </div>
+    );
+}
+
 const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActiveTree }: any) => {
+   // ... Existing detail logic
    const { t } = useLanguage();
     
     return (
@@ -681,6 +739,14 @@ const GrowthPlayerModal = ({ treeId, onClose }: { treeId: string, onClose: () =>
     const [error, setError] = useState('');
 
     useEffect(() => {
+        // Set a timeout to avoid infinite loading if promise hangs
+        const timeout = setTimeout(() => {
+            if (loading) {
+                setLoading(false);
+                if (images.length === 0) setError("Request timed out. Check connection.");
+            }
+        }, 10000);
+
         fetchGrowthPulses(treeId)
             .then(data => {
                 setImages(data.filter(p => p.imageUrl));
@@ -691,6 +757,8 @@ const GrowthPlayerModal = ({ treeId, onClose }: { treeId: string, onClose: () =>
                 setError("Failed to load growth images.");
                 setLoading(false);
             });
+            
+        return () => clearTimeout(timeout);
     }, [treeId]);
 
     useEffect(() => {
@@ -719,7 +787,8 @@ const GrowthPlayerModal = ({ treeId, onClose }: { treeId: string, onClose: () =>
 };
 
 const PulseCard = ({ pulse, lightseed, onMatch }: any) => {
-    const { t } = useLanguage();
+    // ... Existing PulseCard
+     const { t } = useLanguage();
     const [loved, setLoved] = useState(false);
     const [count, setCount] = useState(pulse.loveCount);
 
@@ -735,38 +804,44 @@ const PulseCard = ({ pulse, lightseed, onMatch }: any) => {
         await lovePulse(pulse.id, lightseed.uid);
     }
 
+    // New Compact Pulse Card Design (Matches LifetreeCard)
     return (
-        <div className={`bg-white rounded-xl shadow-sm border border-slate-100 p-0 overflow-hidden hover:shadow-md transition-shadow ${pulse.type === 'GROWTH' ? 'ring-2 ring-emerald-500 ring-opacity-20' : ''}`}>
-            <div className="bg-slate-50 px-5 py-2 border-b border-slate-100 flex justify-between items-center text-[10px] text-slate-400 font-mono">
-                <div className="flex items-center space-x-2">
-                    {pulse.type === 'GROWTH' && <span className="bg-emerald-100 text-emerald-600 px-1 rounded font-bold">GROWTH</span>}
-                    {pulse.isMatch && <span className="bg-sky-100 text-sky-600 px-1 rounded font-bold">MATCH</span>}
-                    <span>BLOCK: {pulse.hash?.substring(0, 8)}</span>
+        <div className={`bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 group ${pulse.type === 'GROWTH' ? 'ring-2 ring-emerald-500 ring-opacity-20' : ''}`}>
+             <div className="relative h-36 bg-slate-100 overflow-hidden group">
+                 <div className="absolute top-2 right-2 z-20 flex space-x-1">
+                    {pulse.type === 'GROWTH' && <span className="bg-emerald-100 text-emerald-600 text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm">GROWTH</span>}
+                    {pulse.isMatch && <span className="bg-sky-100 text-sky-600 text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm">MATCH</span>}
+                 </div>
+
+                {pulse.imageUrl ? (
+                    <img src={pulse.imageUrl} alt={pulse.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">
+                        <Icons.Hash />
+                    </div>
+                )}
+                
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent pointer-events-none"></div>
+                <div className="absolute bottom-2 left-3 right-3 text-white pointer-events-none">
+                     <h3 className="text-sm font-bold tracking-wide truncate">{pulse.title}</h3>
                 </div>
             </div>
 
-            {pulse.imageUrl && (
-                <div className="w-full h-64 overflow-hidden bg-slate-100">
-                    <img src={pulse.imageUrl} alt={pulse.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-                </div>
-            )}
+            <div className="p-3">
+                <p className="text-slate-600 text-xs font-light leading-relaxed line-clamp-2 h-8">
+                    {pulse.body}
+                </p>
+                <div className="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center">
+                    <button onClick={handleLove} disabled={!lightseed} className="flex items-center space-x-1 text-slate-500 hover:text-red-500 transition-colors">
+                        <Icons.Heart filled={loved} />
+                        <span className="text-xs">{count}</span>
+                    </button>
 
-            <div className="p-6">
-                <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs text-slate-400">{pulse.authorName}</p>
                     {lightseed && lightseed.uid !== pulse.authorId && !pulse.isMatch && (
-                        <button onClick={() => onMatch(pulse)} className="text-xs bg-slate-100 hover:bg-sky-100 text-slate-500 hover:text-sky-600 px-2 py-1 rounded flex items-center">
-                            <Icons.Link /> <span className="ml-1">Match</span>
+                        <button onClick={() => onMatch(pulse)} className="text-[10px] bg-slate-50 text-slate-500 hover:bg-sky-50 hover:text-sky-600 px-2 py-1 rounded transition-colors flex items-center space-x-1">
+                            <Icons.Link /> <span>Match</span>
                         </button>
                     )}
-                </div>
-                <h3 className="text-lg font-bold text-slate-800 mb-1">{pulse.title}</h3>
-                <p className="text-slate-600 leading-relaxed font-light">{pulse.body}</p>
-                <div className="mt-4 flex items-center space-x-6">
-                    <button onClick={handleLove} disabled={!lightseed} className="flex items-center space-x-1.5 group">
-                        <Icons.Heart filled={loved} />
-                        <span className={`text-sm ${loved ? 'text-red-500' : 'text-slate-400'}`}>{count}</span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -776,7 +851,7 @@ const PulseCard = ({ pulse, lightseed, onMatch }: any) => {
 // ... Modals (ImagePicker, etc) ... 
 const Modal = ({ children, onClose, title }: any) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95">
             <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
                 <h3 className="font-semibold text-slate-800">{title}</h3>
                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600">&times;</button>
@@ -810,6 +885,7 @@ const AppContent = () => {
     // UI State
     const [showPlantModal, setShowPlantModal] = useState(false);
     const [showPulseModal, setShowPulseModal] = useState(false);
+    const [showVisionModal, setShowVisionModal] = useState(false);
     const [showGrowthPlayer, setShowGrowthPlayer] = useState<string | null>(null);
     const [matchCandidate, setMatchCandidate] = useState<Pulse | null>(null);
 
@@ -824,13 +900,21 @@ const AppContent = () => {
     const [pulseImageUrl, setPulseImageUrl] = useState('');
     const [isGrowth, setIsGrowth] = useState(false);
     const [uploading, setUploading] = useState(false);
+    
+    // Vision Form State
+    const [visionTitle, setVisionTitle] = useState('');
+    const [visionBody, setVisionBody] = useState('');
+    const [visionLink, setVisionLink] = useState('');
+    const [visionImageUrl, setVisionImageUrl] = useState('');
 
     useEffect(() => { loadContent(); }, [tab, lightseed]);
     useEffect(() => { if (lightseed && myTrees.length === 0 && !authLoading) setShowPlantModal(true); }, [lightseed, myTrees]);
 
     const loadContent = async () => {
+        setData([]); // Clear data before loading
         if (tab === 'forest') setData(await fetchLifetrees());
         else if (tab === 'pulses') setData(await fetchPulses());
+        else if (tab === 'visions') setData(await fetchVisions());
         else if (tab === 'matches' && lightseed) setMatches(await getPendingMatches(lightseed.uid));
     };
 
@@ -840,6 +924,22 @@ const AppContent = () => {
         setUploading(false);
         return url;
     };
+    
+    const handleGenerateVisionImage = async () => {
+        if (!visionBody) { alert("Please enter a vision description first."); return; }
+        setUploading(true);
+        try {
+            const url = await generateVisionImage(visionBody);
+            if (url) {
+                setVisionImageUrl(url);
+            } else {
+                throw new Error("No image data returned from AI service.");
+            }
+        } catch (e: any) {
+             alert(`Image generation failed: ${e.message}`);
+        }
+        setUploading(false);
+    }
 
     const handleQuickSnap = async (treeId: string, file: File) => {
         if (!lightseed) return;
@@ -875,13 +975,27 @@ const AppContent = () => {
     const handleEmitPulse = async (e: FormEvent) => {
         e.preventDefault();
         if (!lightseed || !activeTree) return;
+        
+        let finalImageUrl = pulseImageUrl;
+        if (pulseImageUrl.startsWith('data:')) {
+             setUploading(true);
+             try {
+                 finalImageUrl = await uploadBase64Image(pulseImageUrl, `pulses/ai/${Date.now()}`);
+             } catch(e) {
+                 setUploading(false);
+                 alert("Failed to upload AI image");
+                 return;
+             }
+             setUploading(false);
+        }
+
         try {
             await mintPulse({
                 lifetreeId: activeTree.id,
                 type: isGrowth ? 'GROWTH' : 'STANDARD',
                 title: pulseTitle,
                 body: pulseBody,
-                imageUrl: pulseImageUrl,
+                imageUrl: finalImageUrl,
                 authorId: lightseed.uid,
                 authorName: lightseed.displayName || "Soul",
                 authorPhoto: lightseed.photoURL || undefined,
@@ -889,6 +1003,36 @@ const AppContent = () => {
             setShowPulseModal(false); setPulseTitle(''); setPulseBody(''); setPulseImageUrl(''); setIsGrowth(false); loadContent();
         } catch(e: any) { alert(e.message); }
     };
+    
+    const handleCreateVision = async (e: FormEvent) => {
+        e.preventDefault();
+        if (!lightseed || !activeTree) return;
+
+        let finalImageUrl = visionImageUrl;
+        if (visionImageUrl.startsWith('data:')) {
+             setUploading(true);
+             try {
+                 finalImageUrl = await uploadBase64Image(visionImageUrl, `visions/ai/${Date.now()}`);
+             } catch(e) {
+                 setUploading(false);
+                 alert("Failed to upload AI image");
+                 return;
+             }
+             setUploading(false);
+        }
+
+        try {
+            await createVision({
+                lifetreeId: activeTree.id,
+                authorId: lightseed.uid,
+                title: visionTitle,
+                body: visionBody,
+                link: visionLink,
+                imageUrl: finalImageUrl
+            });
+            setShowVisionModal(false); setVisionTitle(''); setVisionBody(''); setVisionLink(''); setVisionImageUrl(''); loadContent();
+        } catch(e:any) { alert(e.message); }
+    }
     
     const initiateMatch = async (e: FormEvent) => {
         e.preventDefault();
@@ -913,14 +1057,12 @@ const AppContent = () => {
     }
 
     // Filter Logic for Forest View
-    const filteredForest = data.filter((item: Lifetree) => {
+    const filteredData = data.filter((item: any) => {
         if (!searchTerm) return true;
         const term = searchTerm.toLowerCase();
-        return (
-            item.name.toLowerCase().includes(term) ||
-            item.locationName?.toLowerCase().includes(term) ||
-            item.body.toLowerCase().includes(term)
-        );
+        // Common props for searching
+        const text = (item.title || item.name || "") + " " + (item.body || "") + " " + (item.locationName || "");
+        return text.toLowerCase().includes(term);
     });
 
     if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-slate-50"><Logo className="animate-pulse" /></div>;
@@ -951,6 +1093,7 @@ const AppContent = () => {
                     onLogout={logout} 
                     onPlant={() => setShowPlantModal(true)} 
                     onPulse={() => setShowPulseModal(true)}
+                    onCreateVision={() => setShowVisionModal(true)}
                     onProfile={() => setTab('profile')} 
                 />
                 <LightseedProfile 
@@ -972,14 +1115,14 @@ const AppContent = () => {
                 onLogout={logout} 
                 onPlant={() => setShowPlantModal(true)} 
                 onPulse={() => setShowPulseModal(true)}
+                onCreateVision={() => setShowVisionModal(true)}
                 onProfile={() => setTab('profile')} 
             />
             
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                {/* Forest View Controls (Search + Toggle) */}
-                {tab === 'forest' && (
+                {/* Search Bar for all tabs except matches/profile */}
+                {tab !== 'matches' && tab !== 'profile' && (
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                        {/* Search Input */}
                         <div className="relative w-full md:max-w-md">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                                 <Icons.Search />
@@ -987,33 +1130,35 @@ const AppContent = () => {
                             <input 
                                 type="text"
                                 className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm shadow-sm"
-                                placeholder="Search by name, location, or vision..."
+                                placeholder="Search..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
 
-                        {/* View Switcher */}
-                        <div className="bg-white p-1 rounded-lg border border-slate-200 flex shadow-sm shrink-0">
-                            <button 
-                                onClick={() => setViewMode('grid')}
-                                className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewMode === 'grid' ? 'bg-slate-800 text-white shadow' : 'text-slate-500 hover:text-slate-800'}`}
-                            >
-                                <div className="flex items-center space-x-2">
-                                    <Icons.List />
-                                    <span>{t('list_view')}</span>
-                                </div>
-                            </button>
-                            <button 
-                                onClick={() => setViewMode('map')}
-                                className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewMode === 'map' ? 'bg-slate-800 text-white shadow' : 'text-slate-500 hover:text-slate-800'}`}
-                            >
-                                <div className="flex items-center space-x-2">
-                                    <Icons.Map />
-                                    <span>{t('map_view')}</span>
-                                </div>
-                            </button>
-                        </div>
+                        {/* View Switcher only for Forest */}
+                        {tab === 'forest' && (
+                            <div className="bg-white p-1 rounded-lg border border-slate-200 flex shadow-sm shrink-0">
+                                <button 
+                                    onClick={() => setViewMode('grid')}
+                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewMode === 'grid' ? 'bg-slate-800 text-white shadow' : 'text-slate-500 hover:text-slate-800'}`}
+                                >
+                                    <div className="flex items-center space-x-2">
+                                        <Icons.List />
+                                        <span>{t('list_view')}</span>
+                                    </div>
+                                </button>
+                                <button 
+                                    onClick={() => setViewMode('map')}
+                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewMode === 'map' ? 'bg-slate-800 text-white shadow' : 'text-slate-500 hover:text-slate-800'}`}
+                                >
+                                    <div className="flex items-center space-x-2">
+                                        <Icons.Map />
+                                        <span>{t('map_view')}</span>
+                                    </div>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -1033,13 +1178,13 @@ const AppContent = () => {
                 {/* Content Area */}
                 {tab === 'forest' ? (
                     viewMode === 'map' ? (
-                        <ForestMap trees={filteredForest} />
+                        <ForestMap trees={filteredData} />
                     ) : (
                         <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                             {filteredForest.length === 0 ? (
+                             {filteredData.length === 0 ? (
                                  <p className="col-span-full text-center text-slate-400 py-10">No trees found matching your search.</p>
                              ) : (
-                                filteredForest.map((item) => (
+                                filteredData.map((item: any) => (
                                     <LifetreeCard 
                                         key={item.id} 
                                         tree={item} 
@@ -1053,8 +1198,14 @@ const AppContent = () => {
                              )}
                         </div>
                     )
+                ) : tab === 'visions' ? (
+                    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                        {filteredData.length === 0 ? <p className="col-span-full text-center text-slate-400 py-10">No visions found.</p> : 
+                            filteredData.map((item: any) => <VisionCard key={item.id} vision={item} />)
+                        }
+                    </div>
                 ) : tab !== 'matches' && tab !== 'profile' && (
-                    <div className="grid gap-8 max-w-3xl mx-auto">
+                    <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {data.map((item) => (
                              <PulseCard key={item.id} pulse={item} lightseed={lightseed} onMatch={(p: Pulse) => { setMatchCandidate(p); setShowPulseModal(true); }} />
                         ))}
@@ -1074,6 +1225,34 @@ const AppContent = () => {
                         <div className="flex gap-2"><input className="flex-1 border p-2 rounded" placeholder="Seed keywords" value={treeSeed} onChange={e=>setTreeSeed(e.target.value)} /><button type="button" onClick={() => generateLifetreeBio(treeSeed).then(setTreeBio)} className="bg-emerald-600 text-white px-4 rounded">AI</button></div>
                         <textarea className="block w-full border p-2 rounded" placeholder="Vision" value={treeBio} onChange={e=>setTreeBio(e.target.value)} required />
                         <button type="submit" disabled={uploading} className="w-full bg-emerald-600 text-white py-2 rounded">Plant</button>
+                    </form>
+                </Modal>
+            )}
+
+            {/* Vision Creation Modal */}
+            {showVisionModal && (
+                <Modal title={t('create_vision')} onClose={() => setShowVisionModal(false)}>
+                    <form onSubmit={handleCreateVision} className="space-y-4">
+                         <div className="border border-slate-200 p-4 rounded-xl text-center space-y-2">
+                             {visionImageUrl ? (
+                                 <img src={visionImageUrl} className="w-full h-40 object-cover rounded-lg" />
+                             ) : (
+                                 <div className="text-slate-400 h-40 flex items-center justify-center bg-slate-50 rounded-lg">No Image</div>
+                             )}
+                             <div className="flex gap-2 justify-center">
+                                 <div className="relative overflow-hidden">
+                                    <button type="button" className="text-sm text-slate-500 hover:text-slate-800 px-3 py-1 border rounded">{t('upload_photo')}</button>
+                                    <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => { if(e.target.files?.[0]) handleImageUpload(e.target.files[0], `visions/${Date.now()}`).then(setVisionImageUrl) }} />
+                                 </div>
+                                 <button type="button" onClick={handleGenerateVisionImage} disabled={uploading} className="text-sm bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600">{t('generate_image')}</button>
+                             </div>
+                         </div>
+
+                        <input className="block w-full border p-2 rounded" placeholder={t('title')} value={visionTitle} onChange={e=>setVisionTitle(e.target.value)} required />
+                        <textarea className="block w-full border p-2 rounded h-24" placeholder={t('body')} value={visionBody} onChange={e=>setVisionBody(e.target.value)} required />
+                        <input className="block w-full border p-2 rounded" placeholder={t('webpage')} value={visionLink} onChange={e=>setVisionLink(e.target.value)} />
+                        
+                        <button type="submit" disabled={uploading} className="w-full bg-amber-500 text-white py-2 rounded font-bold hover:bg-amber-600 transition-colors">{t('create_vision')}</button>
                     </form>
                 </Modal>
             )}

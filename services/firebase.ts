@@ -1,6 +1,4 @@
 
-
-
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
@@ -30,9 +28,10 @@ import {
   getStorage, 
   ref, 
   uploadBytes, 
-  getDownloadURL 
+  getDownloadURL,
+  uploadString
 } from 'firebase/storage';
-import { type Pulse, type PulseType, type Lifetree, type MatchProposal } from '../types';
+import { type Pulse, type PulseType, type Lifetree, type MatchProposal, type Vision } from '../types';
 import { createBlock } from '../utils/crypto';
 
 const env = (import.meta as any).env;
@@ -79,8 +78,17 @@ export const uploadImage = async (file: File, path: string): Promise<string> => 
   } catch (error) { console.error(error); throw error; }
 };
 
+export const uploadBase64Image = async (base64String: string, path: string): Promise<string> => {
+  try {
+    const storageRef = ref(storage, path);
+    await uploadString(storageRef, base64String, 'data_url');
+    return await getDownloadURL(storageRef);
+  } catch (error) { console.error(error); throw error; }
+}
+
 // --- LIFETREES ---
 const lifetreesCollection = collection(db, 'lifetrees');
+const visionsCollection = collection(db, 'visions');
 
 export const plantLifetree = async (data: {
   ownerId: string, 
@@ -112,7 +120,7 @@ export const plantLifetree = async (data: {
   const genesisData = { message: "Genesis Pulse", owner: data.ownerId, timestamp: Date.now() };
   const genesisHash = await createBlock("0", genesisData, Date.now());
 
-  return await addDoc(lifetreesCollection, {
+  const treeDoc = await addDoc(lifetreesCollection, {
     ownerId: data.ownerId,
     name: data.name,
     body: data.body,
@@ -127,6 +135,19 @@ export const plantLifetree = async (data: {
     validated: isValid,
     validatorId: isValid ? (isFirstTree ? "GENESIS" : "SYSTEM") : null
   });
+
+  // Automatically create the first Vision (Branch) for this tree
+  await addDoc(visionsCollection, {
+      lifetreeId: treeDoc.id,
+      authorId: data.ownerId,
+      title: "Root Vision",
+      body: data.body, // The Vision comes from the tree planting
+      imageUrl: data.imageUrl || null,
+      createdAt: serverTimestamp(),
+      link: ""
+  });
+
+  return treeDoc;
 };
 
 export const validateLifetree = async (targetTreeId: string, validatorTreeId: string) => {
@@ -161,6 +182,34 @@ export const getMyLifetrees = async (userId: string): Promise<Lifetree[]> => {
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Lifetree));
 };
+
+// --- VISIONS ---
+export const fetchVisions = async (): Promise<Vision[]> => {
+    const q = query(visionsCollection, orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({id: d.id, ...(d.data() as any)} as Vision));
+}
+
+export const getMyVisions = async (userId: string): Promise<Vision[]> => {
+    if (!userId) return [];
+    const q = query(visionsCollection, where('authorId', '==', userId));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({id: d.id, ...(d.data() as any)} as Vision));
+}
+
+export const createVision = async (data: {
+    lifetreeId: string,
+    authorId: string,
+    title: string,
+    body: string,
+    link?: string,
+    imageUrl?: string
+}) => {
+    return addDoc(visionsCollection, {
+        ...data,
+        createdAt: serverTimestamp()
+    });
+}
 
 // --- PULSES & MATCHING ---
 const pulsesCollection = collection(db, 'pulses');
