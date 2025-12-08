@@ -1,3 +1,4 @@
+
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
@@ -28,7 +29,7 @@ import {
   getDownloadURL,
   uploadString
 } from 'firebase/storage';
-import { type Pulse, type Lifetree, type MatchProposal, type Vision } from '../types/Types';
+import { type Pulse, type PulseType, type Lifetree, type MatchProposal, type Vision } from '../types/Types';
 import { createBlock } from './crypto';
 
 // Access Vite env variables directly

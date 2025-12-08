@@ -1,6 +1,7 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './apps/App'; // Point to the Router App, NOT the monolithic one
+import App from './apps/App'; // Use the modular App router
 import { BrowserRouter } from 'react-router-dom';
 import { loadConfig } from './lib/loadConfig';
 import { ConfigProvider } from './context/ConfigContext';
