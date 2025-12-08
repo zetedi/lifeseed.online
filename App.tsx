@@ -3,29 +3,38 @@ import React, { useState, useEffect, FormEvent, useRef, ChangeEvent } from 'reac
 import {
   signInWithGoogle,
   logout,
-  fetchPresents,
-  createPresent,
-  lovePresent,
-  isPresentLoved,
+  fetchPulses,
+  createPulse,
+  lovePulse,
+  isPulseLoved,
   onAuthChange,
   fetchLifetrees,
   plantLifetree,
-  getMyLifetree,
-  uploadImage
+  getMyLifetrees,
+  uploadImage,
+  validateLifetree
 } from './services/firebase';
 import { generateLifetreeBio } from './services/gemini';
-import { type Lightseed, type Present, type Lifetree } from './types';
+import { type Lightseed, type Pulse, type Lifetree } from './types';
 import Logo from './components/Logo';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { type Language } from './utils/translations';
 
-// --- THEME UTILS ---
+// --- THEME & STYLES ---
 const colors = {
   sky: "bg-slate-800", 
   earth: "bg-[#92400E]", 
   grass: "bg-[#65A30D]",
   snow: "bg-[#F8FAFC]",
 };
+
+// Pulsating Animation
+const PulseEffect = () => (
+    <span className="relative flex h-3 w-3 mr-2">
+      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+      <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+    </span>
+);
 
 // --- ICONS ---
 const Icons = {
@@ -70,12 +79,17 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
     </svg>
+  ),
+  ShieldCheck: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-emerald-500">
+        <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
+    </svg>
   )
 };
 
 const useLifeseed = () => {
     const [lightseed, setLightseed] = useState<Lightseed | null>(null);
-    const [lifetree, setLifetree] = useState<Lifetree | null>(null);
+    const [myTrees, setMyTrees] = useState<Lifetree[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -87,29 +101,32 @@ const useLifeseed = () => {
                     displayName: user.displayName,
                     photoURL: user.photoURL 
                 });
-                const tree = await getMyLifetree(user.uid);
-                setLifetree(tree);
+                const trees = await getMyLifetrees(user.uid);
+                setMyTrees(trees);
             } else {
                 setLightseed(null);
-                setLifetree(null);
+                setMyTrees([]);
             }
             setLoading(false);
         });
         return () => unsub();
     }, []);
 
-    const refreshTree = async () => {
+    const refreshTrees = async () => {
         if (lightseed) {
-            const tree = await getMyLifetree(lightseed.uid);
-            setLifetree(tree);
+            const trees = await getMyLifetrees(lightseed.uid);
+            setMyTrees(trees);
         }
     }
 
-    return { lightseed, lifetree, loading, refreshTree };
+    // Active Tree: For now, default to the first one for pulsing
+    const activeTree = myTrees.length > 0 ? myTrees[0] : null;
+
+    return { lightseed, myTrees, activeTree, loading, refreshTrees };
 };
 
-const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPost, onLogin, onLogout }: any) => {
-    const { t, language, setLanguage, isRTL } = useLanguage();
+const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout }: any) => {
+    const { t, language, setLanguage } = useLanguage();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
@@ -118,7 +135,7 @@ const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPost, onLogin, on
                 <div className="flex justify-between h-20 items-center">
                     {/* Brand */}
                     <div className="flex items-center space-x-3 cursor-pointer rtl:space-x-reverse" onClick={() => setTab('forest')}>
-                        <div className="bg-white p-1 rounded-full shadow-inner">
+                        <div className="bg-white p-1 rounded-full shadow-inner hover:animate-pulse">
                              <Logo width={40} height={40} />
                         </div>
                         <span className="font-light text-2xl tracking-wide lowercase hidden sm:block">lifeseed</span>
@@ -126,7 +143,7 @@ const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPost, onLogin, on
 
                     {/* Desktop Menu */}
                     <div className="hidden md:flex space-x-6 rtl:space-x-reverse">
-                        {['forest', 'posts', 'offerings'].map((tabKey) => (
+                        {['forest', 'pulses'].map((tabKey) => (
                             <button 
                                 key={tabKey}
                                 onClick={() => setTab(tabKey)}
@@ -155,8 +172,9 @@ const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPost, onLogin, on
 
                         {lightseed ? (
                             <>
-                                <button onClick={onPost} className={`hidden sm:flex ${colors.earth} hover:bg-[#78350f] text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95`}>
-                                    {t('create_present')}
+                                <button onClick={onPulse} className={`hidden sm:flex ${colors.earth} hover:bg-[#78350f] text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
+                                    <PulseEffect />
+                                    {t('emit_pulse')}
                                 </button>
                                 <img src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} className="w-9 h-9 rounded-full border-2 border-slate-400" alt="Seed" />
                                 <button onClick={onLogout} className="text-slate-300 hover:text-white text-sm">{t('sign_out')}</button>
@@ -194,7 +212,7 @@ const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPost, onLogin, on
             {isMenuOpen && (
                  <div className="md:hidden bg-slate-800 border-t border-slate-700 pb-4 px-4">
                     <div className="flex flex-col space-y-2 mt-4">
-                        {['forest', 'posts', 'offerings'].map((tabKey) => (
+                        {['forest', 'pulses'].map((tabKey) => (
                             <button 
                                 key={tabKey}
                                 onClick={() => { setTab(tabKey); setIsMenuOpen(false); }}
@@ -205,8 +223,9 @@ const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPost, onLogin, on
                         ))}
                          {lightseed ? (
                             <>
-                                <button onClick={() => { onPost(); setIsMenuOpen(false); }} className={`${colors.earth} text-white px-3 py-3 rounded-md text-base font-medium mt-4`}>
-                                    {t('create_present')}
+                                <button onClick={() => { onPulse(); setIsMenuOpen(false); }} className={`${colors.earth} text-white px-3 py-3 rounded-md text-base font-medium mt-4 flex items-center`}>
+                                    <PulseEffect />
+                                    {t('emit_pulse')}
                                 </button>
                                 <button onClick={onLogout} className="text-left px-3 py-3 text-slate-400">
                                     {t('sign_out')}
@@ -233,7 +252,6 @@ const ForestMap = ({ trees }: { trees: Lifetree[] }) => {
         const L = (window as any).L;
         if (!L) return;
 
-        // Initialize Map
         if (!mapInstance.current) {
             mapInstance.current = L.map(mapContainer.current).setView([0, 0], 2);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -241,7 +259,6 @@ const ForestMap = ({ trees }: { trees: Lifetree[] }) => {
             }).addTo(mapInstance.current);
         }
 
-        // Custom Icon
         const leafIcon = L.divIcon({
             className: 'custom-icon',
             html: `<div style="background:white; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; border:2px solid #65A30D; box-shadow:0 2px 5px rgba(0,0,0,0.3);">
@@ -254,7 +271,6 @@ const ForestMap = ({ trees }: { trees: Lifetree[] }) => {
             iconAnchor: [15, 15]
         });
 
-        // Add Markers
         trees.forEach(tree => {
             if (tree.latitude && tree.longitude) {
                 const marker = L.marker([tree.latitude, tree.longitude], { icon: leafIcon }).addTo(mapInstance.current);
@@ -272,10 +288,24 @@ const ForestMap = ({ trees }: { trees: Lifetree[] }) => {
     return <div ref={mapContainer} className="w-full h-[600px] rounded-xl shadow-inner border border-slate-200 z-0" />;
 };
 
-const LifetreeCard = ({ tree }: { tree: Lifetree }) => {
+const LifetreeCard = ({ tree, myActiveTree, onValidate, onPulseAt }: { tree: Lifetree, myActiveTree?: Lifetree | null, onValidate: (id: string) => void, onPulseAt: (id: string) => void }) => {
     const { t } = useLanguage();
+    
     return (
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-xl transition-all duration-500 group">
+        <div className={`bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-xl transition-all duration-500 group relative ${tree.validated ? 'ring-1 ring-emerald-100' : ''}`}>
+             <div className="absolute top-3 right-3 z-10">
+                {tree.validated ? (
+                    <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-1 rounded-full font-bold flex items-center shadow-sm">
+                        <Icons.ShieldCheck />
+                        <span className="ml-1">{t('validated')}</span>
+                    </span>
+                ) : (
+                    <span className="bg-slate-100 text-slate-500 text-[10px] px-2 py-1 rounded-full font-bold">
+                        {t('unvalidated')}
+                    </span>
+                )}
+            </div>
+
             <div className="relative h-56 bg-slate-200 overflow-hidden">
                 {tree.imageUrl ? (
                     <img src={tree.imageUrl} alt={tree.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
@@ -304,67 +334,74 @@ const LifetreeCard = ({ tree }: { tree: Lifetree }) => {
                         <span className="text-[10px] uppercase tracking-wider text-slate-400">{t('latest_hash')}</span>
                         <span className="text-[10px] font-mono text-slate-500 truncate w-32 bg-slate-50 p-1 rounded">{tree.latestHash?.substring(0, 16)}...</span>
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-700">
-                        <Logo width={16} height={16} />
-                    </div>
+                    {/* Validation Action */}
+                    {myActiveTree && myActiveTree.validated && !tree.validated && myActiveTree.id !== tree.id && (
+                        <button onClick={() => onValidate(tree.id)} className="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded hover:bg-emerald-200 transition-colors">
+                            {t('validate_action')}
+                        </button>
+                    )}
+                    {/* Match Action */}
+                    {myActiveTree && myActiveTree.id !== tree.id && (
+                        <button onClick={() => onPulseAt(tree.id)} className="text-xs bg-sky-100 text-sky-700 px-3 py-1 rounded hover:bg-sky-200 transition-colors ml-2">
+                             Match
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
     );
 };
 
-const PresentCard = ({ present, lightseed }: { present: Present, lightseed: Lightseed | null }) => {
+const PulseCard = ({ pulse, lightseed }: { pulse: Pulse, lightseed: Lightseed | null }) => {
     const { t } = useLanguage();
     const [loved, setLoved] = useState(false);
-    const [count, setCount] = useState(present.loveCount);
+    const [count, setCount] = useState(pulse.loveCount);
 
     useEffect(() => {
-        if (lightseed) isPresentLoved(present.id, lightseed.uid).then(setLoved);
-    }, [present, lightseed]);
+        if (lightseed) isPulseLoved(pulse.id, lightseed.uid).then(setLoved);
+    }, [pulse, lightseed]);
 
     const handleLove = async () => {
         if (!lightseed) return;
         const newStatus = !loved;
         setLoved(newStatus);
         setCount(c => newStatus ? c + 1 : c - 1);
-        await lovePresent(present.id, lightseed.uid);
+        await lovePulse(pulse.id, lightseed.uid);
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-0 overflow-hidden hover:shadow-md transition-shadow">
+        <div className={`bg-white rounded-xl shadow-sm border border-slate-100 p-0 overflow-hidden hover:shadow-md transition-shadow ${pulse.isMatch ? 'border-l-4 border-l-sky-400' : ''}`}>
             <div className="bg-slate-50 px-5 py-2 border-b border-slate-100 flex justify-between items-center text-[10px] text-slate-400 font-mono">
                 <div className="flex items-center space-x-2 rtl:space-x-reverse">
                     <Icons.Hash />
-                    <span>{t('prev')}: {present.previousHash?.substring(0, 12)}...</span>
+                    <span>{t('prev')}: {pulse.previousHash?.substring(0, 12)}...</span>
                 </div>
-                <span>{t('block')}: {present.hash?.substring(0, 8)}</span>
+                <div className="flex items-center space-x-2">
+                    {pulse.isMatch && <span className="bg-sky-100 text-sky-600 px-1 rounded font-bold">MATCH</span>}
+                    <span>{t('block')}: {pulse.hash?.substring(0, 8)}</span>
+                </div>
             </div>
 
             {/* NFT Image Display */}
-            {present.imageUrl && (
+            {pulse.imageUrl && (
                 <div className="w-full h-64 overflow-hidden bg-slate-100">
-                    <img src={present.imageUrl} alt={present.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                    <img src={pulse.imageUrl} alt={pulse.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                 </div>
             )}
 
             <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                        <img src={present.authorPhoto || `https://ui-avatars.com/api/?name=${present.authorName}`} className="w-8 h-8 rounded-full bg-slate-200" alt="" />
+                        <img src={pulse.authorPhoto || `https://ui-avatars.com/api/?name=${pulse.authorName}`} className="w-8 h-8 rounded-full bg-slate-200" alt="" />
                         <div>
-                            <p className="text-sm font-semibold text-slate-800">{present.authorName}</p>
-                            <p className="text-xs text-slate-400">{present.createdAt?.toDate().toLocaleDateString()}</p>
+                            <p className="text-sm font-semibold text-slate-800">{pulse.authorName}</p>
+                            <p className="text-xs text-slate-400">{pulse.createdAt?.toDate().toLocaleDateString()}</p>
                         </div>
                     </div>
-                    {present.type === 'OFFER' && (
-                        <div className={`${colors.grass} text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm`}>
-                            {present.price} ETH-L
-                        </div>
-                    )}
                 </div>
 
-                <h3 className="text-lg font-bold text-slate-800 mb-2">{present.title}</h3>
-                <p className="text-slate-600 leading-relaxed font-light">{present.body}</p>
+                <h3 className="text-lg font-bold text-slate-800 mb-2">{pulse.title}</h3>
+                <p className="text-slate-600 leading-relaxed font-light">{pulse.body}</p>
 
                 <div className="mt-6 flex items-center space-x-6 rtl:space-x-reverse">
                     <button onClick={handleLove} disabled={!lightseed} className="flex items-center space-x-1.5 rtl:space-x-reverse group">
@@ -373,7 +410,7 @@ const PresentCard = ({ present, lightseed }: { present: Present, lightseed: Ligh
                     </button>
                     <button className="flex items-center space-x-1.5 rtl:space-x-reverse text-slate-400 hover:text-slate-600">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                        <span className="text-sm">{present.commentCount}</span>
+                        <span className="text-sm">{pulse.commentCount}</span>
                     </button>
                 </div>
             </div>
@@ -412,7 +449,7 @@ const ImagePicker = ({ onChange, previewUrl, loading }: { onChange: (e: ChangeEv
                     className="hidden" 
                     accept="image/*" 
                     onChange={onChange}
-                    capture="environment" // Hints mobile browsers to use camera
+                    capture="environment"
                 />
                 
                 {loading ? (
@@ -432,7 +469,7 @@ const ImagePicker = ({ onChange, previewUrl, loading }: { onChange: (e: ChangeEv
 
 const AppContent = () => {
     const { t } = useLanguage();
-    const { lightseed, lifetree, loading: authLoading, refreshTree } = useLifeseed();
+    const { lightseed, myTrees, activeTree, loading: authLoading, refreshTrees } = useLifeseed();
     const [tab, setTab] = useState('forest');
     const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
     const [data, setData] = useState<any[]>([]);
@@ -440,7 +477,8 @@ const AppContent = () => {
     
     // Modals
     const [showPlantModal, setShowPlantModal] = useState(false);
-    const [showPresentModal, setShowPresentModal] = useState(false);
+    const [showPulseModal, setShowPulseModal] = useState(false);
+    const [targetMatchId, setTargetMatchId] = useState<string | null>(null);
 
     // Form States
     const [treeName, setTreeName] = useState('');
@@ -449,11 +487,10 @@ const AppContent = () => {
     const [treeImage, setTreeImage] = useState<File | null>(null);
     const [treeImageUrl, setTreeImageUrl] = useState('');
     
-    const [presentTitle, setPresentTitle] = useState('');
-    const [presentBody, setPresentBody] = useState('');
-    const [presentPrice, setPresentPrice] = useState('');
-    const [presentImage, setPresentImage] = useState<File | null>(null);
-    const [presentImageUrl, setPresentImageUrl] = useState('');
+    const [pulseTitle, setPulseTitle] = useState('');
+    const [pulseBody, setPulseBody] = useState('');
+    const [pulseImage, setPulseImage] = useState<File | null>(null);
+    const [pulseImageUrl, setPulseImageUrl] = useState('');
 
     const [isPlanting, setIsPlanting] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -463,17 +500,16 @@ const AppContent = () => {
     }, [tab]);
 
     useEffect(() => {
-        if (lightseed && !lifetree && !authLoading) {
+        if (lightseed && myTrees.length === 0 && !authLoading) {
             setShowPlantModal(true);
         }
-    }, [lightseed, lifetree, authLoading]);
+    }, [lightseed, myTrees, authLoading]);
 
     const loadContent = async () => {
         setLoadingData(true);
         try {
             if (tab === 'forest') setData(await fetchLifetrees());
-            else if (tab === 'posts') setData(await fetchPresents('POST'));
-            else if (tab === 'offerings') setData(await fetchPresents('OFFER'));
+            else if (tab === 'pulses') setData(await fetchPulses());
         } catch(e) { console.error(e) }
         setLoadingData(false);
     };
@@ -490,8 +526,7 @@ const AppContent = () => {
             return url;
         } catch (error: any) {
             console.error("Upload failed", error);
-            // Better error reporting for the user
-            alert(`Upload failed: ${error.message || "Unknown error"}. Check your .env file for correct storage bucket.`);
+            alert(`Upload failed: ${error.message}`);
             setUploading(false);
             return null;
         }
@@ -503,18 +538,18 @@ const AppContent = () => {
             const url = await handleImageUpload(file, `trees/${Date.now()}_${file.name}`);
             if (url) {
                 setTreeImageUrl(url);
-                setTreeImage(file); // Keep file reference if needed, but we upload immediately for UX
+                setTreeImage(file);
             }
         }
     };
 
-    const handlePresentImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const handlePulseImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
              const file = e.target.files[0];
-             const url = await handleImageUpload(file, `presents/${Date.now()}_${file.name}`);
+             const url = await handleImageUpload(file, `pulses/${Date.now()}_${file.name}`);
              if (url) {
-                 setPresentImageUrl(url);
-                 setPresentImage(file);
+                 setPulseImageUrl(url);
+                 setPulseImage(file);
              }
         }
     };
@@ -531,15 +566,15 @@ const AppContent = () => {
                         ownerId: lightseed.uid,
                         name: treeName,
                         body: treeBio,
-                        imageUrl: treeImageUrl, // Use the uploaded URL
+                        imageUrl: treeImageUrl,
                         lat: position.coords.latitude,
                         lng: position.coords.longitude,
                         locName: "Earth" 
                     });
-                    await refreshTree();
+                    await refreshTrees();
                     setShowPlantModal(false);
                     loadContent();
-                } catch(err) { alert(err); }
+                } catch(err: any) { alert(err.message); }
                 setIsPlanting(false);
             }, (err) => {
                 alert(t('geo_error'));
@@ -551,30 +586,43 @@ const AppContent = () => {
         }
     };
 
-    const handleCreatePresent = async (e: FormEvent) => {
+    const handleEmitPulse = async (e: FormEvent) => {
         e.preventDefault();
-        if (!lightseed || !lifetree) return;
+        if (!lightseed || !activeTree) return;
         try {
-            await createPresent({
-                lifetreeId: lifetree.id,
-                title: presentTitle,
-                body: presentBody,
-                imageUrl: presentImageUrl, // NFT logic
+            await createPulse({
+                lifetreeId: activeTree.id,
+                targetLifetreeId: targetMatchId || undefined, // Matching Logic
+                title: pulseTitle,
+                body: pulseBody,
+                imageUrl: pulseImageUrl,
                 authorId: lightseed.uid,
                 authorName: lightseed.displayName || "Soul",
                 authorPhoto: lightseed.photoURL || undefined,
-                type: tab === 'offerings' ? 'OFFER' : 'POST',
-                // SAFETY: Convert undefined price to null or omit to avoid Firestore 'undefined' error
-                price: presentPrice ? Number(presentPrice) : undefined
             });
-            setShowPresentModal(false);
-            setPresentBody(''); setPresentTitle(''); setPresentPrice(''); setPresentImageUrl('');
+            setShowPulseModal(false);
+            setTargetMatchId(null);
+            setPulseBody(''); setPulseTitle(''); setPulseImageUrl('');
             loadContent();
         } catch(err: any) { 
             console.error(err);
             alert(`Error: ${err.message}`); 
         }
     };
+    
+    const handleValidate = async (targetId: string) => {
+        if (!activeTree) return;
+        try {
+            await validateLifetree(targetId, activeTree.id);
+            alert("Tree Validated Successfully!");
+            loadContent();
+        } catch (e: any) { alert(e.message); }
+    }
+    
+    const openPulseMatchModal = (targetId: string) => {
+        setTargetMatchId(targetId);
+        setShowPulseModal(true);
+    }
 
     const generateBio = async () => {
         if (!treeSeed) return;
@@ -593,14 +641,14 @@ const AppContent = () => {
                 onLogin={handleGoogleLogin} 
                 onLogout={logout} 
                 onPlant={() => setShowPlantModal(true)}
-                onPost={() => setShowPresentModal(true)}
+                onPulse={() => setShowPulseModal(true)}
             />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
                     <div>
                         <h1 className="text-4xl font-light text-slate-800 mb-2 capitalize tracking-tight">{t(tab as any)}</h1>
-                        <div className="h-1 w-20 bg-emerald-500 rounded-full"></div>
+                        <div className="h-1 w-20 bg-emerald-500 rounded-full animate-pulse"></div>
                     </div>
                     {/* View Toggle for Forest */}
                     {tab === 'forest' && (
@@ -637,8 +685,14 @@ const AppContent = () => {
                             <div className={`grid gap-8 ${tab === 'forest' ? 'sm:grid-cols-2 lg:grid-cols-3' : 'max-w-3xl mx-auto'}`}>
                                 {data.map((item) => (
                                     tab === 'forest' 
-                                        ? <LifetreeCard key={item.id} tree={item as Lifetree} />
-                                        : <PresentCard key={item.id} present={item as Present} lightseed={lightseed} />
+                                        ? <LifetreeCard 
+                                            key={item.id} 
+                                            tree={item as Lifetree} 
+                                            myActiveTree={activeTree} 
+                                            onValidate={handleValidate} 
+                                            onPulseAt={openPulseMatchModal}
+                                          />
+                                        : <PulseCard key={item.id} pulse={item as Pulse} lightseed={lightseed} />
                                 ))}
                             </div>
                         )}
@@ -654,51 +708,60 @@ const AppContent = () => {
 
             {/* Modals */}
             {showPlantModal && (
-                <Modal title={t('plant_lifetree')} onClose={() => lifetree && setShowPlantModal(false)}>
-                    <form onSubmit={handlePlant} className="space-y-4">
-                        <ImagePicker onChange={handleTreeImageChange} previewUrl={treeImageUrl} loading={uploading} />
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700">{t('tree_name')}</label>
-                            <input className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" placeholder="e.g. The Eternal Oak" value={treeName} onChange={e=>setTreeName(e.target.value)} required />
-                        </div>
-                        <div className="bg-emerald-50 p-4 rounded-md">
-                            <label className="block text-sm font-medium text-emerald-800">{t('ai_prompt')}</label>
-                            <div className="flex gap-2 mt-2">
-                                <input className="flex-1 rounded-md border-emerald-200 shadow-sm text-sm p-2 border" placeholder="Keywords: peace, mountains, code" value={treeSeed} onChange={e=>setTreeSeed(e.target.value)} />
-                                <button type="button" onClick={generateBio} className="bg-emerald-600 text-white px-4 py-2 rounded-md text-sm">{t('generate')}</button>
+                <Modal title={t('plant_lifetree')} onClose={() => myTrees.length > 0 && setShowPlantModal(false)}>
+                    {myTrees.length > 0 && !myTrees.every(t => t.validated) ? (
+                         <div className="text-center p-4">
+                            <div className="text-amber-500 mb-2 font-bold text-xl">Waiting for Validation</div>
+                            <p className="text-slate-600 mb-4">{t('cant_plant')}</p>
+                            <p className="text-sm text-slate-400">A Validated Lifetree must confirm your existing roots before you can expand.</p>
+                            <button onClick={() => setShowPlantModal(false)} className="mt-4 text-slate-500 underline">Close</button>
+                         </div>
+                    ) : (
+                        <form onSubmit={handlePlant} className="space-y-4">
+                            <ImagePicker onChange={handleTreeImageChange} previewUrl={treeImageUrl} loading={uploading} />
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700">{t('tree_name')}</label>
+                                <input className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" placeholder="e.g. Phoenix" value={treeName} onChange={e=>setTreeName(e.target.value)} required />
+                                {treeName.toLowerCase() === 'phoenix' && <span className="text-xs text-emerald-500 animate-pulse font-bold">Genesis Name Detected (Auto-Validate)</span>}
                             </div>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700">{t('vision')}</label>
-                            <textarea className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" rows={3} value={treeBio} onChange={e=>setTreeBio(e.target.value)} required />
-                        </div>
-                        <p className="text-xs text-slate-500 italic">{t('connect_roots')}</p>
-                        <button type="submit" disabled={isPlanting || uploading} className="w-full bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 disabled:opacity-50">
-                            {isPlanting ? t('planting') : t('plant_lifetree')}
-                        </button>
-                    </form>
+                            <div className="bg-emerald-50 p-4 rounded-md">
+                                <label className="block text-sm font-medium text-emerald-800">{t('ai_prompt')}</label>
+                                <div className="flex gap-2 mt-2">
+                                    <input className="flex-1 rounded-md border-emerald-200 shadow-sm text-sm p-2 border" placeholder="Keywords: peace, mountains, code" value={treeSeed} onChange={e=>setTreeSeed(e.target.value)} />
+                                    <button type="button" onClick={generateBio} className="bg-emerald-600 text-white px-4 py-2 rounded-md text-sm">{t('generate')}</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700">{t('vision')}</label>
+                                <textarea className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" rows={3} value={treeBio} onChange={e=>setTreeBio(e.target.value)} required />
+                            </div>
+                            <p className="text-xs text-slate-500 italic">{t('connect_roots')}</p>
+                            <button type="submit" disabled={isPlanting || uploading} className="w-full bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 disabled:opacity-50">
+                                {isPlanting ? t('planting') : t('plant_lifetree')}
+                            </button>
+                        </form>
+                    )}
                 </Modal>
             )}
 
-            {showPresentModal && (
-                <Modal title={t('create_present')} onClose={() => setShowPresentModal(false)}>
-                    <form onSubmit={handleCreatePresent} className="space-y-4">
-                        <ImagePicker onChange={handlePresentImageChange} previewUrl={presentImageUrl} loading={uploading} />
+            {showPulseModal && (
+                <Modal title={targetMatchId ? t('match_pulse') : t('emit_pulse')} onClose={() => { setShowPulseModal(false); setTargetMatchId(null); }}>
+                    <form onSubmit={handleEmitPulse} className="space-y-4">
+                        {targetMatchId && (
+                             <div className="bg-sky-50 p-3 rounded border border-sky-100 text-sky-700 text-sm mb-2">
+                                You are about to link your chain with another Tree. This Pulse will appear on both blockchains.
+                             </div>
+                        )}
+                        <ImagePicker onChange={handlePulseImageChange} previewUrl={pulseImageUrl} loading={uploading} />
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700">{t('title')}</label>
-                            <input className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" value={presentTitle} onChange={e=>setPresentTitle(e.target.value)} required />
+                            <input className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" value={pulseTitle} onChange={e=>setPulseTitle(e.target.value)} required />
                         </div>
-                        {tab === 'offerings' && (
-                             <div>
-                                <label className="block text-sm font-medium text-slate-700">{t('price')}</label>
-                                <input type="number" className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" value={presentPrice} onChange={e=>setPresentPrice(e.target.value)} required />
-                            </div>
-                        )}
                         <div>
                             <label className="block text-sm font-medium text-slate-700">{t('body')}</label>
-                            <textarea className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" rows={4} value={presentBody} onChange={e=>setPresentBody(e.target.value)} required />
+                            <textarea className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" rows={4} value={pulseBody} onChange={e=>setPulseBody(e.target.value)} required />
                         </div>
                         <button type="submit" disabled={uploading} className="w-full bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 disabled:opacity-50">{t('mint')}</button>
                     </form>

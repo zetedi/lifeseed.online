@@ -1,3 +1,4 @@
+
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
@@ -19,7 +20,7 @@ import {
   runTransaction,
   getDoc,
   where,
-  Timestamp
+  updateDoc
 } from 'firebase/firestore';
 import { 
   getStorage, 
@@ -27,11 +28,10 @@ import {
   uploadBytes, 
   getDownloadURL 
 } from 'firebase/storage';
-import { type Present, type Comment, type Lifetree } from '../types';
+import { type Pulse, type Comment, type Lifetree } from '../types';
 import { createBlock } from '../utils/crypto';
 
 // Load config from Environment Variables (.env)
-// Use 'any' cast for import.meta to avoid TS error 'Property env does not exist on type ImportMeta'
 const env = (import.meta as any).env;
 
 const firebaseConfig = {
@@ -43,52 +43,40 @@ const firebaseConfig = {
   appId: env.VITE_FIREBASE_APP_ID
 };
 
-// Safety Check: Ensure keys are replaced
 if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("YOUR_")) {
   console.warn("LifeSeed Configuration Warning: .env file might be missing or invalid.");
 }
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-
-// FIX: ignoreUndefinedProperties prevents crashes when optional fields (like price) are undefined
 export const db = initializeFirestore(app, {
     ignoreUndefinedProperties: true
 });
-
 export const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 
-// --- AUTH FUNCTIONS ---
+// --- AUTH ---
 export const onAuthChange = (callback: (user: FirebaseUser | null) => void) => {
   return onAuthStateChanged(auth, callback);
 };
 
 export const signInWithGoogle = async () => {
-  try {
-    const result = await signInWithPopup(auth, googleProvider);
-    return result.user;
-  } catch (error) {
-    console.error("Google Sign In Error", error);
-    throw error;
-  }
+  try { return (await signInWithPopup(auth, googleProvider)).user; } 
+  catch (error) { console.error(error); throw error; }
 };
 
 export const logout = () => firebaseSignOut(auth);
 
-// --- STORAGE FUNCTIONS ---
+// --- STORAGE ---
 export const uploadImage = async (file: File, path: string): Promise<string> => {
   try {
     const storageRef = ref(storage, path);
     await uploadBytes(storageRef, file);
     return await getDownloadURL(storageRef);
-  } catch (error) {
-    console.error("Storage Error:", error);
-    throw error;
-  }
+  } catch (error) { console.error(error); throw error; }
 };
 
-// --- LIFETREE FUNCTIONS (The Blockchain Entities) ---
+// --- LIFETREE (BLOCKCHAIN ENTITY) ---
 const lifetreesCollection = collection(db, 'lifetrees');
 
 export const plantLifetree = async (data: {
@@ -100,15 +88,24 @@ export const plantLifetree = async (data: {
   lng?: number,
   locName?: string
 }) => {
-  // 1. Check if user already has a tree
+  // 1. Check existing trees for this owner
   const q = query(lifetreesCollection, where('ownerId', '==', data.ownerId));
   const snapshot = await getDocs(q);
+  
+  // Rule: Can only plant new tree if ALL existing trees are validated.
   if (!snapshot.empty) {
-    throw new Error("You have already planted a Lifetree. One soul, one tree.");
+      const trees = snapshot.docs.map(d => d.data() as Lifetree);
+      const allValidated = trees.every(t => t.validated);
+      if (!allValidated) {
+          throw new Error("Your existing Lifetree is not validated yet. You cannot plant another.");
+      }
   }
 
-  // 2. Create Genesis Block Hash
-  const genesisData = { message: "Genesis Block", owner: data.ownerId, timestamp: Date.now() };
+  // 2. Genesis Logic: "Phoenix" is the First Valid Tree
+  const isValid = data.name.trim().toLowerCase() === "phoenix";
+
+  // 3. Create Genesis Block Hash
+  const genesisData = { message: "Genesis Pulse", owner: data.ownerId, timestamp: Date.now() };
   const genesisHash = await createBlock("0", genesisData, Date.now());
 
   return await addDoc(lifetreesCollection, {
@@ -121,120 +118,167 @@ export const plantLifetree = async (data: {
     locationName: data.locName || "Unknown Soil",
     createdAt: serverTimestamp(),
     genesisHash: genesisHash,
-    latestHash: genesisHash, // Cursor starts at genesis
-    blockHeight: 0
+    latestHash: genesisHash,
+    blockHeight: 0,
+    validated: isValid,
+    validatorId: isValid ? "SYSTEM" : null
   });
 };
+
+export const validateLifetree = async (targetTreeId: string, validatorTreeId: string) => {
+    const targetRef = doc(db, 'lifetrees', targetTreeId);
+    const validatorRef = doc(db, 'lifetrees', validatorTreeId);
+
+    return runTransaction(db, async (t) => {
+        const vDoc = await t.get(validatorRef);
+        const tDoc = await t.get(targetRef);
+
+        if (!vDoc.exists() || !tDoc.exists()) throw new Error("Tree not found");
+        
+        const validator = vDoc.data() as Lifetree;
+        if (!validator.validated) throw new Error("Only a Validated Lifetree can validate others.");
+
+        t.update(targetRef, {
+            validated: true,
+            validatorId: validatorTreeId
+        });
+    });
+}
 
 export const fetchLifetrees = async (): Promise<Lifetree[]> => {
   const q = query(lifetreesCollection, orderBy('createdAt', 'desc'));
   const querySnapshot = await getDocs(q);
-  // Cast data to any to prevent TS spread error
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Lifetree));
 };
 
-export const getMyLifetree = async (userId: string): Promise<Lifetree | null> => {
-    if (!userId) return null;
+export const getMyLifetrees = async (userId: string): Promise<Lifetree[]> => {
+    if (!userId) return [];
     const q = query(lifetreesCollection, where('ownerId', '==', userId));
     const snapshot = await getDocs(q);
-    if (snapshot.empty) return null;
-    const document = snapshot.docs[0];
-    // Cast data to any to prevent TS spread error
-    return { id: document.id, ...(document.data() as any) } as Lifetree;
+    return snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Lifetree));
 };
 
-// --- PRESENT FUNCTIONS (The Blocks) ---
-const presentsCollection = collection(db, 'presents');
+// --- PULSES (THE BLOCKS) ---
+// Replaces "Presents"
+const pulsesCollection = collection(db, 'pulses');
 
-export const fetchPresents = async (typeFilter?: 'POST' | 'OFFER'): Promise<Present[]> => {
-  let q;
-  if (typeFilter) {
-      q = query(presentsCollection, where('type', '==', typeFilter), orderBy('createdAt', 'desc'));
-  } else {
-      q = query(presentsCollection, orderBy('createdAt', 'desc'));
-  }
+export const fetchPulses = async (): Promise<Pulse[]> => {
+  // Show all pulses, sorted by time
+  const q = query(pulsesCollection, orderBy('createdAt', 'desc'));
   const querySnapshot = await getDocs(q);
-  // Cast doc.data() to any to allow spreading (fixes strict type check error)
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Present));
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Pulse));
 };
 
 /**
- * Creates a Present (Post/Offer) and links it to the Lifetree's blockchain.
- * Uses a Transaction to ensure the hash chain is atomic.
+ * Creates a Pulse (NFT Block).
+ * If targetLifetreeId is provided, this is a MATCH/MEETING.
+ * It creates entries on BOTH blockchains transactionally.
  */
-export const createPresent = async (presentData: {
-  lifetreeId: string,
+export const createPulse = async (pulseData: {
+  lifetreeId: string, // My tree
+  targetLifetreeId?: string, // The tree I am pulsing at (Matching)
   title: string,
   body: string,
   imageUrl?: string,
   authorId: string,
   authorName: string,
   authorPhoto?: string,
-  type: 'POST' | 'OFFER',
-  price?: number
 }) => {
-  const lifetreeRef = doc(db, 'lifetrees', presentData.lifetreeId);
-  const newPresentRef = doc(presentsCollection);
-
   return runTransaction(db, async (transaction) => {
-    // 1. Get the Lifetree to find the latest hash
-    const lifetreeDoc = await transaction.get(lifetreeRef);
-    if (!lifetreeDoc.exists()) {
-      throw new Error("Lifetree roots not found.");
-    }
-    
-    const lifetree = lifetreeDoc.data() as Lifetree;
-    const previousHash = lifetree.latestHash || lifetree.genesisHash || "0";
-    const newHeight = (lifetree.blockHeight || 0) + 1;
     const timestamp = Date.now();
-
-    // 2. Calculate the Hash for this new Block (Present)
-    // NFT Logic: Image URL is part of the hash
+    
+    // 1. Process Source Tree (My Tree)
+    const sourceTreeRef = doc(db, 'lifetrees', pulseData.lifetreeId);
+    const sourceTreeDoc = await transaction.get(sourceTreeRef);
+    if (!sourceTreeDoc.exists()) throw new Error("Source tree missing");
+    
+    const sourceTree = sourceTreeDoc.data() as Lifetree;
+    const prevHashSource = sourceTree.latestHash || sourceTree.genesisHash || "0";
+    
+    // Hash Payload
     const blockData = {
-      title: presentData.title,
-      body: presentData.body,
-      image: presentData.imageUrl || "",
-      author: presentData.authorId,
-      type: presentData.type,
-      price: presentData.price
+      title: pulseData.title,
+      body: pulseData.body,
+      image: pulseData.imageUrl || "",
+      author: pulseData.authorId,
+      target: pulseData.targetLifetreeId || "SELF"
     };
     
-    const newHash = await createBlock(previousHash, blockData, timestamp);
-
-    // 3. Create the Present
-    // Firestore with ignoreUndefinedProperties: true will handle undefined price automatically
-    transaction.set(newPresentRef, {
-      ...presentData,
+    const newHash = await createBlock(prevHashSource, blockData, timestamp);
+    
+    // Create Source Pulse
+    const newPulseRef = doc(pulsesCollection);
+    transaction.set(newPulseRef, {
+      ...pulseData,
+      id: newPulseRef.id,
+      lifetreeId: pulseData.lifetreeId,
+      isMatch: !!pulseData.targetLifetreeId,
+      matchedLifetreeId: pulseData.targetLifetreeId || null,
       loveCount: 0,
       commentCount: 0,
       createdAt: serverTimestamp(),
-      previousHash: previousHash,
+      previousHash: prevHashSource,
       hash: newHash,
-      blockHeight: newHeight
     });
 
-    // 4. Update the Lifetree ledger cursor
-    transaction.update(lifetreeRef, {
+    // Update Source Tree
+    transaction.update(sourceTreeRef, {
       latestHash: newHash,
-      blockHeight: newHeight
+      blockHeight: (sourceTree.blockHeight || 0) + 1
     });
+
+    // 2. Process Target Tree (If Match)
+    if (pulseData.targetLifetreeId && pulseData.targetLifetreeId !== pulseData.lifetreeId) {
+        const targetTreeRef = doc(db, 'lifetrees', pulseData.targetLifetreeId);
+        const targetTreeDoc = await transaction.get(targetTreeRef);
+        
+        if (targetTreeDoc.exists()) {
+            const targetTree = targetTreeDoc.data() as Lifetree;
+            const prevHashTarget = targetTree.latestHash || targetTree.genesisHash || "0";
+            
+            // The matched pulse on the other tree (Linked by ID or content, but technically a new block on their chain)
+            const matchedPulseRef = doc(pulsesCollection);
+            // Hash payload for target (includes reference to source)
+            const matchHash = await createBlock(prevHashTarget, { ...blockData, origin: pulseData.lifetreeId }, timestamp);
+
+            transaction.set(matchedPulseRef, {
+                ...pulseData,
+                id: matchedPulseRef.id,
+                title: `Match: ${pulseData.title}`,
+                lifetreeId: pulseData.targetLifetreeId, // It lives on their tree now
+                isMatch: true,
+                matchedLifetreeId: pulseData.lifetreeId, // Points back to me
+                loveCount: 0,
+                commentCount: 0,
+                createdAt: serverTimestamp(),
+                previousHash: prevHashTarget,
+                hash: matchHash
+            });
+
+            // Update Target Tree Ledger
+            transaction.update(targetTreeRef, {
+                latestHash: matchHash,
+                blockHeight: (targetTree.blockHeight || 0) + 1
+            });
+        }
+    }
   });
 };
 
-export const isPresentLoved = async (presentId: string, userId: string): Promise<boolean> => {
+export const isPulseLoved = async (pulseId: string, userId: string): Promise<boolean> => {
     if (!userId) return false;
-    const loveDocRef = doc(db, 'presents', presentId, 'loves', userId);
+    const loveDocRef = doc(db, 'pulses', pulseId, 'loves', userId);
     const docSnap = await getDoc(loveDocRef);
     return docSnap.exists();
 };
 
-export const lovePresent = async (presentId: string, userId: string): Promise<number> => {
-  const presentRef = doc(db, 'presents', presentId);
-  const loveRef = doc(presentRef, 'loves', userId);
+export const lovePulse = async (pulseId: string, userId: string): Promise<number> => {
+  const pulseRef = doc(db, 'pulses', pulseId);
+  const loveRef = doc(pulseRef, 'loves', userId);
 
   return runTransaction(db, async (transaction) => {
-    const postDoc = await transaction.get(presentRef);
-    if (!postDoc.exists()) throw new Error("Present gone.");
+    const postDoc = await transaction.get(pulseRef);
+    if (!postDoc.exists()) throw new Error("Pulse dissolved.");
     
     const loveDoc = await transaction.get(loveRef);
     let newLoveCount = postDoc.data().loveCount || 0;
@@ -247,35 +291,7 @@ export const lovePresent = async (presentId: string, userId: string): Promise<nu
       newLoveCount += 1;
     }
     
-    transaction.update(presentRef, { loveCount: newLoveCount });
+    transaction.update(pulseRef, { loveCount: newLoveCount });
     return newLoveCount;
   });
-};
-
-// --- COMMENT FUNCTIONS ---
-export const fetchComments = async (presentId: string): Promise<Comment[]> => {
-    const commentsCollection = collection(db, 'presents', presentId, 'comments');
-    const q = query(commentsCollection, orderBy('createdAt', 'asc'));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Comment));
-};
-
-export const addComment = async (presentId: string, commentData: Omit<Comment, 'id' | 'createdAt'>) => {
-    const presentRef = doc(db, 'presents', presentId);
-    const commentsCollection = collection(presentRef, 'comments');
-
-    return runTransaction(db, async (transaction) => {
-      const pDoc = await transaction.get(presentRef);
-      if (!pDoc.exists()) throw new Error("Present missing.");
-
-      const newCommentRef = doc(commentsCollection);
-      transaction.set(newCommentRef, {
-        ...commentData,
-        createdAt: serverTimestamp()
-      });
-
-      const newCount = (pDoc.data().commentCount || 0) + 1;
-      transaction.update(presentRef, { commentCount: newCount });
-      return newCount;
-    });
 };

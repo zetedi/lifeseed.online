@@ -1,9 +1,10 @@
+
 import { type User as FirebaseUser } from 'firebase/auth';
 import { type Timestamp } from 'firebase/firestore';
 
 export type Lightseed = Pick<FirebaseUser, 'uid' | 'email' | 'displayName' | 'photoURL'>;
 
-export type PresentType = 'POST' | 'OFFER';
+// Removed 'PresentType' as everything is now a Pulse
 
 // The Entity/Blockchain container
 export interface Lifetree {
@@ -16,23 +17,30 @@ export interface Lifetree {
   longitude?: number;
   locationName?: string;
   createdAt: Timestamp;
+  
+  // Validation Logic
+  validated: boolean; // Only validated trees can validate others
+  validatorId?: string; // Who validated this tree
+
   // Blockchain Props
   genesisHash: string;
   latestHash: string; 
   blockHeight: number;
 }
 
-// The Block/Item
-export interface Present {
+// The Block (formerly Present)
+export interface Pulse {
   id: string;
-  lifetreeId: string; // The chain it belongs to
-  type: PresentType;
+  lifetreeId: string; // The chain this specific entry belongs to
   
   // Data Payload
   title: string;
   body: string;
   imageUrl?: string; // NFT Image
-  price?: number; // Only for OFFER
+  
+  // Match/interaction Logic
+  isMatch: boolean; // Is this a meeting of two pulses?
+  matchedLifetreeId?: string; // If matched, which tree did we meet?
   
   // Metadata
   authorId: string;
