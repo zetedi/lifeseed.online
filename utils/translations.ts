@@ -1,4 +1,5 @@
 
+
 export type Language = 'en' | 'es' | 'hu' | 'qu' | 'sa' | 'ja' | 'ar';
 
 export const translations = {
@@ -33,7 +34,13 @@ export const translations = {
     unvalidated: "Unvalidated",
     validate_action: "Validate this Tree",
     cant_plant: "You must validate your existing tree before planting another.",
-    match_pulse: "Match / Send to another Tree?"
+    match_pulse: "Match / Send to another Tree?",
+    quick_snap: "Quick Snap",
+    back_forest: "Back to Forest",
+    genesis: "Genesis Hash",
+    steward: "Steward",
+    location: "Location",
+    tree_details: "Tree Details"
   },
   es: {
     forest: "Bosque",
@@ -66,7 +73,13 @@ export const translations = {
     unvalidated: "No validado",
     validate_action: "Validar este Árbol",
     cant_plant: "Debes validar tu árbol existente antes de plantar otro.",
-    match_pulse: "¿Coincidir / Enviar a otro Árbol?"
+    match_pulse: "¿Coincidir / Enviar a otro Árbol?",
+    quick_snap: "Foto Rápida",
+    back_forest: "Volver al Bosque",
+    genesis: "Hash Génesis",
+    steward: "Guardián",
+    location: "Ubicación",
+    tree_details: "Detalles del Árbol"
   },
   hu: {
     forest: "Erdő",
@@ -99,7 +112,13 @@ export const translations = {
     unvalidated: "Nem hitelesített",
     validate_action: "Fa Hitelesítése",
     cant_plant: "A következő ültetése előtt hitelesítenie kell a meglévő fáját.",
-    match_pulse: "Párosítás / Küldés másik Fához?"
+    match_pulse: "Párosítás / Küldés másik Fához?",
+    quick_snap: "Gyors Fotó",
+    back_forest: "Vissza az Erdőbe",
+    genesis: "Genezis Hash",
+    steward: "Gondnok",
+    location: "Helyszín",
+    tree_details: "Fa Részletei"
   },
   qu: { 
     forest: "Sach'a-sach'a",
@@ -132,7 +151,13 @@ export const translations = {
     unvalidated: "Mana chaskisqa",
     validate_action: "Kay Mallkita Chaskiy",
     cant_plant: "Ñawpaq mallkiyki chaskisqa kanan tiyan.",
-    match_pulse: "Tupachiy / Huk Mallkiman Kachay?"
+    match_pulse: "Tupachiy / Huk Mallkiman Kachay?",
+    quick_snap: "Utqaylla Foto",
+    back_forest: "Sach'a-sach'aman Kutiy",
+    genesis: "Qallariy Hash",
+    steward: "Kamayoq",
+    location: "Tiyay",
+    tree_details: "Mallki Willakuykuna"
   },
   sa: { 
     forest: "अरण्यम् (Araṇyam)",
@@ -165,7 +190,13 @@ export const translations = {
     unvalidated: "अप्रमाणित",
     validate_action: "एतत् वृक्षं प्रमाणयतु",
     cant_plant: "नूतनवृक्षात् पूर्वं वर्तमानवृक्षः प्रमाणितः भवेत्।",
-    match_pulse: "मेलनम् / अन्यवृक्षाय प्रेषयतु?"
+    match_pulse: "मेलनम् / अन्यवृक्षाय प्रेषयतु?",
+    quick_snap: "शीघ्रं चित्रम्",
+    back_forest: "अरण्यं प्रतिनिवर्ततु",
+    genesis: "आदि हैश (Genesis Hash)",
+    steward: "पालक",
+    location: "स्थानम्",
+    tree_details: "वृक्ष विवरण"
   },
   ja: {
     forest: "森",
@@ -198,7 +229,13 @@ export const translations = {
     unvalidated: "未認証",
     validate_action: "この木を認証する",
     cant_plant: "次の木を植える前に、既存の木を認証してください。",
-    match_pulse: "マッチ / 他の木へ送る？"
+    match_pulse: "マッチ / 他の木へ送る？",
+    quick_snap: "クイックスナップ",
+    back_forest: "森へ戻る",
+    genesis: "ジェネシスハッシュ",
+    steward: "管理人",
+    location: "場所",
+    tree_details: "木の詳細"
   },
   ar: {
     forest: "الغابة",
@@ -231,6 +268,12 @@ export const translations = {
     unvalidated: "غير مصدق",
     validate_action: "تصديق هذه الشجرة",
     cant_plant: "يجب تصديق شجرتك الحالية قبل زرع أخرى.",
-    match_pulse: "مطابقة / إرسال لشجرة أخرى؟"
+    match_pulse: "مطابقة / إرسال لشجرة أخرى؟",
+    quick_snap: "لقطة سريعة",
+    back_forest: "عودة للغابة",
+    genesis: "تكوين الهاش",
+    steward: "الراعي",
+    location: "الموقع",
+    tree_details: "تفاصيل الشجرة"
   }
 };

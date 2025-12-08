@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, FormEvent, useRef, ChangeEvent } from 'react';
 import {
   signInWithGoogle,
@@ -52,10 +53,12 @@ const Icons = {
   Close: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>,
   Map: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" /></svg>,
   List: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>,
-  Camera: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>,
+  Camera: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>,
   ShieldCheck: () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-emerald-500"><path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" /></svg>,
   Play: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" /></svg>,
-  Link: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>
+  Link: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>,
+  ArrowLeft: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>,
+  FingerPrint: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M7.875 14.25l1.214 1.942a2.25 2.25 0 001.908 1.058h2.006c.776 0 1.497-.4 1.908-1.058l1.214-1.942M2.41 9a4.5 4.5 0 016.398-3.412 6 6 0 014.866 2.318A6 6 0 0118.665 4.5 6 6 0 0121.75 9v12a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 012.25 21V9z" /></svg>
 };
 
 const useLifeseed = () => {
@@ -257,7 +260,7 @@ const ForestMap = ({ trees }: { trees: Lifetree[] }) => {
     return <div ref={mapContainer} className="w-full h-[600px] rounded-xl shadow-inner border border-slate-200 z-0" />;
 };
 
-const LifetreeCard = ({ tree, myActiveTree, onValidate, onProposeMatch, onPlayGrowth, onQuickSnap }: any) => {
+const LifetreeCard = ({ tree, myActiveTree, onValidate, onPlayGrowth, onQuickSnap, onView }: any) => {
     const { t } = useLanguage();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
@@ -270,10 +273,18 @@ const LifetreeCard = ({ tree, myActiveTree, onValidate, onProposeMatch, onPlayGr
             if(fileInputRef.current) fileInputRef.current.value = "";
         }
     }
+
+    const triggerUpload = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        fileInputRef.current?.click();
+    }
     
     return (
-        <div className={`bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 group relative ${tree.validated ? 'ring-1 ring-emerald-100' : ''}`}>
-             <div className="absolute top-2 right-2 z-10 flex space-x-2">
+        <div 
+            onClick={() => onView(tree)}
+            className={`bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 group relative cursor-pointer ${tree.validated ? 'ring-1 ring-emerald-100' : ''}`}
+        >
+             <div className="absolute top-2 right-2 z-20 flex space-x-2">
                 {tree.validated && (
                     <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center shadow-sm">
                         <Icons.ShieldCheck />
@@ -282,6 +293,29 @@ const LifetreeCard = ({ tree, myActiveTree, onValidate, onProposeMatch, onPlayGr
                 )}
             </div>
 
+            {/* Quick Snap: Moved to top-left with clear label */}
+             {myActiveTree && myActiveTree.id === tree.id && (
+                 <div className="absolute top-2 left-2 z-20">
+                     <button 
+                        onClick={triggerUpload} 
+                        disabled={uploading}
+                        className="flex items-center space-x-1.5 bg-white/95 text-slate-800 px-2.5 py-1 rounded-full shadow-md hover:bg-white hover:text-emerald-700 transition-all active:scale-95"
+                    >
+                        {uploading ? <div className="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div> : <Icons.Camera />}
+                        <span className="text-[10px] font-bold uppercase tracking-wider">{t('quick_snap')}</span>
+                    </button>
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        accept="image/*" 
+                        capture="environment" 
+                        onChange={handleFileChange} 
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                 </div>
+            )}
+
             <div className="relative h-36 bg-slate-200 overflow-hidden group">
                 {tree.imageUrl ? (
                     <img src={tree.imageUrl} alt={tree.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s] animate-[pulse_4s_ease-in-out_infinite]" />
@@ -289,28 +323,6 @@ const LifetreeCard = ({ tree, myActiveTree, onValidate, onProposeMatch, onPlayGr
                     <div className={`w-full h-full ${colors.sky} flex items-center justify-center`}>
                         <Logo width={50} height={50} className="opacity-20 text-white animate-pulse" />
                     </div>
-                )}
-                
-                {/* Upload Overlay (Camera) */}
-                {myActiveTree && myActiveTree.id === tree.id && (
-                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <button 
-                            onClick={() => fileInputRef.current?.click()} 
-                            disabled={uploading}
-                            className="bg-white/90 text-slate-800 p-2 rounded-full shadow-lg hover:bg-white transition-transform transform active:scale-95"
-                            title="Quick Growth Snap"
-                        >
-                            {uploading ? <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div> : <Icons.Camera />}
-                        </button>
-                        <input 
-                            type="file" 
-                            ref={fileInputRef} 
-                            className="hidden" 
-                            accept="image/*" 
-                            capture="environment" // Forces camera on mobile
-                            onChange={handleFileChange} 
-                        />
-                     </div>
                 )}
 
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent pointer-events-none"></div>
@@ -328,14 +340,14 @@ const LifetreeCard = ({ tree, myActiveTree, onValidate, onProposeMatch, onPlayGr
                     "{tree.body}"
                 </p>
                 <div className="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center">
-                    <button onClick={() => onPlayGrowth(tree.id)} className="flex items-center space-x-1 text-[10px] bg-slate-50 hover:bg-slate-100 text-slate-500 px-2 py-1 rounded transition-colors uppercase tracking-wider font-semibold">
+                    <button onClick={(e) => { e.stopPropagation(); onPlayGrowth(tree.id); }} className="flex items-center space-x-1 text-[10px] bg-slate-50 hover:bg-slate-100 text-slate-500 px-2 py-1 rounded transition-colors uppercase tracking-wider font-semibold">
                         <Icons.Play />
                         <span>Growth</span>
                     </button>
                     
                     <div className="flex space-x-2">
                         {myActiveTree && myActiveTree.validated && !tree.validated && myActiveTree.id !== tree.id && (
-                            <button onClick={() => onValidate(tree.id)} className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-100 transition-colors uppercase font-bold">
+                            <button onClick={(e) => { e.stopPropagation(); onValidate(tree.id); }} className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-100 transition-colors uppercase font-bold">
                                 {t('validate_action')}
                             </button>
                         )}
@@ -345,6 +357,124 @@ const LifetreeCard = ({ tree, myActiveTree, onValidate, onProposeMatch, onPlayGr
         </div>
     );
 };
+
+const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActiveTree }: any) => {
+    const { t } = useLanguage();
+    
+    return (
+        <div className="min-h-screen bg-slate-50 animate-in fade-in zoom-in-95 duration-300">
+            {/* Header */}
+            <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 py-4 flex items-center justify-between">
+                <button onClick={onClose} className="flex items-center space-x-2 text-slate-600 hover:text-slate-900 font-medium">
+                    <Icons.ArrowLeft />
+                    <span>{t('back_forest')}</span>
+                </button>
+                <h2 className="text-xl font-light tracking-wide">{tree.name}</h2>
+                <div className="w-8"></div> {/* Spacer for center alignment */}
+            </div>
+
+            <div className="max-w-4xl mx-auto p-6 space-y-8">
+                {/* Hero */}
+                <div className="relative h-64 md:h-96 w-full rounded-2xl overflow-hidden shadow-xl">
+                    <img 
+                        src={tree.imageUrl || 'https://via.placeholder.com/800x400'} 
+                        className="w-full h-full object-cover" 
+                        alt={tree.name}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute bottom-6 left-6 text-white">
+                        <div className="flex items-center space-x-3 mb-2">
+                            {tree.validated && (
+                                <span className="bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full font-bold flex items-center">
+                                    <Icons.ShieldCheck />
+                                    <span className="ml-1">{t('validated')}</span>
+                                </span>
+                            )}
+                            <button onClick={() => onPlayGrowth(tree.id)} className="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-1 rounded-full flex items-center space-x-1 backdrop-blur-sm transition-colors">
+                                <Icons.Play />
+                                <span>PLAY GROWTH</span>
+                            </button>
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-thin tracking-tight">{tree.name}</h1>
+                    </div>
+                </div>
+
+                {/* Info Grid */}
+                <div className="grid md:grid-cols-2 gap-8">
+                    
+                    {/* Left: Bio & Meta */}
+                    <div className="space-y-6">
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center">
+                                <Icons.FingerPrint />
+                                <span className="ml-2">{t('vision')}</span>
+                            </h3>
+                            <p className="text-lg font-serif italic text-slate-700 leading-relaxed">
+                                "{tree.body}"
+                            </p>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">{t('tree_details')}</h3>
+                            
+                            <div className="flex justify-between py-2 border-b border-slate-50">
+                                <span className="text-slate-500 text-sm">{t('steward')}</span>
+                                <span className="text-slate-800 font-mono text-sm">{tree.ownerId.substring(0, 10)}...</span>
+                            </div>
+                            <div className="flex justify-between py-2 border-b border-slate-50">
+                                <span className="text-slate-500 text-sm">{t('location')}</span>
+                                <span className="text-slate-800 font-mono text-sm">{tree.locationName}</span>
+                            </div>
+                            <div className="flex justify-between py-2 border-b border-slate-50">
+                                <span className="text-slate-500 text-sm">Lat / Lng</span>
+                                <span className="text-slate-800 font-mono text-sm">{tree.latitude?.toFixed(4)}, {tree.longitude?.toFixed(4)}</span>
+                            </div>
+                             <div className="flex justify-between py-2">
+                                <span className="text-slate-500 text-sm">Validator</span>
+                                <span className="text-slate-800 font-mono text-sm">{tree.validatorId ? tree.validatorId.substring(0, 8) + '...' : t('unvalidated')}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right: Blockchain */}
+                    <div className="space-y-6">
+                         <div className="bg-slate-900 text-slate-300 p-6 rounded-2xl shadow-inner font-mono text-xs overflow-hidden relative">
+                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <Logo width={100} height={100} />
+                            </div>
+                            <h3 className="text-emerald-400 font-bold uppercase tracking-wider mb-6 flex items-center">
+                                <Icons.Hash />
+                                <span className="ml-2">Blockchain Ledger</span>
+                            </h3>
+
+                            <div className="space-y-4 relative z-10">
+                                <div>
+                                    <p className="text-slate-500 mb-1 uppercase text-[10px]">Block Height</p>
+                                    <p className="text-2xl text-white">{tree.blockHeight}</p>
+                                </div>
+                                <div className="break-all">
+                                    <p className="text-slate-500 mb-1 uppercase text-[10px]">{t('genesis')}</p>
+                                    <p className="text-emerald-500/80">{tree.genesisHash}</p>
+                                </div>
+                                <div className="break-all">
+                                    <p className="text-slate-500 mb-1 uppercase text-[10px]">{t('latest_hash')}</p>
+                                    <p className="text-emerald-300">{tree.latestHash}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        {myActiveTree && myActiveTree.validated && !tree.validated && myActiveTree.id !== tree.id && (
+                             <button onClick={() => onValidate(tree.id)} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-emerald-200 transition-all active:scale-95">
+                                {t('validate_action')}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
 
 const GrowthPlayerModal = ({ treeId, onClose }: { treeId: string, onClose: () => void }) => {
     const [images, setImages] = useState<Pulse[]>([]);
@@ -468,6 +598,7 @@ const AppContent = () => {
     const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
     const [data, setData] = useState<any[]>([]);
     const [matches, setMatches] = useState<MatchProposal[]>([]);
+    const [selectedTree, setSelectedTree] = useState<Lifetree | null>(null);
     
     // UI State
     const [showPlantModal, setShowPlantModal] = useState(false);
@@ -557,17 +688,8 @@ const AppContent = () => {
         e.preventDefault();
         if (!lightseed || !activeTree || !matchCandidate) return;
         try {
-             // Find matching pulse of my own to link (simplified: using current form as the "Response Pulse")
-             // Actually, handshake implies I select MY pulse and THEIR pulse.
-             // For UI simplicity: I create a new "Response Pulse" right here to match theirs.
-             
-             // 1. Create my side of the pulse first (mint it)
-             const myPulseId = `temp_${Date.now()}`; // In real app, mint it first. 
-             // To keep it simple: We just Propose. Real implementation needs a pulse ID selector.
-             // Let's assume user is picking their "Active Tree" as the source entity.
-             
              await proposeMatch({
-                 initiatorPulseId: "PENDING_CREATION", // Simplified: just linking trees for now in UI logic
+                 initiatorPulseId: "PENDING_CREATION",
                  initiatorTreeId: activeTree.id,
                  initiatorUid: lightseed.uid,
                  targetPulseId: matchCandidate.id,
@@ -585,6 +707,22 @@ const AppContent = () => {
     }
 
     if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-slate-50"><Logo className="animate-pulse" /></div>;
+    
+    if (selectedTree) {
+        return (
+            <div className={`min-h-screen ${colors.snow} font-sans text-slate-800`}>
+                <LifetreeDetail 
+                    tree={selectedTree} 
+                    onClose={() => setSelectedTree(null)} 
+                    onPlayGrowth={setShowGrowthPlayer}
+                    onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); setSelectedTree(null); loadContent(); })}
+                    myActiveTree={activeTree}
+                />
+                 {/* Growth Player Modal (can be opened from Detail) */}
+                 {showGrowthPlayer && <GrowthPlayerModal treeId={showGrowthPlayer} onClose={() => setShowGrowthPlayer(null)} />}
+            </div>
+        )
+    }
 
     return (
         <div className={`min-h-screen ${colors.snow} font-sans text-slate-800`}>
@@ -643,6 +781,8 @@ const AppContent = () => {
                                     myActiveTree={activeTree} 
                                     onPlayGrowth={setShowGrowthPlayer} 
                                     onQuickSnap={handleQuickSnap}
+                                    onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); loadContent(); })}
+                                    onView={setSelectedTree}
                                 />
                              ))}
                         </div>
