@@ -1,0 +1,70 @@
+<svg width="262" height="262" viewBox="0 0 262 262" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="clean">
+      <circle cx="131" cy="131" r="131" />
+    </clipPath>
+  </defs>
+  <g>
+    <circle cx="131" cy="131" r="131" fill="white" stroke="#334155" stroke-width="7" clip-path="url(#clean)" />
+
+    <!-- Left Column -->
+    <circle cx="-35.28" cy="-29" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="-35.28" cy="35" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="-35.28" cy="99" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="-35.28" cy="163" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="-35.28" cy="227" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="-35.28" cy="291" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+
+    <!-- Mid-Left Column -->
+    <circle cx="20.15" cy="3" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="20.15" cy="67" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="20.15" cy="131" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="20.15" cy="195" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="20.15" cy="259" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+
+    <!-- Center Column -->
+    <circle cx="75.57" cy="-29" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="75.57" cy="35" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="75.57" cy="99" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="75.57" cy="163" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="75.57" cy="227" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="75.57" cy="291" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+
+    <!-- Mid-Right Column -->
+    <circle cx="131" cy="3" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="131" cy="67" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="131" cy="131" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="131" cy="195" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="131" cy="259" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+
+    <!-- Right Columns -->
+    <circle cx="186.43" cy="-29" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="186.43" cy="35" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="186.43" cy="99" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="186.43" cy="163" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="186.43" cy="227" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="186.43" cy="291" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+
+    <circle cx="241.85" cy="3" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="241.85" cy="67" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="241.85" cy="131" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="241.85" cy="195" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="241.85" cy="259" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+
+    <circle cx="297.28" cy="-29" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="297.28" cy="35" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="297.28" cy="99" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="297.28" cy="163" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="297.28" cy="227" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+    <circle cx="297.28" cy="291" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#clean)" />
+
+    <!-- Inner Seed Circles -->
+    <circle cx="75.57" cy="99" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#clean)" />
+    <circle cx="75.57" cy="163" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#clean)" />
+    <circle cx="131" cy="67" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#clean)" />
+    <circle cx="131" cy="131" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#clean)" />
+    <circle cx="131" cy="195" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#clean)" />
+    <circle cx="186.43" cy="99" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#clean)" />
+    <circle cx="186.43" cy="163" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#clean)" />
+  </g>
+</svg>
