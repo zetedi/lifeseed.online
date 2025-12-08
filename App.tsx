@@ -257,51 +257,85 @@ const ForestMap = ({ trees }: { trees: Lifetree[] }) => {
     return <div ref={mapContainer} className="w-full h-[600px] rounded-xl shadow-inner border border-slate-200 z-0" />;
 };
 
-const LifetreeCard = ({ tree, myActiveTree, onValidate, onProposeMatch, onPlayGrowth }: any) => {
+const LifetreeCard = ({ tree, myActiveTree, onValidate, onProposeMatch, onPlayGrowth, onQuickSnap }: any) => {
     const { t } = useLanguage();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [uploading, setUploading] = useState(false);
+
+    const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setUploading(true);
+            await onQuickSnap(tree.id, e.target.files[0]);
+            setUploading(false);
+            if(fileInputRef.current) fileInputRef.current.value = "";
+        }
+    }
     
     return (
-        <div className={`bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-xl transition-all duration-500 group relative ${tree.validated ? 'ring-1 ring-emerald-100' : ''}`}>
-             <div className="absolute top-3 right-3 z-10 flex space-x-2">
+        <div className={`bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 group relative ${tree.validated ? 'ring-1 ring-emerald-100' : ''}`}>
+             <div className="absolute top-2 right-2 z-10 flex space-x-2">
                 {tree.validated && (
-                    <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-1 rounded-full font-bold flex items-center shadow-sm">
+                    <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center shadow-sm">
                         <Icons.ShieldCheck />
-                        <span className="ml-1">{t('validated')}</span>
+                        <span className="ml-1 text-[9px]">{t('validated')}</span>
                     </span>
                 )}
             </div>
 
-            <div className="relative h-56 bg-slate-200 overflow-hidden">
+            <div className="relative h-36 bg-slate-200 overflow-hidden group">
                 {tree.imageUrl ? (
                     <img src={tree.imageUrl} alt={tree.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s] animate-[pulse_4s_ease-in-out_infinite]" />
                 ) : (
                     <div className={`w-full h-full ${colors.sky} flex items-center justify-center`}>
-                        <Logo width={80} height={80} className="opacity-20 text-white animate-pulse" />
+                        <Logo width={50} height={50} className="opacity-20 text-white animate-pulse" />
                     </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
-                <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <h3 className="text-2xl font-light tracking-wide truncate">{tree.name}</h3>
-                    <div className="flex items-center text-xs text-slate-300 mt-1 space-x-2 rtl:space-x-reverse">
-                         <span className="px-2 py-0.5 border border-slate-500 rounded-full text-[10px] bg-slate-800/50 backdrop-blur">
-                            H: {tree.blockHeight || 0}
+                
+                {/* Upload Overlay (Camera) */}
+                {myActiveTree && myActiveTree.id === tree.id && (
+                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button 
+                            onClick={() => fileInputRef.current?.click()} 
+                            disabled={uploading}
+                            className="bg-white/90 text-slate-800 p-2 rounded-full shadow-lg hover:bg-white transition-transform transform active:scale-95"
+                            title="Quick Growth Snap"
+                        >
+                            {uploading ? <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div> : <Icons.Camera />}
+                        </button>
+                        <input 
+                            type="file" 
+                            ref={fileInputRef} 
+                            className="hidden" 
+                            accept="image/*" 
+                            capture="environment" // Forces camera on mobile
+                            onChange={handleFileChange} 
+                        />
+                     </div>
+                )}
+
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent pointer-events-none"></div>
+                <div className="absolute bottom-2 left-3 right-3 text-white pointer-events-none">
+                    <h3 className="text-lg font-light tracking-wide truncate">{tree.name}</h3>
+                    <div className="flex items-center text-xs text-slate-300 mt-0.5 space-x-2 rtl:space-x-reverse">
+                         <span className="px-1.5 py-0 border border-slate-500 rounded-full text-[9px] bg-slate-800/50 backdrop-blur">
+                            Block: {tree.blockHeight || 0}
                         </span>
                     </div>
                 </div>
             </div>
-            <div className="p-6">
-                <p className="text-slate-600 font-light italic leading-relaxed border-l-4 border-emerald-500 pl-4 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4">
+            <div className="p-3">
+                <p className="text-slate-600 text-xs font-light italic leading-relaxed line-clamp-2 h-8">
                     "{tree.body}"
                 </p>
-                <div className="mt-6 pt-4 border-t border-slate-100 flex flex-wrap gap-2 justify-between items-center">
-                    <button onClick={() => onPlayGrowth(tree.id)} className="flex items-center space-x-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-1 rounded transition-colors">
+                <div className="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center">
+                    <button onClick={() => onPlayGrowth(tree.id)} className="flex items-center space-x-1 text-[10px] bg-slate-50 hover:bg-slate-100 text-slate-500 px-2 py-1 rounded transition-colors uppercase tracking-wider font-semibold">
                         <Icons.Play />
                         <span>Growth</span>
                     </button>
                     
                     <div className="flex space-x-2">
                         {myActiveTree && myActiveTree.validated && !tree.validated && myActiveTree.id !== tree.id && (
-                            <button onClick={() => onValidate(tree.id)} className="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded hover:bg-emerald-200 transition-colors">
+                            <button onClick={() => onValidate(tree.id)} className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-100 transition-colors uppercase font-bold">
                                 {t('validate_action')}
                             </button>
                         )}
@@ -470,6 +504,26 @@ const AppContent = () => {
         return url;
     };
 
+    const handleQuickSnap = async (treeId: string, file: File) => {
+        if (!lightseed) return;
+        try {
+            const url = await handleImageUpload(file, `growth/${treeId}/${Date.now()}`);
+            await mintPulse({
+                lifetreeId: treeId,
+                type: 'GROWTH',
+                title: 'Growth Snapshot',
+                body: `Snapped on ${new Date().toLocaleDateString()}`,
+                imageUrl: url,
+                authorId: lightseed.uid,
+                authorName: lightseed.displayName || "Soul",
+                authorPhoto: lightseed.photoURL || undefined,
+            });
+            await loadContent(); // Reload so map and card update
+        } catch (e: any) {
+            alert("Error taking picture: " + e.message);
+        }
+    }
+
     const handlePlant = async (e: FormEvent) => {
         e.preventDefault();
         if (!lightseed) return;
@@ -581,9 +635,15 @@ const AppContent = () => {
                     viewMode === 'map' ? (
                         <ForestMap trees={data} />
                     ) : (
-                        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                              {data.map((item) => (
-                                <LifetreeCard key={item.id} tree={item} myActiveTree={activeTree} onPlayGrowth={setShowGrowthPlayer} />
+                                <LifetreeCard 
+                                    key={item.id} 
+                                    tree={item} 
+                                    myActiveTree={activeTree} 
+                                    onPlayGrowth={setShowGrowthPlayer} 
+                                    onQuickSnap={handleQuickSnap}
+                                />
                              ))}
                         </div>
                     )
