@@ -1,4 +1,5 @@
-import React, { useState, useEffect, FormEvent } from 'react';
+
+import React, { useState, useEffect, FormEvent, useRef, ChangeEvent } from 'react';
 import {
   signInWithGoogle,
   logout,
@@ -9,7 +10,8 @@ import {
   onAuthChange,
   fetchLifetrees,
   plantLifetree,
-  getMyLifetree
+  getMyLifetree,
+  uploadImage
 } from './services/firebase';
 import { generateLifetreeBio } from './services/gemini';
 import { type Lightseed, type Present, type Lifetree } from './types';
@@ -51,6 +53,22 @@ const Icons = {
   Close: () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  ),
+  Map: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+    </svg>
+  ),
+  List: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+    </svg>
+  ),
+  Camera: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
     </svg>
   )
 };
@@ -206,6 +224,54 @@ const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPost, onLogin, on
     );
 };
 
+const ForestMap = ({ trees }: { trees: Lifetree[] }) => {
+    const mapContainer = useRef<HTMLDivElement>(null);
+    const mapInstance = useRef<any>(null);
+
+    useEffect(() => {
+        if (!mapContainer.current) return;
+        const L = (window as any).L;
+        if (!L) return;
+
+        // Initialize Map
+        if (!mapInstance.current) {
+            mapInstance.current = L.map(mapContainer.current).setView([0, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(mapInstance.current);
+        }
+
+        // Custom Icon
+        const leafIcon = L.divIcon({
+            className: 'custom-icon',
+            html: `<div style="background:white; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; border:2px solid #65A30D; box-shadow:0 2px 5px rgba(0,0,0,0.3);">
+                    <svg width="20" height="20" viewBox="0 0 262 262" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="131" cy="131" r="131" fill="#65A30D"/>
+                        <circle cx="131" cy="131" r="100" fill="white"/>
+                    </svg>
+                   </div>`,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+
+        // Add Markers
+        trees.forEach(tree => {
+            if (tree.latitude && tree.longitude) {
+                const marker = L.marker([tree.latitude, tree.longitude], { icon: leafIcon }).addTo(mapInstance.current);
+                marker.bindPopup(`
+                    <div style="text-align:center;">
+                        <h3 style="margin:0; font-weight:bold; color:#334155;">${tree.name}</h3>
+                        <p style="margin:5px 0 0 0; font-size:12px; color:#64748B;">${tree.locationName}</p>
+                    </div>
+                `);
+            }
+        });
+
+    }, [trees]);
+
+    return <div ref={mapContainer} className="w-full h-[600px] rounded-xl shadow-inner border border-slate-200 z-0" />;
+};
+
 const LifetreeCard = ({ tree }: { tree: Lifetree }) => {
     const { t } = useLanguage();
     return (
@@ -274,6 +340,13 @@ const PresentCard = ({ present, lightseed }: { present: Present, lightseed: Ligh
                 <span>{t('block')}: {present.hash?.substring(0, 8)}</span>
             </div>
 
+            {/* NFT Image Display */}
+            {present.imageUrl && (
+                <div className="w-full h-64 overflow-hidden bg-slate-100">
+                    <img src={present.imageUrl} alt={present.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                </div>
+            )}
+
             <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3 rtl:space-x-reverse">
@@ -315,17 +388,53 @@ const Modal = ({ children, onClose, title }: any) => (
                 <h3 className="font-semibold text-slate-800">{title}</h3>
                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600">&times;</button>
             </div>
-            <div className="p-6">
+            <div className="p-6 max-h-[80vh] overflow-y-auto">
                 {children}
             </div>
         </div>
     </div>
 );
 
+const ImagePicker = ({ onChange, previewUrl, loading }: { onChange: (e: ChangeEvent<HTMLInputElement>) => void, previewUrl?: string, loading?: boolean }) => {
+    const { t } = useLanguage();
+    const fileInput = useRef<HTMLInputElement>(null);
+
+    return (
+        <div className="space-y-2">
+             <label className="block text-sm font-medium text-slate-700">{t('upload_photo')}</label>
+             <div 
+                onClick={() => fileInput.current?.click()}
+                className={`border-2 border-dashed border-slate-300 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-emerald-500 hover:bg-slate-50 transition-colors h-40 ${previewUrl ? 'border-none p-0' : ''}`}
+             >
+                <input 
+                    type="file" 
+                    ref={fileInput} 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={onChange}
+                    capture="environment" // Hints mobile browsers to use camera
+                />
+                
+                {loading ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+                ) : previewUrl ? (
+                    <img src={previewUrl} className="w-full h-full object-cover rounded-xl" alt="Preview" />
+                ) : (
+                    <div className="text-center text-slate-400">
+                        <Icons.Camera />
+                        <span className="text-xs mt-2 block">{t('upload_photo')}</span>
+                    </div>
+                )}
+             </div>
+        </div>
+    );
+};
+
 const AppContent = () => {
     const { t } = useLanguage();
     const { lightseed, lifetree, loading: authLoading, refreshTree } = useLifeseed();
     const [tab, setTab] = useState('forest');
+    const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
     const [data, setData] = useState<any[]>([]);
     const [loadingData, setLoadingData] = useState(false);
     
@@ -337,10 +446,17 @@ const AppContent = () => {
     const [treeName, setTreeName] = useState('');
     const [treeSeed, setTreeSeed] = useState('');
     const [treeBio, setTreeBio] = useState('');
+    const [treeImage, setTreeImage] = useState<File | null>(null);
+    const [treeImageUrl, setTreeImageUrl] = useState('');
+    
     const [presentTitle, setPresentTitle] = useState('');
     const [presentBody, setPresentBody] = useState('');
     const [presentPrice, setPresentPrice] = useState('');
+    const [presentImage, setPresentImage] = useState<File | null>(null);
+    const [presentImageUrl, setPresentImageUrl] = useState('');
+
     const [isPlanting, setIsPlanting] = useState(false);
+    const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
         loadContent();
@@ -366,6 +482,43 @@ const AppContent = () => {
         try { await signInWithGoogle(); } catch(e) { alert(t('login_failed')); }
     };
 
+    const handleImageUpload = async (file: File, path: string) => {
+        setUploading(true);
+        try {
+            const url = await uploadImage(file, path);
+            setUploading(false);
+            return url;
+        } catch (error: any) {
+            console.error("Upload failed", error);
+            // Better error reporting for the user
+            alert(`Upload failed: ${error.message || "Unknown error"}. Check your .env file for correct storage bucket.`);
+            setUploading(false);
+            return null;
+        }
+    };
+
+    const handleTreeImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files?.[0]) {
+            const file = e.target.files[0];
+            const url = await handleImageUpload(file, `trees/${Date.now()}_${file.name}`);
+            if (url) {
+                setTreeImageUrl(url);
+                setTreeImage(file); // Keep file reference if needed, but we upload immediately for UX
+            }
+        }
+    };
+
+    const handlePresentImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files?.[0]) {
+             const file = e.target.files[0];
+             const url = await handleImageUpload(file, `presents/${Date.now()}_${file.name}`);
+             if (url) {
+                 setPresentImageUrl(url);
+                 setPresentImage(file);
+             }
+        }
+    };
+
     const handlePlant = async (e: FormEvent) => {
         e.preventDefault();
         if (!lightseed) return;
@@ -378,6 +531,7 @@ const AppContent = () => {
                         ownerId: lightseed.uid,
                         name: treeName,
                         body: treeBio,
+                        imageUrl: treeImageUrl, // Use the uploaded URL
                         lat: position.coords.latitude,
                         lng: position.coords.longitude,
                         locName: "Earth" 
@@ -405,16 +559,21 @@ const AppContent = () => {
                 lifetreeId: lifetree.id,
                 title: presentTitle,
                 body: presentBody,
+                imageUrl: presentImageUrl, // NFT logic
                 authorId: lightseed.uid,
                 authorName: lightseed.displayName || "Soul",
                 authorPhoto: lightseed.photoURL || undefined,
                 type: tab === 'offerings' ? 'OFFER' : 'POST',
+                // SAFETY: Convert undefined price to null or omit to avoid Firestore 'undefined' error
                 price: presentPrice ? Number(presentPrice) : undefined
             });
             setShowPresentModal(false);
-            setPresentBody(''); setPresentTitle(''); setPresentPrice('');
+            setPresentBody(''); setPresentTitle(''); setPresentPrice(''); setPresentImageUrl('');
             loadContent();
-        } catch(err) { alert(err); }
+        } catch(err: any) { 
+            console.error(err);
+            alert(`Error: ${err.message}`); 
+        }
     };
 
     const generateBio = async () => {
@@ -438,26 +597,58 @@ const AppContent = () => {
             />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                <div className="mb-8">
-                    <h1 className="text-4xl font-light text-slate-800 mb-2 capitalize tracking-tight">{t(tab as any)}</h1>
-                    <div className="h-1 w-20 bg-emerald-500 rounded-full"></div>
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+                    <div>
+                        <h1 className="text-4xl font-light text-slate-800 mb-2 capitalize tracking-tight">{t(tab as any)}</h1>
+                        <div className="h-1 w-20 bg-emerald-500 rounded-full"></div>
+                    </div>
+                    {/* View Toggle for Forest */}
+                    {tab === 'forest' && (
+                        <div className="flex bg-white rounded-lg p-1 shadow-sm border border-slate-200 mt-4 md:mt-0">
+                            <button 
+                                onClick={() => setViewMode('grid')}
+                                className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm transition-all ${viewMode === 'grid' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
+                            >
+                                <Icons.List />
+                                <span>{t('list_view')}</span>
+                            </button>
+                            <button 
+                                onClick={() => setViewMode('map')}
+                                className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm transition-all ${viewMode === 'map' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
+                            >
+                                <Icons.Map />
+                                <span>{t('map_view')}</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {loadingData ? (
                     <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>
                 ) : (
-                    <div className={`grid gap-8 ${tab === 'forest' ? 'sm:grid-cols-2 lg:grid-cols-3' : 'max-w-3xl mx-auto'}`}>
-                        {data.map((item) => (
-                            tab === 'forest' 
-                                ? <LifetreeCard key={item.id} tree={item as Lifetree} />
-                                : <PresentCard key={item.id} present={item as Present} lightseed={lightseed} />
-                        ))}
+                    <>
+                        {/* Map View */}
+                        {tab === 'forest' && viewMode === 'map' && (
+                             <ForestMap trees={data as Lifetree[]} />
+                        )}
+
+                        {/* Grid View */}
+                        {(tab !== 'forest' || viewMode === 'grid') && (
+                            <div className={`grid gap-8 ${tab === 'forest' ? 'sm:grid-cols-2 lg:grid-cols-3' : 'max-w-3xl mx-auto'}`}>
+                                {data.map((item) => (
+                                    tab === 'forest' 
+                                        ? <LifetreeCard key={item.id} tree={item as Lifetree} />
+                                        : <PresentCard key={item.id} present={item as Present} lightseed={lightseed} />
+                                ))}
+                            </div>
+                        )}
+
                         {data.length === 0 && (
                             <div className="col-span-full text-center py-20 text-slate-400">
                                 <p className="text-xl font-light">{t('dormant')}</p>
                             </div>
                         )}
-                    </div>
+                    </>
                 )}
             </main>
 
@@ -465,6 +656,8 @@ const AppContent = () => {
             {showPlantModal && (
                 <Modal title={t('plant_lifetree')} onClose={() => lifetree && setShowPlantModal(false)}>
                     <form onSubmit={handlePlant} className="space-y-4">
+                        <ImagePicker onChange={handleTreeImageChange} previewUrl={treeImageUrl} loading={uploading} />
+                        
                         <div>
                             <label className="block text-sm font-medium text-slate-700">{t('tree_name')}</label>
                             <input className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" placeholder="e.g. The Eternal Oak" value={treeName} onChange={e=>setTreeName(e.target.value)} required />
@@ -481,7 +674,7 @@ const AppContent = () => {
                             <textarea className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" rows={3} value={treeBio} onChange={e=>setTreeBio(e.target.value)} required />
                         </div>
                         <p className="text-xs text-slate-500 italic">{t('connect_roots')}</p>
-                        <button type="submit" disabled={isPlanting} className="w-full bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 disabled:opacity-50">
+                        <button type="submit" disabled={isPlanting || uploading} className="w-full bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 disabled:opacity-50">
                             {isPlanting ? t('planting') : t('plant_lifetree')}
                         </button>
                     </form>
@@ -491,6 +684,8 @@ const AppContent = () => {
             {showPresentModal && (
                 <Modal title={t('create_present')} onClose={() => setShowPresentModal(false)}>
                     <form onSubmit={handleCreatePresent} className="space-y-4">
+                        <ImagePicker onChange={handlePresentImageChange} previewUrl={presentImageUrl} loading={uploading} />
+
                         <div>
                             <label className="block text-sm font-medium text-slate-700">{t('title')}</label>
                             <input className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" value={presentTitle} onChange={e=>setPresentTitle(e.target.value)} required />
@@ -505,7 +700,7 @@ const AppContent = () => {
                             <label className="block text-sm font-medium text-slate-700">{t('body')}</label>
                             <textarea className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" rows={4} value={presentBody} onChange={e=>setPresentBody(e.target.value)} required />
                         </div>
-                        <button type="submit" className="w-full bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700">{t('mint')}</button>
+                        <button type="submit" disabled={uploading} className="w-full bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 disabled:opacity-50">{t('mint')}</button>
                     </form>
                 </Modal>
             )}

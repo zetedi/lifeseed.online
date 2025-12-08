@@ -1,3 +1,4 @@
+
 export type Language = 'en' | 'es' | 'hu' | 'qu' | 'sa' | 'ja' | 'ar';
 
 export const translations = {
@@ -27,6 +28,11 @@ export const translations = {
     geo_error: "Geolocation error",
     planting: "Planting...",
     minting: "Minting...",
+    map_view: "Map View",
+    list_view: "List View",
+    open_map: "Open Map",
+    upload_photo: "Upload Photo",
+    uploading: "Uploading..."
   },
   es: {
     forest: "Bosque",
@@ -54,6 +60,11 @@ export const translations = {
     geo_error: "Error de geolocalización",
     planting: "Plantando...",
     minting: "Acuñando...",
+    map_view: "Vista de Mapa",
+    list_view: "Vista de Lista",
+    open_map: "Abrir Mapa",
+    upload_photo: "Subir Foto",
+    uploading: "Subiendo..."
   },
   hu: {
     forest: "Erdő",
@@ -81,6 +92,11 @@ export const translations = {
     geo_error: "Helymeghatározási hiba",
     planting: "Ültetés...",
     minting: "Verés...",
+    map_view: "Térkép Nézet",
+    list_view: "Lista Nézet",
+    open_map: "Térkép Megnyitása",
+    upload_photo: "Fénykép Feltöltése",
+    uploading: "Feltöltés..."
   },
   qu: { // Quechua (Runasimi)
     forest: "Sach'a-sach'a",
@@ -108,6 +124,11 @@ export const translations = {
     geo_error: "Tiyay pantay",
     planting: "Tarpuchkan...",
     minting: "Paqarichichkan...",
+    map_view: "Mapa Rikuy",
+    list_view: "Sutisuyu Rikuy",
+    open_map: "Mapata Kichay",
+    upload_photo: "Fotota Churay",
+    uploading: "Churachkan..."
   },
   sa: { // Sanskrit
     forest: "अरण्यम् (Araṇyam)",
@@ -135,6 +156,11 @@ export const translations = {
     geo_error: "स्थानदोषः",
     planting: "रोपयति...",
     minting: "टङ्कयति...",
+    map_view: "मानचित्र दर्शनम्",
+    list_view: "सूची दर्शनम्",
+    open_map: "मानचित्रं उद्घाटयतु",
+    upload_photo: "चित्रं अपलोडं करोतु",
+    uploading: "अपलोडं करोति..."
   },
   ja: {
     forest: "森 (Mori)",
@@ -162,6 +188,11 @@ export const translations = {
     geo_error: "位置情報エラー",
     planting: "植樹中...",
     minting: "鋳造中...",
+    map_view: "地図表示",
+    list_view: "リスト表示",
+    open_map: "地図を開く",
+    upload_photo: "写真をアップロード",
+    uploading: "アップロード中..."
   },
   ar: {
     forest: "الغابة",
@@ -189,5 +220,10 @@ export const translations = {
     geo_error: "خطأ في الموقع الجغرافي",
     planting: "جاري الزراعة...",
     minting: "جاري الصك...",
+    map_view: "عرض الخريطة",
+    list_view: "عرض القائمة",
+    open_map: "فتح الخريطة",
+    upload_photo: "رفع صورة",
+    uploading: "جاري الرفع..."
   }
 };

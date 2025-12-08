@@ -1,13 +1,31 @@
 import { GoogleGenAI } from "@google/genai";
 import { type GenerateContentResponse } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+// Read API Key from Vite Environment Variables
+const API_KEY = (import.meta as any).env.VITE_API_KEY;
+
+// Lazy initialization to prevent top-level crash
+let aiClient: GoogleGenAI | null = null;
+
+const getAiClient = () => {
+    if (!aiClient) {
+        if (!API_KEY) {
+            console.warn("LifeSeed: VITE_API_KEY is missing in .env");
+            return null;
+        }
+        aiClient = new GoogleGenAI({ apiKey: API_KEY });
+    }
+    return aiClient;
+}
 
 export const generatePostTitle = async (body: string): Promise<string> => {
   if (!body.trim()) {
     return "";
   }
   
+  const ai = getAiClient();
+  if (!ai) return "";
+
   try {
     const prompt = `Generate a short, engaging title (maximum 10 words) for the following post body. Do not use quotation marks in the title:\n\n---\n${body}\n---`;
     
@@ -27,6 +45,12 @@ export const generatePostTitle = async (body: string): Promise<string> => {
 
 export const generateLifetreeBio = async (seed: string): Promise<string> => {
   if (!seed.trim()) return "";
+  
+  const ai = getAiClient();
+  if (!ai) {
+      console.warn("Gemini API Key missing");
+      return "Roots run deep... (AI key missing)";
+  }
 
   try {
     const prompt = `

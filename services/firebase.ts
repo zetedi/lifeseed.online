@@ -8,7 +8,7 @@ import {
   signOut as firebaseSignOut
 } from 'firebase/auth';
 import { 
-  getFirestore, 
+  initializeFirestore, 
   collection, 
   query, 
   orderBy, 
@@ -21,22 +21,42 @@ import {
   where,
   Timestamp
 } from 'firebase/firestore';
+import { 
+  getStorage, 
+  ref, 
+  uploadBytes, 
+  getDownloadURL 
+} from 'firebase/storage';
 import { type Present, type Comment, type Lifetree } from '../types';
 import { createBlock } from '../utils/crypto';
 
-// CRITICAL: Replace these with your actual Firebase config from the Firebase Console
+// Load config from Environment Variables (.env)
+// Use 'any' cast for import.meta to avoid TS error 'Property env does not exist on type ImportMeta'
+const env = (import.meta as any).env;
+
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: env.VITE_FIREBASE_API_KEY,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: env.VITE_FIREBASE_APP_ID
 };
+
+// Safety Check: Ensure keys are replaced
+if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("YOUR_")) {
+  console.warn("LifeSeed Configuration Warning: .env file might be missing or invalid.");
+}
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+// FIX: ignoreUndefinedProperties prevents crashes when optional fields (like price) are undefined
+export const db = initializeFirestore(app, {
+    ignoreUndefinedProperties: true
+});
+
+export const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 
 // --- AUTH FUNCTIONS ---
@@ -55,6 +75,18 @@ export const signInWithGoogle = async () => {
 };
 
 export const logout = () => firebaseSignOut(auth);
+
+// --- STORAGE FUNCTIONS ---
+export const uploadImage = async (file: File, path: string): Promise<string> => {
+  try {
+    const storageRef = ref(storage, path);
+    await uploadBytes(storageRef, file);
+    return await getDownloadURL(storageRef);
+  } catch (error) {
+    console.error("Storage Error:", error);
+    throw error;
+  }
+};
 
 // --- LIFETREE FUNCTIONS (The Blockchain Entities) ---
 const lifetreesCollection = collection(db, 'lifetrees');
@@ -97,7 +129,8 @@ export const plantLifetree = async (data: {
 export const fetchLifetrees = async (): Promise<Lifetree[]> => {
   const q = query(lifetreesCollection, orderBy('createdAt', 'desc'));
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Lifetree));
+  // Cast data to any to prevent TS spread error
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Lifetree));
 };
 
 export const getMyLifetree = async (userId: string): Promise<Lifetree | null> => {
@@ -105,7 +138,9 @@ export const getMyLifetree = async (userId: string): Promise<Lifetree | null> =>
     const q = query(lifetreesCollection, where('ownerId', '==', userId));
     const snapshot = await getDocs(q);
     if (snapshot.empty) return null;
-    return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Lifetree;
+    const document = snapshot.docs[0];
+    // Cast data to any to prevent TS spread error
+    return { id: document.id, ...(document.data() as any) } as Lifetree;
 };
 
 // --- PRESENT FUNCTIONS (The Blocks) ---
@@ -119,7 +154,8 @@ export const fetchPresents = async (typeFilter?: 'POST' | 'OFFER'): Promise<Pres
       q = query(presentsCollection, orderBy('createdAt', 'desc'));
   }
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Present));
+  // Cast doc.data() to any to allow spreading (fixes strict type check error)
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Present));
 };
 
 /**
@@ -130,6 +166,7 @@ export const createPresent = async (presentData: {
   lifetreeId: string,
   title: string,
   body: string,
+  imageUrl?: string,
   authorId: string,
   authorName: string,
   authorPhoto?: string,
@@ -152,9 +189,11 @@ export const createPresent = async (presentData: {
     const timestamp = Date.now();
 
     // 2. Calculate the Hash for this new Block (Present)
+    // NFT Logic: Image URL is part of the hash
     const blockData = {
       title: presentData.title,
       body: presentData.body,
+      image: presentData.imageUrl || "",
       author: presentData.authorId,
       type: presentData.type,
       price: presentData.price
@@ -163,6 +202,7 @@ export const createPresent = async (presentData: {
     const newHash = await createBlock(previousHash, blockData, timestamp);
 
     // 3. Create the Present
+    // Firestore with ignoreUndefinedProperties: true will handle undefined price automatically
     transaction.set(newPresentRef, {
       ...presentData,
       loveCount: 0,

@@ -2,6 +2,8 @@
   "name": "lifeseed.online",
   "description": "A decentralized social sharing platform where every lifetree is a blockchain of presents.",
   "requestFramePermissions": [
-    "geolocation"
+    "geolocation",
+    "camera",
+    "microphone"
   ]
 }

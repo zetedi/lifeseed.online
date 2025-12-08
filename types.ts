@@ -31,6 +31,7 @@ export interface Present {
   // Data Payload
   title: string;
   body: string;
+  imageUrl?: string; // NFT Image
   price?: number; // Only for OFFER
   
   // Metadata
