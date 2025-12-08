@@ -1,4 +1,5 @@
 
+
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
@@ -163,6 +164,15 @@ export const fetchPulses = async (): Promise<Pulse[]> => {
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Pulse));
 };
 
+export const getMyPulses = async (userId: string): Promise<Pulse[]> => {
+    if (!userId) return [];
+    // Note: Use orderBy client-side if missing index
+    const q = query(pulsesCollection, where('authorId', '==', userId));
+    const snapshot = await getDocs(q);
+    const pulses = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Pulse));
+    return pulses.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+};
+
 export const fetchGrowthPulses = async (treeId: string): Promise<Pulse[]> => {
     const q = query(
         pulsesCollection, 
@@ -248,6 +258,18 @@ export const getPendingMatches = async (userId: string): Promise<MatchProposal[]
     const q = query(matchesCollection, where('targetUid', '==', userId), where('status', '==', 'PENDING'));
     const snap = await getDocs(q);
     return snap.docs.map(d => ({id: d.id, ...d.data() as any} as MatchProposal));
+}
+
+// Get completed matches where user was involved
+export const getMyMatchesHistory = async (userId: string): Promise<MatchProposal[]> => {
+    // Requires multiple queries or an OR clause (not fully supported in simple queries without index)
+    // Simpler: Fetch accepted matches for target, accepted for initiator
+    const q1 = query(matchesCollection, where('targetUid', '==', userId), where('status', '==', 'ACCEPTED'));
+    const q2 = query(matchesCollection, where('initiatorUid', '==', userId), where('status', '==', 'ACCEPTED'));
+    
+    const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+    const matches = [...s1.docs, ...s2.docs].map(d => ({id: d.id, ...d.data() as any} as MatchProposal));
+    return matches.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
 }
 
 // Accepts match and writes to blockchain

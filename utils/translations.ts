@@ -40,7 +40,13 @@ export const translations = {
     genesis: "Genesis Hash",
     steward: "Steward",
     location: "Location",
-    tree_details: "Tree Details"
+    tree_details: "Tree Details",
+    profile: "Profile",
+    my_trees: "My Trees",
+    my_pulses: "My Pulses",
+    my_matches: "My Matches",
+    joined: "Joined",
+    total_love: "Total Love"
   },
   es: {
     forest: "Bosque",
@@ -79,7 +85,13 @@ export const translations = {
     genesis: "Hash Génesis",
     steward: "Guardián",
     location: "Ubicación",
-    tree_details: "Detalles del Árbol"
+    tree_details: "Detalles del Árbol",
+    profile: "Perfil",
+    my_trees: "Mis Árboles",
+    my_pulses: "Mis Pulsos",
+    my_matches: "Mis Coincidencias",
+    joined: "Se unió",
+    total_love: "Amor Total"
   },
   hu: {
     forest: "Erdő",
@@ -118,7 +130,13 @@ export const translations = {
     genesis: "Genezis Hash",
     steward: "Gondnok",
     location: "Helyszín",
-    tree_details: "Fa Részletei"
+    tree_details: "Fa Részletei",
+    profile: "Profil",
+    my_trees: "Fáim",
+    my_pulses: "Pulzusaim",
+    my_matches: "Párosításaim",
+    joined: "Csatlakozott",
+    total_love: "Összes Szeretet"
   },
   qu: { 
     forest: "Sach'a-sach'a",
@@ -157,7 +175,13 @@ export const translations = {
     genesis: "Qallariy Hash",
     steward: "Kamayoq",
     location: "Tiyay",
-    tree_details: "Mallki Willakuykuna"
+    tree_details: "Mallki Willakuykuna",
+    profile: "Runaq Uyan",
+    my_trees: "Mallkiykuna",
+    my_pulses: "Sirkaykuna",
+    my_matches: "Tupachisqaykuna",
+    joined: "Yaykurqa",
+    total_love: "Tukuy Munakuynin"
   },
   sa: { 
     forest: "अरण्यम् (Araṇyam)",
@@ -196,7 +220,13 @@ export const translations = {
     genesis: "आदि हैश (Genesis Hash)",
     steward: "पालक",
     location: "स्थानम्",
-    tree_details: "वृक्ष विवरण"
+    tree_details: "वृक्ष विवरण",
+    profile: "परिचय",
+    my_trees: "मम वृक्षाः",
+    my_pulses: "मम स्पन्दनानि",
+    my_matches: "मम मेलनानि",
+    joined: "सम्बद्धः",
+    total_love: "सम्पूर्ण स्नेह"
   },
   ja: {
     forest: "森",
@@ -235,7 +265,13 @@ export const translations = {
     genesis: "ジェネシスハッシュ",
     steward: "管理人",
     location: "場所",
-    tree_details: "木の詳細"
+    tree_details: "木の詳細",
+    profile: "プロフィール",
+    my_trees: "私の木",
+    my_pulses: "私のパルス",
+    my_matches: "私のマッチ",
+    joined: "参加日",
+    total_love: "総ラブ数"
   },
   ar: {
     forest: "الغابة",
@@ -274,6 +310,12 @@ export const translations = {
     genesis: "تكوين الهاش",
     steward: "الراعي",
     location: "الموقع",
-    tree_details: "تفاصيل الشجرة"
+    tree_details: "تفاصيل الشجرة",
+    profile: "الملف الشخصي",
+    my_trees: "أشجاري",
+    my_pulses: "نبضاتي",
+    my_matches: "مطابقاتي",
+    joined: "انضم",
+    total_love: "مجموع الحب"
   }
 };
