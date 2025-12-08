@@ -174,14 +174,17 @@ export const getMyPulses = async (userId: string): Promise<Pulse[]> => {
 };
 
 export const fetchGrowthPulses = async (treeId: string): Promise<Pulse[]> => {
+    // Removed orderBy to prevent 'Missing Index' errors on new deployments.
+    // Sorting happens client-side.
     const q = query(
         pulsesCollection, 
         where('lifetreeId', '==', treeId), 
-        where('type', '==', 'GROWTH'),
-        orderBy('createdAt', 'asc')
+        where('type', '==', 'GROWTH')
     );
     const snap = await getDocs(q);
-    return snap.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Pulse));
+    const pulses = snap.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Pulse));
+    // Client-side sort
+    return pulses.sort((a,b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
 }
 
 // Mint a single Pulse (Growth or Standard)

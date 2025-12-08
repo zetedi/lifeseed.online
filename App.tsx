@@ -60,7 +60,8 @@ const Icons = {
   Play: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" /></svg>,
   Link: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>,
   ArrowLeft: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>,
-  FingerPrint: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M7.875 14.25l1.214 1.942a2.25 2.25 0 001.908 1.058h2.006c.776 0 1.497-.4 1.908-1.058l1.214-1.942M2.41 9a4.5 4.5 0 016.398-3.412 6 6 0 014.866 2.318A6 6 0 0118.665 4.5 6 6 0 0121.75 9v12a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 012.25 21V9z" /></svg>
+  FingerPrint: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M7.875 14.25l1.214 1.942a2.25 2.25 0 001.908 1.058h2.006c.776 0 1.497-.4 1.908-1.058l1.214-1.942M2.41 9a4.5 4.5 0 016.398-3.412 6 6 0 014.866 2.318A6 6 0 0118.665 4.5 6 6 0 0121.75 9v12a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 012.25 21V9z" /></svg>,
+  Search: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
 };
 
 const useLifeseed = () => {
@@ -219,6 +220,7 @@ const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, o
 };
 
 const LightseedProfile = ({ lightseed, myTrees, onPulseSelect, onViewTree }: any) => {
+    // ... (Profile component code remains same, included for completeness in XML)
     const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState<'trees' | 'pulses' | 'history'>('trees');
     const [pulses, setPulses] = useState<Pulse[]>([]);
@@ -245,7 +247,6 @@ const LightseedProfile = ({ lightseed, myTrees, onPulseSelect, onViewTree }: any
 
     return (
         <div className="min-h-screen bg-slate-50">
-            {/* Hero Profile */}
             <div className="relative bg-gradient-to-b from-slate-800 to-slate-900 text-white pb-20 pt-10 px-4">
                 <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
                     <div className="relative">
@@ -263,17 +264,11 @@ const LightseedProfile = ({ lightseed, myTrees, onPulseSelect, onViewTree }: any
                                 <span className="block text-2xl font-bold">{myTrees.length}</span>
                                 <span className="text-xs text-slate-400 uppercase tracking-wider">{t('my_trees')}</span>
                             </div>
-                            {/* Stats placeholders - could be fetched */}
-                            {/* <div className="text-center">
-                                <span className="block text-2xl font-bold">-</span>
-                                <span className="text-xs text-slate-400 uppercase tracking-wider">{t('total_love')}</span>
-                            </div> */}
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Content Tabs */}
             <div className="max-w-4xl mx-auto px-4 -mt-12">
                 <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden min-h-[500px]">
                     <div className="flex border-b border-slate-100">
@@ -366,8 +361,6 @@ const LightseedProfile = ({ lightseed, myTrees, onPulseSelect, onViewTree }: any
     );
 };
 
-// ... Existing Components (ForestMap, LifetreeCard, LifetreeDetail, GrowthPlayerModal, PulseCard, Modal, ImagePicker) stay the same ...
-
 const ForestMap = ({ trees }: { trees: Lifetree[] }) => {
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapInstance = useRef<any>(null);
@@ -424,6 +417,7 @@ const ForestMap = ({ trees }: { trees: Lifetree[] }) => {
 };
 
 const LifetreeCard = ({ tree, myActiveTree, onValidate, onPlayGrowth, onQuickSnap, onView }: any) => {
+    // ... (No changes here, keeping existing implementation)
     const { t } = useLanguage();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
@@ -456,7 +450,7 @@ const LifetreeCard = ({ tree, myActiveTree, onValidate, onPlayGrowth, onQuickSna
                 )}
             </div>
 
-            {/* Quick Snap: Moved to top-left with clear label */}
+            {/* Quick Snap */}
              {myActiveTree && myActiveTree.id === tree.id && (
                  <div className="absolute top-2 left-2 z-20">
                      <button 
@@ -522,7 +516,8 @@ const LifetreeCard = ({ tree, myActiveTree, onValidate, onPlayGrowth, onQuickSna
 };
 
 const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActiveTree }: any) => {
-    const { t } = useLanguage();
+   // ... (No changes here)
+   const { t } = useLanguage();
     
     return (
         <div className="min-h-screen bg-slate-50 animate-in fade-in zoom-in-95 duration-300">
@@ -637,18 +632,25 @@ const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActiveTree 
             </div>
         </div>
     )
-}
+};
 
 const GrowthPlayerModal = ({ treeId, onClose }: { treeId: string, onClose: () => void }) => {
     const [images, setImages] = useState<Pulse[]>([]);
     const [index, setIndex] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     useEffect(() => {
-        fetchGrowthPulses(treeId).then(data => {
-            setImages(data.filter(p => p.imageUrl));
-            setLoading(false);
-        });
+        fetchGrowthPulses(treeId)
+            .then(data => {
+                setImages(data.filter(p => p.imageUrl));
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                setError("Failed to load growth images.");
+                setLoading(false);
+            });
     }, [treeId]);
 
     useEffect(() => {
@@ -661,6 +663,7 @@ const GrowthPlayerModal = ({ treeId, onClose }: { treeId: string, onClose: () =>
     return (
         <Modal title="Growth Evolution" onClose={onClose}>
             {loading ? <div className="p-10 text-center">Loading Growth...</div> : (
+                error ? <div className="p-10 text-center text-red-500">{error}</div> :
                 images.length === 0 ? <div className="p-10 text-center">No growth pictures recorded yet.</div> :
                 <div className="flex flex-col items-center">
                     <img src={images[index].imageUrl} className="w-full h-64 object-cover rounded-lg shadow-lg mb-4" />
@@ -676,6 +679,7 @@ const GrowthPlayerModal = ({ treeId, onClose }: { treeId: string, onClose: () =>
 };
 
 const PulseCard = ({ pulse, lightseed, onMatch }: any) => {
+    // ... (No changes here)
     const { t } = useLanguage();
     const [loved, setLoved] = useState(false);
     const [count, setCount] = useState(pulse.loveCount);
@@ -762,6 +766,7 @@ const AppContent = () => {
     const [data, setData] = useState<any[]>([]);
     const [matches, setMatches] = useState<MatchProposal[]>([]);
     const [selectedTree, setSelectedTree] = useState<Lifetree | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
     
     // UI State
     const [showPlantModal, setShowPlantModal] = useState(false);
@@ -773,7 +778,6 @@ const AppContent = () => {
     const [treeName, setTreeName] = useState('');
     const [treeSeed, setTreeSeed] = useState('');
     const [treeBio, setTreeBio] = useState('');
-    const [treeImage, setTreeImage] = useState<File | null>(null);
     const [treeImageUrl, setTreeImageUrl] = useState('');
     
     const [pulseTitle, setPulseTitle] = useState('');
@@ -789,7 +793,6 @@ const AppContent = () => {
         if (tab === 'forest') setData(await fetchLifetrees());
         else if (tab === 'pulses') setData(await fetchPulses());
         else if (tab === 'matches' && lightseed) setMatches(await getPendingMatches(lightseed.uid));
-        // profile loading is handled inside the component
     };
 
     const handleImageUpload = async (file: File, path: string) => {
@@ -813,7 +816,7 @@ const AppContent = () => {
                 authorName: lightseed.displayName || "Soul",
                 authorPhoto: lightseed.photoURL || undefined,
             });
-            await loadContent(); // Reload so map and card update
+            await loadContent(); 
         } catch (e: any) {
             alert("Error taking picture: " + e.message);
         }
@@ -870,6 +873,17 @@ const AppContent = () => {
         catch(e:any) { alert(e.message); }
     }
 
+    // Filter Logic for Forest View
+    const filteredForest = data.filter((item: Lifetree) => {
+        if (!searchTerm) return true;
+        const term = searchTerm.toLowerCase();
+        return (
+            item.name.toLowerCase().includes(term) ||
+            item.locationName?.toLowerCase().includes(term) ||
+            item.body.toLowerCase().includes(term)
+        );
+    });
+
     if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-slate-50"><Logo className="animate-pulse" /></div>;
     
     if (selectedTree) {
@@ -882,13 +896,11 @@ const AppContent = () => {
                     onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); setSelectedTree(null); loadContent(); })}
                     myActiveTree={activeTree}
                 />
-                 {/* Growth Player Modal (can be opened from Detail) */}
                  {showGrowthPlayer && <GrowthPlayerModal treeId={showGrowthPlayer} onClose={() => setShowGrowthPlayer(null)} />}
             </div>
         )
     }
 
-    // Profile View
     if (tab === 'profile' && lightseed) {
         return (
             <div className={`min-h-screen ${colors.snow} font-sans text-slate-800`}>
@@ -925,10 +937,25 @@ const AppContent = () => {
             />
             
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                {/* Forest View Toggle */}
+                {/* Forest View Controls (Search + Toggle) */}
                 {tab === 'forest' && (
-                    <div className="flex justify-end mb-6">
-                        <div className="bg-white p-1 rounded-lg border border-slate-200 flex shadow-sm">
+                    <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                        {/* Search Input */}
+                        <div className="relative w-full md:max-w-md">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <Icons.Search />
+                            </div>
+                            <input 
+                                type="text"
+                                className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm shadow-sm"
+                                placeholder="Search by name, location, or vision..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+
+                        {/* View Switcher */}
+                        <div className="bg-white p-1 rounded-lg border border-slate-200 flex shadow-sm shrink-0">
                             <button 
                                 onClick={() => setViewMode('grid')}
                                 className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewMode === 'grid' ? 'bg-slate-800 text-white shadow' : 'text-slate-500 hover:text-slate-800'}`}
@@ -967,20 +994,24 @@ const AppContent = () => {
                 {/* Content Area */}
                 {tab === 'forest' ? (
                     viewMode === 'map' ? (
-                        <ForestMap trees={data} />
+                        <ForestMap trees={filteredForest} />
                     ) : (
                         <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                             {data.map((item) => (
-                                <LifetreeCard 
-                                    key={item.id} 
-                                    tree={item} 
-                                    myActiveTree={activeTree} 
-                                    onPlayGrowth={setShowGrowthPlayer} 
-                                    onQuickSnap={handleQuickSnap}
-                                    onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); loadContent(); })}
-                                    onView={setSelectedTree}
-                                />
-                             ))}
+                             {filteredForest.length === 0 ? (
+                                 <p className="col-span-full text-center text-slate-400 py-10">No trees found matching your search.</p>
+                             ) : (
+                                filteredForest.map((item) => (
+                                    <LifetreeCard 
+                                        key={item.id} 
+                                        tree={item} 
+                                        myActiveTree={activeTree} 
+                                        onPlayGrowth={setShowGrowthPlayer} 
+                                        onQuickSnap={handleQuickSnap}
+                                        onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); loadContent(); })}
+                                        onView={setSelectedTree}
+                                    />
+                                ))
+                             )}
                         </div>
                     )
                 ) : tab !== 'matches' && tab !== 'profile' && (
