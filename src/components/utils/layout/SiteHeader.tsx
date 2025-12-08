@@ -18,11 +18,11 @@ export function SiteHeader() {
   const { lightseed, signIn, signOut } = useAuth();
 
   return (
-    <header className="bg-background/90 sticky top-0 z-40 w-full border-b">
+    <header className="bg-background/90 sticky top-0 z-40 w-full border-b backdrop-blur-sm">
       <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
         <MainNav items={mainNav || []} />
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <nav className="flex items-center space-x-1">
+          <nav className="flex items-center space-x-2">
             {lightseed ? (
                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -51,7 +51,10 @@ export function SiteHeader() {
               </Button>
             )}
 
-            <div
+            <a
+              href="https://github.com/zetedi/lightseed.online"
+              target="_blank"
+              rel="noreferrer"
               className={buttonVariants({
                 size: "icon",
                 variant: "ghost",
@@ -59,7 +62,7 @@ export function SiteHeader() {
             >
               <Icons.gitHub className="h-5 w-5" />
               <span className="sr-only">GitHub</span>
-            </div>
+            </a>
             <ModeToggle />
             <DotMenu />
           </nav>

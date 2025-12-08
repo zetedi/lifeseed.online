@@ -31,17 +31,29 @@ import {
 import { type Pulse, type Lifetree, type MatchProposal, type Vision } from '../types/Types';
 import { createBlock } from './crypto';
 
-// Use import.meta.env directly for Vite compatibility
+// Access Vite env variables directly
 const env = (import.meta as any).env;
 
+const apiKey = env.VITE_FIREBASE_API_KEY;
+const authDomain = env.VITE_FIREBASE_AUTH_DOMAIN;
+const projectId = env.VITE_FIREBASE_PROJECT_ID;
+const storageBucket = env.VITE_FIREBASE_STORAGE_BUCKET;
+const messagingSenderId = env.VITE_FIREBASE_MESSAGING_SENDER_ID;
+const appId = env.VITE_FIREBASE_APP_ID;
+const measurementId = env.VITE_FIREBASE_MEASUREMENT_ID;
+
+if (!apiKey) {
+  console.error("Firebase API Key is missing. Check your .env file.");
+}
+
 const firebaseConfig = {
-  apiKey: env.VITE_FIREBASE_API_KEY,
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: env.VITE_FIREBASE_APP_ID,
-  measurementId: env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey,
+  authDomain,
+  projectId,
+  storageBucket,
+  messagingSenderId,
+  appId,
+  measurementId
 };
 
 const app = initializeApp(firebaseConfig);
@@ -245,3 +257,21 @@ export const acceptMatch = async (proposalId: string) => {
         t.update(matchRef, { status: 'ACCEPTED' });
     });
 }
+
+// --- PROFILE HELPERS ---
+export const getMyPulses = async (userId: string) => {
+    const q = query(pulsesCollection, where('authorId', '==', userId));
+    const s = await getDocs(q);
+    return s.docs.map(d => ({id:d.id, ...d.data()} as Pulse)).sort((a,b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
+};
+export const getMyVisions = async (userId: string) => {
+    const q = query(visionsCollection, where('authorId', '==', userId));
+    const s = await getDocs(q);
+    return s.docs.map(d => ({id:d.id, ...d.data()} as Vision));
+};
+export const getMyMatchesHistory = async (userId: string) => {
+    const q1 = query(matchesCollection, where('targetUid', '==', userId), where('status', '==', 'ACCEPTED'));
+    const q2 = query(matchesCollection, where('initiatorUid', '==', userId), where('status', '==', 'ACCEPTED'));
+    const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+    return [...s1.docs, ...s2.docs].map(d => ({id:d.id, ...d.data()} as MatchProposal)).sort((a,b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
+};

@@ -5,13 +5,13 @@ import TheSecretSun from "@/pages/TheSecretSun";
 import TheWhitePaper from "@/pages/White";
 import Photography from "@/pages/Photography";
 import Phoenix from "@/pages/Phoenix";
-import Simulator from "@/pages/Simulator";
 import TheTree from "@/pages/TheTree";
 import Home from "@/pages/Home";
 import Layout from "@/pages/Layout";
 import Forest from "@/pages/Forest";
 import Pulses from "@/pages/Pulses";
 import Visions from "@/pages/Visions";
+import Contact from "@/pages/Contact";
 import ThemeProvider from "@/components/ThemeProvider";
 import TailwindIndicator from "@/components/utils/TailwindIndicator";
 import GlowBorder from "@/components/utils/layout/GlowBorder";
@@ -32,13 +32,13 @@ export default function App() {
                   <Route path="white" element={<TheWhitePaper />} />
                   <Route path="phoenix" element={<Phoenix />} />
                   <Route path="photos" element={<Photography />} />
-                  <Route path="simulator" element={<Simulator />} />
                   <Route path="thetree" element={<TheTree />} />
                   
                   {/* NEW ROUTES */}
                   <Route path="forest" element={<Forest />} />
                   <Route path="pulses" element={<Pulses />} />
                   <Route path="visions" element={<Visions />} />
+                  <Route path="contact" element={<Contact />} />
                 </Route>
               </Routes>
             </div>

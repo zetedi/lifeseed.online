@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { type GenerateContentResponse } from "@google/genai";
 
-// Read API Key from Vite Environment Variables
+// Read API Key from Vite Environment Variables safely
 const API_KEY = (import.meta as any).env.VITE_API_KEY;
 
 // Lazy initialization to prevent top-level crash
