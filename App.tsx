@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useState, useEffect, FormEvent, useRef } from 'react';
 import {
   signInWithGoogle,
   logout,
@@ -18,7 +18,7 @@ import {
   deleteLifetree
 } from './services/firebase';
 import { generateLifetreeBio, generateVisionImage } from './services/gemini';
-import { type Pulse, type Lifetree, type MatchProposal } from './types';
+import { type Pulse, type Lifetree, type MatchProposal, type Vision } from './types';
 import Logo from './components/Logo';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { colors } from './utils/theme';
@@ -34,6 +34,7 @@ import { VisionCard } from './components/VisionCard';
 import { PulseCard } from './components/PulseCard';
 import { ForestMap } from './components/ForestMap';
 import { LifetreeDetail } from './components/LifetreeDetail';
+import { VisionDetail } from './components/VisionDetail';
 import { GrowthPlayerModal } from './components/GrowthPlayerModal';
 import { OracleChat } from './components/OracleChat';
 import { LightseedProfile } from './components/LightseedProfile';
@@ -46,9 +47,15 @@ const AppContent = () => {
     const [data, setData] = useState<any[]>([]);
     const [matches, setMatches] = useState<MatchProposal[]>([]);
     const [selectedTree, setSelectedTree] = useState<Lifetree | null>(null);
+    const [selectedVision, setSelectedVision] = useState<Vision | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [hasApiKey, setHasApiKey] = useState(false);
     
+    // Pagination State
+    const [lastDoc, setLastDoc] = useState<any>(null);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+
     // UI State
     const [showPlantModal, setShowPlantModal] = useState(false);
     const [showPulseModal, setShowPulseModal] = useState(false);
@@ -74,10 +81,15 @@ const AppContent = () => {
     const [visionLink, setVisionLink] = useState('');
     const [visionImageUrl, setVisionImageUrl] = useState('');
 
-    // Background Configuration
-    const pageBackground = {
-        className: "min-h-screen font-sans text-slate-800 bg-fixed bg-cover bg-center bg-no-repeat",
-        style: { backgroundImage: "url('/background.jpg')" }
+    const mainContainerRef = useRef<HTMLDivElement>(null);
+
+    // Background Configuration with Opacity Overlay Logic
+    // We render the image in a fixed div behind content, then content has a semi-transparent bg.
+    const backgroundStyle = {
+        backgroundImage: "url('/background.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
     };
 
     const checkKey = async () => {
@@ -94,15 +106,63 @@ const AppContent = () => {
 
     useEffect(() => { 
         checkKey();
-        loadContent(); 
+        loadContent(true); 
     }, [tab, lightseed]);
     
-    const loadContent = async () => {
-        setData([]); // Clear data before loading
-        if (tab === 'forest') setData(await fetchLifetrees());
-        else if (tab === 'pulses') setData(await fetchPulses());
-        else if (tab === 'visions') setData(await fetchVisions());
-        else if (tab === 'matches' && lightseed) setMatches(await getPendingMatches(lightseed.uid));
+    // Infinite Scroll Listener
+    useEffect(() => {
+        const handleScroll = () => {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+                if (!loadingMore && hasMore && tab !== 'matches' && tab !== 'oracle' && tab !== 'profile') {
+                    loadContent(false);
+                }
+            }
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [loadingMore, hasMore, tab, lastDoc]);
+
+    const loadContent = async (reset = false) => {
+        if (reset) {
+            setData([]);
+            setLastDoc(null);
+            setHasMore(true);
+        }
+
+        // Avoid fetching if we're just matching/profile/oracle or no more data
+        if (!reset && !hasMore) return;
+        
+        setLoadingMore(true);
+        const currentLastDoc = reset ? undefined : lastDoc;
+
+        try {
+            if (tab === 'forest') {
+                const res = await fetchLifetrees(currentLastDoc);
+                setData(prev => reset ? res.items : [...prev, ...res.items]);
+                setLastDoc(res.lastDoc);
+                setHasMore(!!res.lastDoc);
+            }
+            else if (tab === 'pulses') {
+                const res = await fetchPulses(currentLastDoc);
+                setData(prev => reset ? res.items : [...prev, ...res.items]);
+                setLastDoc(res.lastDoc);
+                setHasMore(!!res.lastDoc);
+            }
+            else if (tab === 'visions') {
+                const res = await fetchVisions(currentLastDoc);
+                setData(prev => reset ? res.items : [...prev, ...res.items]);
+                setLastDoc(res.lastDoc);
+                setHasMore(!!res.lastDoc);
+            }
+            else if (tab === 'matches' && lightseed) {
+                 // Matches don't support cursor pagination in this simplified version yet
+                 const res = await getPendingMatches(lightseed.uid);
+                 setMatches(res);
+            }
+        } catch(e) {
+            console.error(e);
+        }
+        setLoadingMore(false);
     };
 
     const handleImageUpload = async (file: File, path: string) => {
@@ -142,7 +202,7 @@ const AppContent = () => {
                 authorName: lightseed.displayName || "Soul",
                 authorPhoto: lightseed.photoURL || undefined,
             });
-            await loadContent(); 
+            loadContent(true); 
         } catch (e: any) {
             alert("Error taking picture: " + e.message);
         }
@@ -154,7 +214,7 @@ const AppContent = () => {
         navigator.geolocation.getCurrentPosition(async (pos) => {
             try {
                 await plantLifetree({ ownerId: lightseed.uid, name: treeName, body: treeBio, imageUrl: treeImageUrl, lat: pos.coords.latitude, lng: pos.coords.longitude });
-                await refreshTrees(); setShowPlantModal(false); loadContent();
+                await refreshTrees(); setShowPlantModal(false); loadContent(true);
             } catch(e: any) { alert(e.message); }
         });
     };
@@ -164,7 +224,7 @@ const AppContent = () => {
         try {
             await deleteLifetree(treeId);
             await refreshTrees();
-            loadContent();
+            loadContent(true);
         } catch (e: any) {
             alert("Error deleting tree: " + e.message);
         }
@@ -198,7 +258,7 @@ const AppContent = () => {
                 authorName: lightseed.displayName || "Soul",
                 authorPhoto: lightseed.photoURL || undefined,
             });
-            setShowPulseModal(false); setPulseTitle(''); setPulseBody(''); setPulseImageUrl(''); setIsGrowth(false); loadContent();
+            setShowPulseModal(false); setPulseTitle(''); setPulseBody(''); setPulseImageUrl(''); setIsGrowth(false); loadContent(true);
         } catch(e: any) { alert(e.message); }
     };
     
@@ -228,7 +288,7 @@ const AppContent = () => {
                 link: visionLink,
                 imageUrl: finalImageUrl
             });
-            setShowVisionModal(false); setVisionTitle(''); setVisionBody(''); setVisionLink(''); setVisionImageUrl(''); loadContent();
+            setShowVisionModal(false); setVisionTitle(''); setVisionBody(''); setVisionLink(''); setVisionImageUrl(''); loadContent(true);
         } catch(e:any) { alert(e.message); }
     }
     
@@ -250,7 +310,7 @@ const AppContent = () => {
     }
 
     const onAcceptMatch = async (id: string) => {
-        try { await acceptMatch(id); alert("Match Accepted! Blocks synced."); loadContent(); } 
+        try { await acceptMatch(id); alert("Match Accepted! Blocks synced."); loadContent(true); } 
         catch(e:any) { alert(e.message); }
     }
 
@@ -263,26 +323,47 @@ const AppContent = () => {
         return text.toLowerCase().includes(term);
     });
 
+    // Create unique suggestion list for datalist
+    const searchSuggestions = Array.from(new Set(data.map((item: any) => item.title || item.name).filter(Boolean)));
+
     if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-slate-50"><Logo className="animate-pulse" /></div>;
     
+    // DETAIL VIEWS WRAPPER to preserve background
+    const DetailWrapper = ({children}: {children: React.ReactNode}) => (
+        <div className="fixed inset-0 z-40 overflow-y-auto bg-slate-50/95 backdrop-blur-sm">
+            {children}
+        </div>
+    );
+
     if (selectedTree) {
         return (
-            <div {...pageBackground}>
+            <DetailWrapper>
                 <LifetreeDetail 
                     tree={selectedTree} 
                     onClose={() => setSelectedTree(null)} 
                     onPlayGrowth={setShowGrowthPlayer}
-                    onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); setSelectedTree(null); loadContent(); })}
+                    onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); setSelectedTree(null); loadContent(true); })}
                     myActiveTree={activeTree}
                 />
                  {showGrowthPlayer && <GrowthPlayerModal treeId={showGrowthPlayer} onClose={() => setShowGrowthPlayer(null)} />}
-            </div>
+            </DetailWrapper>
+        )
+    }
+
+    if (selectedVision) {
+        return (
+            <DetailWrapper>
+                <VisionDetail vision={selectedVision} onClose={() => setSelectedVision(null)} />
+            </DetailWrapper>
         )
     }
 
     if (tab === 'profile' && lightseed) {
         return (
-            <div {...pageBackground}>
+             <div className="min-h-screen relative font-sans text-slate-800">
+                <div className="fixed inset-0 z-[-1]" style={backgroundStyle}></div>
+                <div className="fixed inset-0 z-[-1] bg-white/85"></div> {/* Increased Opacity Overlay */}
+
                 <Navigation 
                     lightseed={lightseed} 
                     activeTab={tab} 
@@ -295,19 +376,26 @@ const AppContent = () => {
                     onProfile={() => setTab('profile')} 
                     hasApiKey={hasApiKey}
                     onCheckKey={checkKey}
+                    pendingMatchesCount={matches.length}
                 />
                 <LightseedProfile 
                     lightseed={lightseed} 
                     myTrees={myTrees} 
                     onViewTree={(tree: Lifetree) => setSelectedTree(tree)}
                     onDeleteTree={handleDeleteTree}
+                    onViewVision={(v: Vision) => setSelectedVision(v)}
                 />
             </div>
         )
     }
 
     return (
-        <div {...pageBackground}>
+        <div className="min-h-screen relative font-sans text-slate-800">
+            {/* Fixed Background */}
+            <div className="fixed inset-0 z-[-1]" style={backgroundStyle}></div>
+            {/* Overlay to increase opacity (whiten) the background */}
+            <div className="fixed inset-0 z-[-1] bg-white/85"></div> 
+
             <Navigation 
                 lightseed={lightseed} 
                 activeTab={tab} 
@@ -320,9 +408,10 @@ const AppContent = () => {
                 onProfile={() => setTab('profile')} 
                 hasApiKey={hasApiKey}
                 onCheckKey={checkKey}
+                pendingMatchesCount={matches.length}
             />
             
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 min-h-[80vh]">
                 {/* Search Bar for all tabs except matches/profile/oracle */}
                 {tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && (
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -332,16 +421,20 @@ const AppContent = () => {
                             </div>
                             <input 
                                 type="text"
-                                className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm shadow-sm"
+                                list="search-suggestions"
+                                className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-white/80 backdrop-blur placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm shadow-sm"
                                 placeholder="Search..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
+                            <datalist id="search-suggestions">
+                                {searchSuggestions.map((s, i) => <option key={i} value={s} />)}
+                            </datalist>
                         </div>
 
                         {/* View Switcher only for Forest */}
                         {tab === 'forest' && (
-                            <div className="bg-white p-1 rounded-lg border border-slate-200 flex shadow-sm shrink-0">
+                            <div className="bg-white/80 backdrop-blur p-1 rounded-lg border border-slate-200 flex shadow-sm shrink-0">
                                 <button 
                                     onClick={() => setViewMode('grid')}
                                     className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewMode === 'grid' ? 'bg-slate-800 text-white shadow' : 'text-slate-500 hover:text-slate-800'}`}
@@ -370,7 +463,7 @@ const AppContent = () => {
                     <div className="max-w-2xl mx-auto">
                         <h2 className="text-2xl font-light mb-6">Pending Matches</h2>
                         {matches.length === 0 ? <p className="text-slate-400">No pending requests.</p> : matches.map(m => (
-                            <div key={m.id} className="bg-white p-4 rounded shadow-sm border border-slate-200 mb-4 flex justify-between items-center">
+                            <div key={m.id} className="bg-white/90 p-4 rounded shadow-sm border border-slate-200 mb-4 flex justify-between items-center">
                                 <div><p className="font-bold">Match Request</p><p className="text-sm text-slate-500">From another Tree</p></div>
                                 <button onClick={() => onAcceptMatch(m.id)} className="bg-sky-500 text-white px-4 py-2 rounded">Accept & Sync</button>
                             </div>
@@ -387,7 +480,7 @@ const AppContent = () => {
                         <ForestMap trees={filteredData} />
                     ) : (
                         <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                             {filteredData.length === 0 ? (
+                             {filteredData.length === 0 && !loadingMore ? (
                                  <p className="col-span-full text-center text-slate-400 py-10">No trees found matching your search.</p>
                              ) : (
                                 filteredData.map((item: any) => (
@@ -397,7 +490,7 @@ const AppContent = () => {
                                         myActiveTree={activeTree} 
                                         onPlayGrowth={setShowGrowthPlayer} 
                                         onQuickSnap={handleQuickSnap}
-                                        onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); loadContent(); })}
+                                        onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); loadContent(true); })}
                                         onView={setSelectedTree}
                                     />
                                 ))
@@ -406,8 +499,12 @@ const AppContent = () => {
                     )
                 ) : tab === 'visions' ? (
                     <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                        {filteredData.length === 0 ? <p className="col-span-full text-center text-slate-400 py-10">No visions found.</p> : 
-                            filteredData.map((item: any) => <VisionCard key={item.id} vision={item} />)
+                        {filteredData.length === 0 && !loadingMore ? <p className="col-span-full text-center text-slate-400 py-10">No visions found.</p> : 
+                            filteredData.map((item: any) => (
+                                <div key={item.id} onClick={() => setSelectedVision(item)} className="cursor-pointer">
+                                    <VisionCard vision={item} />
+                                </div>
+                            ))
                         }
                     </div>
                 ) : tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && (
@@ -417,6 +514,8 @@ const AppContent = () => {
                         ))}
                     </div>
                 )}
+
+                {loadingMore && <div className="text-center py-4 text-slate-500 text-sm animate-pulse">Growing root network...</div>}
             </main>
 
             {/* Growth Player Modal */}

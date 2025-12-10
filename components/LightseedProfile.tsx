@@ -1,18 +1,23 @@
 
 import React, { useState, useEffect } from 'react';
-import { type Pulse, type Lifetree, type MatchProposal, type Vision } from '../types';
+import { type Pulse, type Lifetree, type MatchProposal, type Vision, type VisionSynergy } from '../types';
 import { getMyPulses, getMyVisions, getMyMatchesHistory } from '../services/firebase';
+import { findVisionSynergies } from '../services/gemini';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Icons } from './ui/Icons';
 import { VisionCard } from './VisionCard';
 
-export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree }: any) => {
+export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree, onViewVision }: any) => {
     const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState<'trees' | 'pulses' | 'visions' | 'history'>('trees');
     const [pulses, setPulses] = useState<Pulse[]>([]);
     const [visions, setVisions] = useState<Vision[]>([]);
     const [history, setHistory] = useState<MatchProposal[]>([]);
     const [loading, setLoading] = useState(false);
+    
+    // AI Matchmaking State
+    const [synergies, setSynergies] = useState<VisionSynergy[]>([]);
+    const [analyzing, setAnalyzing] = useState(false);
 
     useEffect(() => {
         if (!lightseed) return;
@@ -32,6 +37,33 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree 
         };
         fetchData();
     }, [activeTab, lightseed]);
+
+    const handleMatchmaking = async () => {
+        if (visions.length < 2) {
+             const data = await getMyVisions(lightseed.uid);
+             if (data.length < 2) {
+                 alert("You need at least 2 visions to find synergies.");
+                 return;
+             }
+             setVisions(data);
+             // Proceed with fetched data
+             performAnalysis(data);
+        } else {
+            performAnalysis(visions);
+        }
+    }
+
+    const performAnalysis = async (vs: Vision[]) => {
+        setAnalyzing(true);
+        setSynergies([]);
+        try {
+            const results = await findVisionSynergies(vs);
+            setSynergies(results);
+        } catch (e: any) {
+            alert("Analysis failed: " + e.message);
+        }
+        setAnalyzing(false);
+    }
 
     if (!lightseed) return null;
 
@@ -145,9 +177,59 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree 
                         )}
                          {activeTab === 'visions' && (
                              loading ? <p className="text-center py-10 text-slate-400">Loading...</p> : (
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    {visions.length === 0 ? <p className="col-span-full text-slate-400 text-center py-10">No visions created yet.</p> : visions.map((vision) => (
-                                        <VisionCard key={vision.id} vision={vision} />
+                                <div>
+                                    <div className="flex justify-between items-center mb-6">
+                                         <h3 className="text-lg font-bold">My Visions</h3>
+                                         <button 
+                                            onClick={handleMatchmaking}
+                                            disabled={analyzing}
+                                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 transition-colors disabled:opacity-50"
+                                         >
+                                             {analyzing ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <Icons.Sparkles />}
+                                             <span>AI Matchmaking</span>
+                                         </button>
+                                    </div>
+                                    
+                                    {synergies.length > 0 && (
+                                        <div className="mb-8 bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                                            <h4 className="font-bold text-indigo-900 mb-3 flex items-center"><Icons.SparkleFill /> <span className="ml-2">Synergy Report</span></h4>
+                                            <div className="space-y-3">
+                                                {synergies.map((s, i) => (
+                                                    <div key={i} className="bg-white p-3 rounded-lg shadow-sm border border-indigo-100/50">
+                                                        <div className="flex justify-between items-start">
+                                                            <div className="font-medium text-slate-800 text-sm">
+                                                                <span className="text-indigo-600">{s.vision1Title}</span> + <span className="text-indigo-600">{s.vision2Title}</span>
+                                                            </div>
+                                                            <span className="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full font-bold">{s.score}%</span>
+                                                        </div>
+                                                        <p className="text-xs text-slate-600 mt-2 leading-relaxed">{s.reasoning}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                        {visions.length === 0 ? <p className="col-span-full text-slate-400 text-center py-10">No visions created yet.</p> : visions.map((vision) => (
+                                            <div key={vision.id} onClick={() => onViewVision(vision)} className="cursor-pointer">
+                                                <VisionCard vision={vision} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                             )
+                        )}
+                        {activeTab === 'history' && (
+                             loading ? <p className="text-center py-10 text-slate-400">Loading...</p> : (
+                                <div className="space-y-4">
+                                    {history.length === 0 ? <p className="text-slate-400 text-center py-10">No history yet.</p> : history.map((h) => (
+                                        <div key={h.id} className="border border-slate-200 p-4 rounded-lg bg-slate-50 flex justify-between items-center">
+                                            <div>
+                                                <p className="font-bold text-sm text-slate-700">{h.status}</p>
+                                                <p className="text-xs text-slate-500">{new Date(h.createdAt?.toMillis()).toLocaleDateString()}</p>
+                                            </div>
+                                            <div className="text-xs font-mono text-slate-400">{h.id.substring(0,8)}...</div>
+                                        </div>
                                     ))}
                                 </div>
                              )

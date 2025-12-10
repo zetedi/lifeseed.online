@@ -51,8 +51,17 @@ export const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
         try {
             const response: GenerateContentResponse = await chat.sendMessage({ message: userMsg });
             setMessages(prev => [...prev, {role: 'model', text: response.text || "..."}]);
-        } catch(e) {
-            setMessages(prev => [...prev, {role: 'model', text: "The wind is too strong (Error connecting to AI)."}]);
+        } catch(e: any) {
+            console.error("Oracle Error:", e);
+            let msg = "The wind is too strong (Error connecting to AI).";
+            
+            if (e.message?.includes("403")) {
+                msg = "Forbidden (403): The Oracle cannot hear you. Please ensure your API Key is valid and selected via the key icon.";
+            } else if (e.message?.includes("429")) {
+                msg = "The spirits are overwhelmed (Rate Limit). Please wait a moment.";
+            }
+            
+            setMessages(prev => [...prev, {role: 'model', text: msg}]);
         }
         setIsTyping(false);
     }

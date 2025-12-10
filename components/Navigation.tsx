@@ -18,9 +18,10 @@ interface NavigationProps {
     onCreateVision: () => void;
     hasApiKey: boolean;
     onCheckKey: () => void;
+    pendingMatchesCount: number;
 }
 
-export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout, onProfile, onCreateVision, hasApiKey, onCheckKey }: NavigationProps) => {
+export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout, onProfile, onCreateVision, hasApiKey, onCheckKey, pendingMatchesCount }: NavigationProps) => {
     const { t, language, setLanguage } = useLanguage();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -66,9 +67,15 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                             <button 
                                 key={tabKey}
                                 onClick={() => setTab(tabKey)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${getTabStyle(tabKey)}`}
+                                className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${getTabStyle(tabKey)}`}
                             >
                                 {tabKey === 'matches' ? 'Matches' : t(tabKey as any)}
+                                {tabKey === 'matches' && pendingMatchesCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                    </span>
+                                )}
                             </button>
                         ))}
                     </div>
@@ -141,8 +148,9 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                             <option value="es">ES</option>
                             <option value="hu">HU</option>
                         </select>
-                        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white p-2">
+                        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white p-2 relative">
                             {isMenuOpen ? <Icons.Close /> : <Icons.Menu />}
+                            {pendingMatchesCount > 0 && !isMenuOpen && <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></div>}
                         </button>
                     </div>
                 </div>
@@ -161,9 +169,12 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                             <button 
                                 key={tabKey}
                                 onClick={() => { setTab(tabKey); setIsMenuOpen(false); }}
-                                className={`text-left px-3 py-3 rounded-md text-base font-medium ${activeTab === tabKey ? 'bg-slate-800 text-white' : 'text-slate-400'}`}
+                                className={`flex justify-between items-center text-left px-3 py-3 rounded-md text-base font-medium ${activeTab === tabKey ? 'bg-slate-800 text-white' : 'text-slate-400'}`}
                             >
-                                {tabKey === 'matches' ? 'Matches' : t(tabKey as any)}
+                                <span>{tabKey === 'matches' ? 'Matches' : t(tabKey as any)}</span>
+                                {tabKey === 'matches' && pendingMatchesCount > 0 && (
+                                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{pendingMatchesCount}</span>
+                                )}
                             </button>
                         ))}
                          {lightseed ? (

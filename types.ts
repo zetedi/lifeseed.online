@@ -92,3 +92,10 @@ export interface Comment {
   authorName: string;
   createdAt: Timestamp;
 }
+
+export interface VisionSynergy {
+    vision1Title: string;
+    vision2Title: string;
+    reasoning: string;
+    score: number;
+}

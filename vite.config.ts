@@ -1,12 +1,24 @@
+
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
-    // Use process.cwd() to ensure we look in the project root for .env
-    // Casting process to any to avoid TS errors if types are incomplete
-    const cwd = (process as any).cwd();
-    const env = loadEnv(mode, cwd, '');
+    const cwd = process.cwd();
+    const envFileVars = loadEnv(mode, cwd, '');
+    const combinedEnv = { ...process.env, ...envFileVars };
+
+    // Selectively expose variables
+    const clientEnv = {
+        API_KEY: combinedEnv.API_KEY,
+        VITE_FIREBASE_API_KEY: combinedEnv.VITE_FIREBASE_API_KEY,
+        VITE_FIREBASE_AUTH_DOMAIN: combinedEnv.VITE_FIREBASE_AUTH_DOMAIN,
+        VITE_FIREBASE_PROJECT_ID: combinedEnv.VITE_FIREBASE_PROJECT_ID,
+        VITE_FIREBASE_STORAGE_BUCKET: combinedEnv.VITE_FIREBASE_STORAGE_BUCKET,
+        VITE_FIREBASE_MESSAGING_SENDER_ID: combinedEnv.VITE_FIREBASE_MESSAGING_SENDER_ID,
+        VITE_FIREBASE_APP_ID: combinedEnv.VITE_FIREBASE_APP_ID,
+    };
+
     return {
       server: {
         port: 3000,
@@ -14,11 +26,10 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        // Expose loaded env vars as a global constant
-        '__STATIC_ENV__': JSON.stringify(env),
-        // Remap process.env to window.process.env
-        // The index.html shim ensures window.process exists at runtime.
-        'process.env': 'window.process.env',
+        // We define __STATIC_ENV__ instead of process.env.
+        // This allows the polyfill (in utils/polyfill.ts) to merge these build-time vars
+        // with the runtime vars (window.process.env) injected by the AI Studio UI.
+        '__STATIC_ENV__': JSON.stringify(clientEnv),
       },
       resolve: {
         alias: {

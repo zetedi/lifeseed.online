@@ -22,7 +22,9 @@ import {
   where,
   updateDoc,
   deleteDoc,
-  limit
+  limit,
+  startAfter,
+  QueryDocumentSnapshot
 } from 'firebase/firestore';
 import { 
   getStorage, 
@@ -175,10 +177,18 @@ export const validateLifetree = async (targetTreeId: string, validatorTreeId: st
     });
 }
 
-export const fetchLifetrees = async (): Promise<Lifetree[]> => {
-  const q = query(lifetreesCollection, orderBy('createdAt', 'desc'));
+// Updated fetch with Pagination
+export const fetchLifetrees = async (lastDoc?: QueryDocumentSnapshot): Promise<{items: Lifetree[], lastDoc: QueryDocumentSnapshot | null}> => {
+  let q = query(lifetreesCollection, orderBy('createdAt', 'desc'), limit(12));
+  if (lastDoc) {
+      q = query(q, startAfter(lastDoc));
+  }
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Lifetree));
+  const items = querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Lifetree));
+  return {
+      items,
+      lastDoc: querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : null
+  };
 };
 
 export const getMyLifetrees = async (userId: string): Promise<Lifetree[]> => {
@@ -189,10 +199,18 @@ export const getMyLifetrees = async (userId: string): Promise<Lifetree[]> => {
 };
 
 // --- VISIONS ---
-export const fetchVisions = async (): Promise<Vision[]> => {
-    const q = query(visionsCollection, orderBy('createdAt', 'desc'));
+// Updated fetch with Pagination
+export const fetchVisions = async (lastDoc?: QueryDocumentSnapshot): Promise<{items: Vision[], lastDoc: QueryDocumentSnapshot | null}> => {
+    let q = query(visionsCollection, orderBy('createdAt', 'desc'), limit(12));
+    if (lastDoc) {
+        q = query(q, startAfter(lastDoc));
+    }
     const snap = await getDocs(q);
-    return snap.docs.map(d => ({id: d.id, ...(d.data() as any)} as Vision));
+    const items = snap.docs.map(d => ({id: d.id, ...(d.data() as any)} as Vision));
+    return {
+        items,
+        lastDoc: snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null
+    };
 }
 
 export const getMyVisions = async (userId: string): Promise<Vision[]> => {
@@ -220,10 +238,18 @@ export const createVision = async (data: {
 const pulsesCollection = collection(db, 'pulses');
 const matchesCollection = collection(db, 'matches');
 
-export const fetchPulses = async (): Promise<Pulse[]> => {
-  const q = query(pulsesCollection, orderBy('createdAt', 'desc'));
+// Updated fetch with Pagination
+export const fetchPulses = async (lastDoc?: QueryDocumentSnapshot): Promise<{items: Pulse[], lastDoc: QueryDocumentSnapshot | null}> => {
+  let q = query(pulsesCollection, orderBy('createdAt', 'desc'), limit(12));
+  if (lastDoc) {
+      q = query(q, startAfter(lastDoc));
+  }
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Pulse));
+  const items = querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Pulse));
+  return {
+      items,
+      lastDoc: querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : null
+  };
 };
 
 export const getMyPulses = async (userId: string): Promise<Pulse[]> => {
