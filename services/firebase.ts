@@ -34,15 +34,16 @@ import {
 import { type Pulse, type PulseType, type Lifetree, type MatchProposal, type Vision } from '../types';
 import { createBlock } from '../utils/crypto';
 
-const env = (import.meta as any).env;
-
+// We use process.env because vite.config.ts explicitly polyfills it to merge 
+// local .env vars with runtime injected vars (window.process.env).
+// This prevents "undefined" errors that can happen with import.meta.env in some environments.
 const firebaseConfig = {
-  apiKey: env.VITE_FIREBASE_API_KEY,
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: env.VITE_FIREBASE_APP_ID
+  apiKey: process.env.VITE_FIREBASE_API_KEY,
+  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.VITE_FIREBASE_APP_ID
 };
 
 if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("YOUR_")) {

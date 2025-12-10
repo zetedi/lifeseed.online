@@ -28,14 +28,13 @@ export interface Lifetree {
   blockHeight: number;
 }
 
-// Separate Entity: Branch of a Lifetree
 export interface Vision {
   id: string;
-  lifetreeId: string; // The parent tree
+  lifetreeId: string;
   authorId: string;
   title: string;
   body: string;
-  link?: string; // Webpage
+  link?: string;
   imageUrl?: string;
   createdAt: Timestamp;
 }

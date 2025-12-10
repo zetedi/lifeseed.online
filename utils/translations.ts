@@ -1,5 +1,6 @@
 
 
+
 export type Language = 'en' | 'es' | 'hu' | 'qu' | 'sa' | 'ja' | 'ar';
 
 export const translations = {
@@ -7,6 +8,7 @@ export const translations = {
     forest: "Forest",
     pulses: "Pulses",
     visions: "Visions",
+    oracle: "Oracle",
     sign_in: "Sign in",
     sign_out: "Sign out",
     emit_pulse: "Emit Pulse",
@@ -57,6 +59,7 @@ export const translations = {
     forest: "Bosque",
     pulses: "Pulsos",
     visions: "Visiones",
+    oracle: "Oráculo",
     sign_in: "Iniciar sesión",
     sign_out: "Cerrar sesión",
     emit_pulse: "Emitir Pulso",
@@ -107,6 +110,7 @@ export const translations = {
     forest: "Erdő",
     pulses: "Pulzusok",
     visions: "Víziók",
+    oracle: "Orákulum",
     sign_in: "Bejelentkezés",
     sign_out: "Kijelentkezés",
     emit_pulse: "Pulzus Kibocsátása",
@@ -157,6 +161,7 @@ export const translations = {
     forest: "Sach'a-sach'a",
     pulses: "Sirkaykuna",
     visions: "Musquykuna",
+    oracle: "Willaq",
     sign_in: "Yaykuy",
     sign_out: "Lloqsiy",
     emit_pulse: "Sirkayta Kachay",
@@ -207,6 +212,7 @@ export const translations = {
     forest: "अरण्यम् (Araṇyam)",
     pulses: "स्पन्दनानि (Spandanāni)",
     visions: "दृष्टयः (Dṛṣṭayaḥ)",
+    oracle: "दैववाणी (Daivavāṇī)",
     sign_in: "प्रविशतु (Praviśatu)",
     sign_out: "निर्गच्छतु (Nirgacchatu)",
     emit_pulse: "स्पन्दनं सृजतु",
@@ -257,6 +263,7 @@ export const translations = {
     forest: "森",
     pulses: "パルス (鼓動)",
     visions: "ビジョン (枝)",
+    oracle: "オラクル",
     sign_in: "ログイン",
     sign_out: "ログアウト",
     emit_pulse: "パルスを放つ",
@@ -307,6 +314,7 @@ export const translations = {
     forest: "الغابة",
     pulses: "نبضات",
     visions: "الرؤى",
+    oracle: "العراف",
     sign_in: "دخول",
     sign_out: "خروج",
     emit_pulse: "إصدار نبضة",

@@ -1,22 +1,19 @@
 
-import { GoogleGenAI } from "@google/genai";
-import { type GenerateContentResponse } from "@google/genai";
+import { GoogleGenAI, GenerateContentResponse, Chat } from "@google/genai";
 
-// Read API Key from Vite Environment Variables
-const API_KEY = (import.meta as any).env.VITE_API_KEY;
-
-// Lazy initialization to prevent top-level crash
-let aiClient: GoogleGenAI | null = null;
-
-const getAiClient = () => {
-    if (!aiClient) {
-        if (!API_KEY) {
-            console.warn("LifeSeed: VITE_API_KEY is missing in .env");
-            return null;
-        }
-        aiClient = new GoogleGenAI({ apiKey: API_KEY });
+// Helper to get a fresh client instance every time.
+// This ensures we capture the API Key if it is injected dynamically by the UI (window.aistudio).
+const getAiClient = (): GoogleGenAI | null => {
+    // process.env.API_KEY is the strict requirement.
+    // We access it dynamically to support runtime injection.
+    const apiKey = process.env.API_KEY ? process.env.API_KEY.trim() : "";
+    
+    if (!apiKey) {
+        console.warn("LifeSeed: process.env.API_KEY is missing. Please select an API key via the UI or check your .env file.");
+        return null;
     }
-    return aiClient;
+    
+    return new GoogleGenAI({ apiKey });
 }
 
 export const generatePostTitle = async (body: string): Promise<string> => {
@@ -35,8 +32,7 @@ export const generatePostTitle = async (body: string): Promise<string> => {
       contents: prompt,
     });
 
-    const title = response.text ? response.text.trim().replace(/["']/g, '') : ""; // Remove quotes
-    return title;
+    return response.text ? response.text.trim().replace(/["']/g, '') : ""; // Remove quotes
 
   } catch (error) {
     console.error("Error generating title with Gemini:", error);
@@ -49,8 +45,9 @@ export const generateLifetreeBio = async (seed: string): Promise<string> => {
   
   const ai = getAiClient();
   if (!ai) {
+      // Return a fallback so the UI doesn't crash, but warn user
       console.warn("Gemini API Key missing");
-      return "Roots run deep... (AI key missing)";
+      return "Roots run deep... (Please connect AI Key via the Key icon)";
   }
 
   try {
@@ -71,7 +68,7 @@ export const generateLifetreeBio = async (seed: string): Promise<string> => {
     return response.text ? response.text.trim() : "";
   } catch (error) {
     console.error("Error generating bio:", error);
-    return "";
+    return "The forest whispers quietly... (AI Error)";
   }
 }
 
@@ -80,20 +77,22 @@ export const generateVisionImage = async (prompt: string): Promise<string | null
     if (!prompt.trim()) return null;
     const ai = getAiClient();
     if (!ai) {
-        throw new Error("API Key Missing");
+        throw new Error("API Key Missing. Please ensure API_KEY is set in your .env file or connected via the UI.");
     }
 
     try {
         console.log("Generating vision image with Nano Banana...");
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash-image', // Nano Banana
-            contents: {
-                parts: [{ text: `A mystical, nature-inspired, abstract painting representing: ${prompt}` }]
-            },
+            contents: [
+                { 
+                    parts: [{ text: `A mystical, nature-inspired, abstract painting representing: ${prompt}` }] 
+                }
+            ],
             config: {
                 imageConfig: {
                     aspectRatio: "1:1",
-                    // imageSize is NOT supported by gemini-2.5-flash-image, only pro models
+                    // imageSize is NOT supported by gemini-2.5-flash-image
                 }
             }
         });
@@ -114,8 +113,24 @@ export const generateVisionImage = async (prompt: string): Promise<string | null
         if (errorMsg.includes("429") || errorMsg.includes("quota") || errorMsg.includes("resource_exhausted")) {
              throw new Error("Daily quota or rate limit exceeded. Please wait 30 seconds and try again.");
         }
+        if (errorMsg.includes("key not valid") || errorMsg.includes("api_key_invalid") || errorMsg.includes("403")) {
+            throw new Error("Invalid API Key. Please check your .env file or re-select your key using the Key icon.");
+        }
 
         // Throw specific error message to be caught by UI
         throw new Error(e.message || "Unknown GenAI Error");
     }
+}
+
+// New Chat Interface
+export const createOracleChat = (systemInstruction?: string) => {
+    const ai = getAiClient();
+    if (!ai) throw new Error("API Key Missing");
+
+    return ai.chats.create({
+        model: 'gemini-2.5-flash',
+        config: {
+            systemInstruction: systemInstruction || "You are the LifeSeed Oracle, an ancient digital spirit of the forest. You speak in metaphors, trees, and roots. You are wise, calm, and helpful, but always maintain your mystical forest persona. Keep answers relatively short and poetic.",
+        }
+    });
 }

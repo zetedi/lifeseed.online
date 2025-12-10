@@ -1,3 +1,24 @@
+=== ./index.tsx ===
+
+import './utils/polyfill';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error("Could not find root element to mount to");
+}
+
+const root = ReactDOM.createRoot(rootElement);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+
+=== ./App.tsx ===
 
 import React, { useState, useEffect, FormEvent, useRef, ChangeEvent } from 'react';
 import {
@@ -67,7 +88,7 @@ const Icons = {
   ArrowLeft: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>,
   FingerPrint: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M7.875 14.25l1.214 1.942a2.25 2.25 0 001.908 1.058h2.006c.776 0 1.497-.4 1.908-1.058l1.214-1.942M2.41 9a4.5 4.5 0 016.398-3.412 6 6 0 014.866 2.318A6 6 0 0118.665 4.5 6 6 0 0121.75 9v12a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 012.25 21V9z" /></svg>,
   Search: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>,
-  Sparkles: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 00-1.423 1.423z" /></svg>,
+  Sparkles: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>,
   Globe: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>,
   Key: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>,
   Send: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>,
@@ -109,16 +130,33 @@ const useLifeseed = () => {
     return { lightseed, myTrees, activeTree, loading, refreshTrees };
 };
 
-const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout, onProfile, onCreateVision, hasApiKey, onCheckKey }: any) => {
+const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout, onProfile, onCreateVision }: any) => {
     const { t, language, setLanguage } = useLanguage();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [hasApiKey, setHasApiKey] = useState(false); // Default to false until checked
+
+    useEffect(() => {
+        const checkKey = async () => {
+             const aiStudio = (window as any).aistudio;
+             if (aiStudio && aiStudio.hasSelectedApiKey) {
+                 const has = await aiStudio.hasSelectedApiKey();
+                 setHasApiKey(has);
+             } else {
+                 // If not in AI Studio environment, check process.env
+                 setHasApiKey(!!process.env.API_KEY);
+             }
+        }
+        checkKey();
+    }, []);
 
     const handleApiKeySelect = async () => {
         const aiStudio = (window as any).aistudio;
         if (aiStudio) {
             try {
                 await aiStudio.openSelectKey();
-                await onCheckKey();
+                // Re-check after selection
+                const has = await aiStudio.hasSelectedApiKey();
+                setHasApiKey(has);
             } catch (e) {
                 console.error("API Key selection cancelled or failed", e);
             }
@@ -907,7 +945,7 @@ const ImagePicker = ({ onChange, previewUrl, loading }: any) => {
 };
 
 // --- ORACLE CHAT ---
-const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
+const OracleChat = () => {
     const { t } = useLanguage();
     const [messages, setMessages] = useState<{role: 'user' | 'model', text: string}[]>([]);
     const [input, setInput] = useState('');
@@ -916,20 +954,14 @@ const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
     const bottomRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (!hasApiKey) {
-            setMessages([{role: 'model', text: "The Oracle awaits your Key. Please connect above."}]);
-            setChat(null);
-            return;
-        }
-
         try {
             const c = createOracleChat();
             setChat(c);
             setMessages([{role: 'model', text: "I am the LifeSeed Oracle. Ask me of roots, seeds, and the digital winds..."}]);
         } catch(e) {
-            setMessages([{role: 'model', text: "The connection to the spirits (API) is severed."}]);
+            setMessages([{role: 'model', text: "The connection to the spirits (API) is severed. Please check your Key."}]);
         }
-    }, [hasApiKey]);
+    }, []);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -937,13 +969,7 @@ const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!input.trim()) return;
-        
-        if (!chat) {
-             setMessages(prev => [...prev, {role: 'user', text: input}, {role: 'model', text: "Please connect your Spirit Key to speak."}]);
-             setInput('');
-             return;
-        }
+        if (!input.trim() || !chat) return;
 
         const userMsg = input;
         setInput('');
@@ -1010,7 +1036,6 @@ const AppContent = () => {
     const [matches, setMatches] = useState<MatchProposal[]>([]);
     const [selectedTree, setSelectedTree] = useState<Lifetree | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [hasApiKey, setHasApiKey] = useState(false);
     
     // UI State
     const [showPlantModal, setShowPlantModal] = useState(false);
@@ -1037,23 +1062,7 @@ const AppContent = () => {
     const [visionLink, setVisionLink] = useState('');
     const [visionImageUrl, setVisionImageUrl] = useState('');
 
-    const checkKey = async () => {
-         const aiStudio = (window as any).aistudio;
-         if (aiStudio && aiStudio.hasSelectedApiKey) {
-             const has = await aiStudio.hasSelectedApiKey();
-             setHasApiKey(has);
-         } else {
-             // Safe check thanks to vite config
-             const key = process.env.API_KEY;
-             setHasApiKey(!!key);
-         }
-    }
-
-    useEffect(() => { 
-        checkKey();
-        loadContent(); 
-    }, [tab, lightseed]);
-    
+    useEffect(() => { loadContent(); }, [tab, lightseed]);
     useEffect(() => { if (lightseed && myTrees.length === 0 && !authLoading) setShowPlantModal(true); }, [lightseed, myTrees]);
 
     const loadContent = async () => {
@@ -1241,8 +1250,6 @@ const AppContent = () => {
                     onPulse={() => setShowPulseModal(true)}
                     onCreateVision={() => setShowVisionModal(true)}
                     onProfile={() => setTab('profile')} 
-                    hasApiKey={hasApiKey}
-                    onCheckKey={checkKey}
                 />
                 <LightseedProfile 
                     lightseed={lightseed} 
@@ -1265,8 +1272,6 @@ const AppContent = () => {
                 onPulse={() => setShowPulseModal(true)}
                 onCreateVision={() => setShowVisionModal(true)}
                 onProfile={() => setTab('profile')} 
-                hasApiKey={hasApiKey}
-                onCheckKey={checkKey}
             />
             
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -1326,7 +1331,7 @@ const AppContent = () => {
                 )}
 
                 {/* Oracle Chat */}
-                {tab === 'oracle' && <OracleChat hasApiKey={hasApiKey} />}
+                {tab === 'oracle' && <OracleChat />}
 
                 {/* Content Area */}
                 {tab === 'forest' ? (
@@ -1440,3 +1445,1560 @@ const AppContent = () => {
 
 const App = () => (<LanguageProvider><AppContent /></LanguageProvider>);
 export default App;
+
+
+=== ./index.html ===
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>lifeseed</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0",
+    "firebase/": "https://aistudiocdn.com/firebase@^12.6.0/",
+    "path": "https://aistudiocdn.com/path@^0.12.7",
+    "vite": "https://aistudiocdn.com/vite@^7.2.7",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.2"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-slate-50 text-slate-800">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
+
+=== ./contexts/LanguageContext.tsx ===
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { translations, Language } from '../utils/translations';
+
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: keyof typeof translations['en']) => string;
+  isRTL: boolean;
+}
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+  const [language, setLanguage] = useState<Language>('en');
+
+  const t = (key: keyof typeof translations['en']) => {
+    return translations[language][key] || translations['en'][key];
+  };
+
+  const isRTL = language === 'ar';
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t, isRTL }}>
+      <div dir={isRTL ? 'rtl' : 'ltr'} className={isRTL ? 'font-arabic' : ''}>
+        {children}
+      </div>
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) throw new Error("useLanguage must be used within a LanguageProvider");
+  return context;
+};
+
+=== ./metadata.json ===
+{
+  "name": "lifeseed.online",
+  "description": "A decentralized social sharing platform where every lifetree is a blockchain of presents.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera",
+    "microphone"
+  ]
+}
+
+=== ./cors.json ===
+[
+  {
+    "origin": ["*"],
+    "method": ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"],
+    "maxAgeSeconds": 3600
+  }
+]
+
+
+=== ./utils/polyfill.ts ===
+
+// This file runs before the app to ensure process.env is set up correctly
+declare global {
+  interface Window {
+    process: any;
+  }
+  var __STATIC_ENV__: any;
+}
+
+if (typeof window !== 'undefined') {
+  window.process = window.process || {};
+  window.process.env = window.process.env || {};
+  
+  // __STATIC_ENV__ is replaced by Vite at build time with the contents of .env
+  // We use typeof check to prevent reference errors if it wasn't defined for some reason
+  const staticEnv = (typeof __STATIC_ENV__ !== 'undefined') ? __STATIC_ENV__ : {};
+  
+  // runtimeEnv might be injected by the host environment (e.g. AI Studio)
+  const runtimeEnv = window.process.env;
+  
+  // Merge: Static envs form the base, runtime envs override them if present.
+  window.process.env = { ...staticEnv, ...runtimeEnv };
+}
+
+export {};
+
+
+=== ./utils/crypto.ts ===
+export async function sha256(message: string): Promise<string> {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
+export async function createBlock(
+  previousHash: string,
+  data: object,
+  timestamp: number
+): Promise<string> {
+  const payload = JSON.stringify(data) + previousHash + timestamp;
+  return await sha256(payload);
+}
+
+=== ./utils/translations.ts ===
+
+
+
+export type Language = 'en' | 'es' | 'hu' | 'qu' | 'sa' | 'ja' | 'ar';
+
+export const translations = {
+  en: {
+    forest: "Forest",
+    pulses: "Pulses",
+    visions: "Visions",
+    oracle: "Oracle",
+    sign_in: "Sign in",
+    sign_out: "Sign out",
+    emit_pulse: "Emit Pulse",
+    plant_lifetree: "Plant Lifetree",
+    create_vision: "New Vision",
+    connect_roots: "We need your roots (location) to plant a tree.",
+    tree_name: "Tree Name",
+    vision: "Vision (The Body)",
+    title: "Title",
+    body: "Body",
+    webpage: "Webpage Link",
+    mint: "Mint Pulse (NFT)",
+    generate: "Generate",
+    generate_image: "Generate with Nano Banana",
+    ai_prompt: "Use AI to generate your Vision",
+    dormant: "The soil is dormant here.",
+    latest_hash: "Latest Hash",
+    prev: "PREV",
+    block: "BLOCK",
+    loading: "Loading...",
+    login_failed: "Login failed",
+    geo_error: "Geolocation error",
+    planting: "Planting...",
+    minting: "Pulsing...",
+    creating: "Creating...",
+    map_view: "Map View",
+    list_view: "List View",
+    upload_photo: "Upload Photo",
+    validated: "VALIDATED",
+    unvalidated: "Unvalidated",
+    validate_action: "Validate this Tree",
+    cant_plant: "You must validate your existing tree before planting another.",
+    match_pulse: "Match / Send to another Tree?",
+    quick_snap: "Quick Snap",
+    back_forest: "Back to Forest",
+    genesis: "Genesis Hash",
+    steward: "Steward",
+    location: "Location",
+    tree_details: "Tree Details",
+    profile: "Profile",
+    my_trees: "My Trees",
+    my_pulses: "My Pulses",
+    my_matches: "My Matches",
+    joined: "Joined",
+    total_love: "Total Love"
+  },
+  es: {
+    forest: "Bosque",
+    pulses: "Pulsos",
+    visions: "Visiones",
+    oracle: "Oráculo",
+    sign_in: "Iniciar sesión",
+    sign_out: "Cerrar sesión",
+    emit_pulse: "Emitir Pulso",
+    plant_lifetree: "Plantar Árbol de Vida",
+    create_vision: "Nueva Visión",
+    connect_roots: "Necesitamos tus raíces (ubicación) para plantar.",
+    tree_name: "Nombre del Árbol",
+    vision: "Visión (El Cuerpo)",
+    title: "Título",
+    body: "Cuerpo",
+    webpage: "Enlace Web",
+    mint: "Acuñar Pulso",
+    generate: "Generar",
+    generate_image: "Generar con Nano Banana",
+    ai_prompt: "Usa IA para generar tu Visión",
+    dormant: "El suelo duerme aquí.",
+    latest_hash: "Último Hash",
+    prev: "ANT",
+    block: "BLOQUE",
+    loading: "Cargando...",
+    login_failed: "Error de inicio de sesión",
+    geo_error: "Error de geolocalización",
+    planting: "Plantando...",
+    minting: "Pulsando...",
+    creating: "Creando...",
+    map_view: "Vista de Mapa",
+    list_view: "Vista de Lista",
+    upload_photo: "Subir Foto",
+    validated: "VALIDADO",
+    unvalidated: "No validado",
+    validate_action: "Validar este Árbol",
+    cant_plant: "Debes validar tu árbol existente antes de plantar otro.",
+    match_pulse: "¿Coincidir / Enviar a otro Árbol?",
+    quick_snap: "Foto Rápida",
+    back_forest: "Volver al Bosque",
+    genesis: "Hash Génesis",
+    steward: "Guardián",
+    location: "Ubicación",
+    tree_details: "Detalles del Árbol",
+    profile: "Perfil",
+    my_trees: "Mis Árboles",
+    my_pulses: "Mis Pulsos",
+    my_matches: "Mis Coincidencias",
+    joined: "Se unió",
+    total_love: "Amor Total"
+  },
+  hu: {
+    forest: "Erdő",
+    pulses: "Pulzusok",
+    visions: "Víziók",
+    oracle: "Orákulum",
+    sign_in: "Bejelentkezés",
+    sign_out: "Kijelentkezés",
+    emit_pulse: "Pulzus Kibocsátása",
+    plant_lifetree: "Életfa Ültetése",
+    create_vision: "Új Vízió",
+    connect_roots: "Szükségünk van a gyökereire (helyzetére) az ültetéshez.",
+    tree_name: "Fa Neve",
+    vision: "Jövőkép (A Test)",
+    title: "Cím",
+    body: "Szöveg",
+    webpage: "Weboldal Link",
+    mint: "Pulzus Verése",
+    generate: "Generálás",
+    generate_image: "Kép Generálása (Nano Banana)",
+    ai_prompt: "AI használata a jövőképhez",
+    dormant: "Itt alszik a föld.",
+    latest_hash: "Legutóbbi Hash",
+    prev: "ELŐZŐ",
+    block: "BLOKK",
+    loading: "Betöltés...",
+    login_failed: "Sikertelen bejelentkezés",
+    geo_error: "Helymeghatározási hiba",
+    planting: "Ültetés...",
+    minting: "Pulzálás...",
+    creating: "Létrehozás...",
+    map_view: "Térkép Nézet",
+    list_view: "Lista Nézet",
+    upload_photo: "Fénykép Feltöltése",
+    validated: "HITELESÍTVE",
+    unvalidated: "Nem hitelesített",
+    validate_action: "Fa Hitelesítése",
+    cant_plant: "A következő ültetése előtt hitelesítenie kell a meglévő fáját.",
+    match_pulse: "Párosítás / Küldés másik Fához?",
+    quick_snap: "Gyors Fotó",
+    back_forest: "Vissza az Erdőbe",
+    genesis: "Genezis Hash",
+    steward: "Gondnok",
+    location: "Helyszín",
+    tree_details: "Fa Részletei",
+    profile: "Profil",
+    my_trees: "Fáim",
+    my_pulses: "Pulzusaim",
+    my_matches: "Párosításaim",
+    joined: "Csatlakozott",
+    total_love: "Összes Szeretet"
+  },
+  qu: { 
+    forest: "Sach'a-sach'a",
+    pulses: "Sirkaykuna",
+    visions: "Musquykuna",
+    oracle: "Willaq",
+    sign_in: "Yaykuy",
+    sign_out: "Lloqsiy",
+    emit_pulse: "Sirkayta Kachay",
+    plant_lifetree: "Kawsay Mallkita Tarpuy",
+    create_vision: "Musuq Musquy",
+    connect_roots: "Saphikiykita (tiyayniykita) necesitayku.",
+    tree_name: "Mallki Suti",
+    vision: "Rikuy (Ukhu)",
+    title: "Suti",
+    body: "Kurku",
+    webpage: "Llikachay T'inki",
+    mint: "Sirkayta Paqarichiy",
+    generate: "Paqarichiy",
+    generate_image: "Ruray Nano Banana-wan",
+    ai_prompt: "AI-wan visionniykita ruray",
+    dormant: "Allpaqa puñuchkanmi.",
+    latest_hash: "Qhipa Hash",
+    prev: "ÑAWPAQ",
+    block: "TAQE",
+    loading: "Cargachkan...",
+    login_failed: "Mana yaykuyta atikunchu",
+    geo_error: "Tiyay pantay",
+    planting: "Tarpuchkan...",
+    minting: "Sirkaychkan...",
+    creating: "Rurachkan...",
+    map_view: "Mapa Rikuy",
+    list_view: "Sutisuyu Rikuy",
+    upload_photo: "Fotota Churay",
+    validated: "CHASKISQA",
+    unvalidated: "Mana chaskisqa",
+    validate_action: "Kay Mallkita Chaskiy",
+    cant_plant: "Ñawpaq mallkiyki chaskisqa kanan tiyan.",
+    match_pulse: "Tupachiy / Huk Mallkiman Kachay?",
+    quick_snap: "Utqaylla Foto",
+    back_forest: "Sach'a-sach'aman Kutiy",
+    genesis: "Qallariy Hash",
+    steward: "Kamayoq",
+    location: "Tiyay",
+    tree_details: "Mallki Willakuykuna",
+    profile: "Runaq Uyan",
+    my_trees: "Mallkiykuna",
+    my_pulses: "Sirkaykuna",
+    my_matches: "Tupachisqaykuna",
+    joined: "Yaykurqa",
+    total_love: "Tukuy Munakuynin"
+  },
+  sa: { 
+    forest: "अरण्यम् (Araṇyam)",
+    pulses: "स्पन्दनानि (Spandanāni)",
+    visions: "दृष्टयः (Dṛṣṭayaḥ)",
+    oracle: "दैववाणी (Daivavāṇī)",
+    sign_in: "प्रविशतु (Praviśatu)",
+    sign_out: "निर्गच्छतु (Nirgacchatu)",
+    emit_pulse: "स्पन्दनं सृजतु",
+    plant_lifetree: "जीवनवृक्षं रोपयतु",
+    create_vision: "नूतन दृष्टिः",
+    connect_roots: "वृक्षारोपणार्थं भवतः मूलानि आवश्यकानि।",
+    tree_name: "वृक्षनाम",
+    vision: "दर्शनम्",
+    title: "शीर्षकम्",
+    body: "शरीरम्",
+    webpage: "जालपृष्ठ अनुबन्धः",
+    mint: "स्पन्दनं टङ्कयतु",
+    generate: "जनयतु",
+    generate_image: "Nano Banana द्वारा जनयतु",
+    ai_prompt: "दर्शनार्थं AI उपयुज्यताम्",
+    dormant: "अत्र भूमिः सुप्ता अस्ति।",
+    latest_hash: "अन्तिम Hash",
+    prev: "पूर्व",
+    block: "खण्ड",
+    loading: "आरोचयति...",
+    login_failed: "प्रवेशः विफलः",
+    geo_error: "स्थानदोषः",
+    planting: "रोपयति...",
+    minting: "स्पन्दते...",
+    creating: "सृजति...",
+    map_view: "मानचित्र दर्शनम्",
+    list_view: "सूची दर्शनम्",
+    upload_photo: "चित्रं अपलोडं करोतु",
+    validated: "प्रमाणित",
+    unvalidated: "अप्रमाणित",
+    validate_action: "एतत् वृक्षं प्रमाणयतु",
+    cant_plant: "नूतनवृक्षात् पूर्वं वर्तमानवृक्षः प्रमाणितः भवेत्।",
+    match_pulse: "मेलनम् / अन्यवृक्षाय प्रेषयतु?",
+    quick_snap: "शीघ्रं चित्रम्",
+    back_forest: "अरण्यं प्रतिनिवर्ततु",
+    genesis: "आदि हैश (Genesis Hash)",
+    steward: "पालक",
+    location: "स्थानम्",
+    tree_details: "वृक्ष विवरण",
+    profile: "परिचय",
+    my_trees: "मम वृक्षाः",
+    my_pulses: "मम स्पन्दनानि",
+    my_matches: "मम मेलनानि",
+    joined: "सम्बद्धः",
+    total_love: "सम्पूर्ण स्नेह"
+  },
+  ja: {
+    forest: "森",
+    pulses: "パルス (鼓動)",
+    visions: "ビジョン (枝)",
+    oracle: "オラクル",
+    sign_in: "ログイン",
+    sign_out: "ログアウト",
+    emit_pulse: "パルスを放つ",
+    plant_lifetree: "命の木を植える",
+    create_vision: "新しいビジョン",
+    connect_roots: "位置情報が必要です。",
+    tree_name: "木の名前",
+    vision: "ビジョン",
+    title: "タイトル",
+    body: "本文",
+    webpage: "Webリンク",
+    mint: "パルスを鋳造 (NFT)",
+    generate: "生成",
+    generate_image: "Nano Bananaで生成",
+    ai_prompt: "AI生成",
+    dormant: "静寂。",
+    latest_hash: "最新ハッシュ",
+    prev: "前",
+    block: "ブロック",
+    loading: "読込中...",
+    login_failed: "エラー",
+    geo_error: "位置情報エラー",
+    planting: "植樹中...",
+    minting: "鼓動中...",
+    creating: "作成中...",
+    map_view: "地図",
+    list_view: "リスト",
+    upload_photo: "写真",
+    validated: "認証済",
+    unvalidated: "未認証",
+    validate_action: "この木を認証する",
+    cant_plant: "次の木を植える前に、既存の木を認証してください。",
+    match_pulse: "マッチ / 他の木へ送る？",
+    quick_snap: "クイックスナップ",
+    back_forest: "森へ戻る",
+    genesis: "ジェネシスハッシュ",
+    steward: "管理人",
+    location: "場所",
+    tree_details: "木の詳細",
+    profile: "プロフィール",
+    my_trees: "私の木",
+    my_pulses: "私のパルス",
+    my_matches: "私のマッチ",
+    joined: "参加日",
+    total_love: "総ラブ数"
+  },
+  ar: {
+    forest: "الغابة",
+    pulses: "نبضات",
+    visions: "الرؤى",
+    oracle: "العراف",
+    sign_in: "دخول",
+    sign_out: "خروج",
+    emit_pulse: "إصدار نبضة",
+    plant_lifetree: "زرع شجرة الحياة",
+    create_vision: "رؤية جديدة",
+    connect_roots: "نحتاج لموقعك.",
+    tree_name: "اسم الشجرة",
+    vision: "الرؤية",
+    title: "العنوان",
+    body: "المحتوى",
+    webpage: "رابط الموقع",
+    mint: "صك النبضة",
+    generate: "توليد",
+    generate_image: "توليد بـ Nano Banana",
+    ai_prompt: "استخدم الذكاء الاصطناعي",
+    dormant: "التربة هامدة.",
+    latest_hash: "أحدث هاش",
+    prev: "السابق",
+    block: "كتلة",
+    loading: "تحميل...",
+    login_failed: "فشل الدخول",
+    geo_error: "خطأ في الموقع",
+    planting: "زراعة...",
+    minting: "نبض...",
+    creating: "إنشاء...",
+    map_view: "خريطة",
+    list_view: "قائمة",
+    upload_photo: "رفع صورة",
+    validated: "مصدق",
+    unvalidated: "غير مصدق",
+    validate_action: "تصديق هذه الشجرة",
+    cant_plant: "يجب تصديق شجرتك الحالية قبل زرع أخرى.",
+    match_pulse: "مطابقة / إرسال لشجرة أخرى؟",
+    quick_snap: "لقطة سريعة",
+    back_forest: "عودة للغابة",
+    genesis: "تكوين الهاش",
+    steward: "الراعي",
+    location: "الموقع",
+    tree_details: "تفاصيل الشجرة",
+    profile: "الملف الشخصي",
+    my_trees: "أشجاري",
+    my_pulses: "نبضاتي",
+    my_matches: "مطابقاتي",
+    joined: "انضم",
+    total_love: "مجموع الحب"
+  }
+};
+
+
+=== ./README.md ===
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
+
+# Run and deploy your AI Studio app
+
+This contains everything you need to run your app locally.
+
+View your app in AI Studio: https://ai.studio/apps/drive/1eBSglJJDv9P5IVCTX6YihXiQBwDVGWAg
+
+## Run Locally
+
+**Prerequisites:**  Node.js
+
+
+1. Install dependencies:
+   `npm install`
+2. Set the `API_KEY` in `.env` to your Gemini API key (see `.env.example`).
+3. Set the Firebase configuration keys in `.env` (see `.env.example`).
+4. Run the app:
+   `npm run dev`
+
+=== ./types.ts ===
+
+import { type User as FirebaseUser } from 'firebase/auth';
+import { type Timestamp } from 'firebase/firestore';
+
+export type Lightseed = Pick<FirebaseUser, 'uid' | 'email' | 'displayName' | 'photoURL'>;
+
+export type PulseType = 'STANDARD' | 'GROWTH';
+
+// The Entity/Blockchain container
+export interface Lifetree {
+  id: string;
+  ownerId: string;
+  name: string;
+  body: string; // The Vision
+  imageUrl?: string;
+  latitude?: number;
+  longitude?: number;
+  locationName?: string;
+  createdAt: Timestamp;
+  
+  // Validation Logic
+  validated: boolean; 
+  validatorId?: string;
+
+  // Blockchain Props
+  genesisHash: string;
+  latestHash: string; 
+  blockHeight: number;
+}
+
+export interface Vision {
+  id: string;
+  lifetreeId: string;
+  authorId: string;
+  title: string;
+  body: string;
+  link?: string;
+  imageUrl?: string;
+  createdAt: Timestamp;
+}
+
+// The Block
+export interface Pulse {
+  id: string;
+  lifetreeId: string;
+  type: PulseType; // GROWTH or STANDARD
+  
+  // Data Payload
+  title: string;
+  body: string;
+  imageUrl?: string;
+  
+  // Match Logic (On Chain)
+  isMatch: boolean;
+  matchedLifetreeId?: string;
+  matchId?: string; // Link to the handshake
+  
+  // Metadata
+  authorId: string;
+  authorName: string;
+  authorPhoto?: string;
+  createdAt: Timestamp;
+  
+  // Interactions (Off Chain)
+  loveCount: number;
+  commentCount: number;
+
+  // Blockchain Ledger
+  previousHash: string;
+  hash: string;
+}
+
+// Off-Chain Match Handshake
+export interface MatchProposal {
+  id: string;
+  initiatorPulseId: string;
+  initiatorTreeId: string;
+  initiatorUid: string;
+  
+  targetPulseId: string; // The pulse being matched WITH
+  targetTreeId: string;
+  targetUid: string; // The owner who needs to accept
+
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  createdAt: Timestamp;
+}
+
+export interface Comment {
+  id: string;
+  body: string;
+  authorId: string;
+  authorName: string;
+  createdAt: Timestamp;
+}
+
+
+=== ./components/Logo.tsx ===
+
+import React, { useId } from 'react';
+
+interface LogoProps {
+  className?: string;
+  width?: number;
+  height?: number;
+}
+
+const Logo: React.FC<LogoProps> = ({ className, width = 64, height = 64 }) => {
+  const uniqueId = useId();
+  const clipPathId = `clean-${uniqueId}`;
+
+  return (
+    <svg 
+      width={width} 
+      height={height} 
+      viewBox="0 0 262 262" 
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <defs>
+        <clipPath id={clipPathId}>
+          <circle cx="131" cy="131" r="131" />
+        </clipPath>
+      </defs>
+      <g>
+        <circle cx="131" cy="131" r="131" fill="white" stroke="#334155" strokeWidth="7" clipPath={`url(#${clipPathId})`} />
+
+        {/* Left Column */}
+        <circle cx="-35.28" cy="-29" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="-35.28" cy="35" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="-35.28" cy="99" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="-35.28" cy="163" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="-35.28" cy="227" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="-35.28" cy="291" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+
+        {/* Mid-Left Column */}
+        <circle cx="20.15" cy="3" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="20.15" cy="67" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="20.15" cy="131" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="20.15" cy="195" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="20.15" cy="259" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+
+        {/* Center Column */}
+        <circle cx="75.57" cy="-29" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="75.57" cy="35" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="75.57" cy="99" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="75.57" cy="163" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="75.57" cy="227" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="75.57" cy="291" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+
+        {/* Mid-Right Column */}
+        <circle cx="131" cy="3" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="67" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="131" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="195" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="259" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+
+        {/* Right Columns */}
+        <circle cx="186.43" cy="-29" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="35" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="99" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="163" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="227" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="291" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+
+        <circle cx="241.85" cy="3" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="241.85" cy="67" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="241.85" cy="131" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="241.85" cy="195" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="241.85" cy="259" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+
+        <circle cx="297.28" cy="-29" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="297.28" cy="35" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="297.28" cy="99" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="297.28" cy="163" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="297.28" cy="227" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+        <circle cx="297.28" cy="291" r="64" fill="none" stroke="#334155" strokeWidth=".7" clipPath={`url(#${clipPathId})`} />
+
+        {/* Inner Seed Circles */}
+        <circle cx="75.57" cy="99" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
+        <circle cx="75.57" cy="163" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="67" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="131" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
+        <circle cx="131" cy="195" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="99" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
+        <circle cx="186.43" cy="163" r="16" fill="white" stroke="#334155" strokeWidth="3" clipPath={`url(#${clipPathId})`} />
+      </g>
+    </svg>
+  );
+};
+
+export default Logo;
+
+
+=== ./package.json ===
+{
+  "name": "lifeseed.online",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "@google/genai": "^1.27.0",
+    "firebase": "^12.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}
+
+
+=== ./.github/workflows/firebase-hosting-pull-request.yml ===
+# This file was auto-generated by the Firebase CLI
+# https://github.com/firebase/firebase-tools
+
+name: Deploy to Firebase Hosting on PR
+on: pull_request
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+jobs:
+  build_and_preview:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci && npm run build
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LIFESEED_7CDB0 }}
+          projectId: lifeseed-7cdb0
+
+
+=== ./.github/workflows/firebase-hosting-merge.yml ===
+# This file was auto-generated by the Firebase CLI
+# https://github.com/firebase/firebase-tools
+
+name: Deploy to Firebase Hosting on merge
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci && npm run build
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LIFESEED_7CDB0 }}
+          channelId: live
+          projectId: lifeseed-7cdb0
+
+
+=== ./tsconfig.json ===
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "module": "ESNext",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ],
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  }
+}
+
+=== ./firebase.json ===
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}
+
+=== ./vite.config.ts ===
+
+import path from 'path';
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig(({ mode }) => {
+    // Use process.cwd() to ensure we look in the project root for .env
+    const env = loadEnv(mode, process.cwd(), '');
+    return {
+      server: {
+        port: 3000,
+        host: '0.0.0.0',
+      },
+      plugins: [react()],
+      define: {
+        // Expose loaded env vars as a global constant
+        '__STATIC_ENV__': JSON.stringify(env),
+        // Remap process.env to window.process.env to support runtime injection + static build
+        // This satisfies esbuild (it's a simple identifier replacement)
+        'process.env': 'window.process.env',
+      },
+      resolve: {
+        alias: {
+          '@': path.resolve(__dirname, '.'),
+        }
+      }
+    };
+});
+
+
+=== ./flat.sh ===
+#!/bin/bash
+
+# Output file for flattened project
+OUTPUT_FILE="${1:-flattened_project.txt}"
+
+# Check if this is a Git repository
+if [ ! -d .git ]; then
+  echo "Error: This doesn't seem to be a Git repository (no .git directory found)."
+  exit 1
+fi
+
+# Clear output file
+> "$OUTPUT_FILE"
+
+# Counters for summary
+INCLUDED_COUNT=0
+EXCLUDED_COUNT=0
+
+# Image extensions to exclude
+IMAGE_EXTENSIONS="\.png$|\.jpg$|\.jpeg$|\.gif$|\.bmp$|\.webp$|\.ico$|\.svg$"
+
+# Function to check if a file is ignored by .gitignore
+is_ignored() {
+  local path="$1"
+  path="${path#./}"
+  git check-ignore -q "$path" 2>/dev/null && return 0
+  local parent="$path"
+  while [ "$parent" != "." ] && [ "$parent" != "/" ]; do
+    parent=$(dirname "$parent")
+    git check-ignore -q "$parent" 2>/dev/null && return 0
+  done
+  return 1
+}
+
+# Function to check if a file is text-based
+is_text_file() {
+  local file="$1"
+  local ext="${file##*.}"
+  case "$ext" in
+    ts|tsx|js|jsx|css|json|html|md|txt|sh|yml|yaml)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+# Find and process files
+find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | while read -r file; do
+  # Skip output file, lock files, and Firebase cache
+  if [ "$file" = "./$OUTPUT_FILE" ] ||
+     [[ "$file" == *"/bun.lockb" ]] ||
+     [[ "$file" == *"/package-lock.json" ]] ||
+     [[ "$file" == *"/.firebase/"* ]]; then
+    ((EXCLUDED_COUNT++))
+    continue
+  fi
+
+  # Skip image files
+  if echo "$file" | grep -E -q "$IMAGE_EXTENSIONS"; then
+    ((EXCLUDED_COUNT++))
+    continue
+  fi
+
+  # Skip ignored files
+  if is_ignored "$file"; then
+    ((EXCLUDED_COUNT++))
+    continue
+  fi
+
+  # Include text-based files
+  if is_text_file "$file"; then
+    echo "=== $file ===" >> "$OUTPUT_FILE"
+    cat "$file" >> "$OUTPUT_FILE"
+    echo -e "\n" >> "$OUTPUT_FILE"
+    ((INCLUDED_COUNT++))
+  else
+    ((EXCLUDED_COUNT++))
+  fi
+done
+
+# Print summary
+echo "Flattened project written to: $OUTPUT_FILE"
+echo "Summary: Included $INCLUDED_COUNT files, excluded $EXCLUDED_COUNT files"
+
+=== ./services/firebase.ts ===
+
+import { initializeApp } from 'firebase/app';
+import { 
+  getAuth, 
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  type User as FirebaseUser,
+  signOut as firebaseSignOut
+} from 'firebase/auth';
+import { 
+  initializeFirestore, 
+  collection, 
+  query, 
+  orderBy, 
+  getDocs, 
+  addDoc,
+  serverTimestamp,
+  doc,
+  runTransaction,
+  getDoc,
+  where,
+  updateDoc,
+  deleteDoc,
+  limit
+} from 'firebase/firestore';
+import { 
+  getStorage, 
+  ref, 
+  uploadBytes, 
+  getDownloadURL,
+  uploadString
+} from 'firebase/storage';
+import { type Pulse, type PulseType, type Lifetree, type MatchProposal, type Vision } from '../types';
+import { createBlock } from '../utils/crypto';
+
+// We use process.env because vite.config.ts explicitly polyfills it to merge 
+// local .env vars with runtime injected vars (window.process.env).
+// This prevents "undefined" errors that can happen with import.meta.env in some environments.
+const firebaseConfig = {
+  apiKey: process.env.VITE_FIREBASE_API_KEY,
+  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.VITE_FIREBASE_APP_ID
+};
+
+if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("YOUR_")) {
+  console.warn("LifeSeed Configuration Warning: .env file might be missing or invalid.");
+}
+
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = initializeFirestore(app, {
+    ignoreUndefinedProperties: true
+});
+export const storage = getStorage(app);
+const googleProvider = new GoogleAuthProvider();
+
+// --- AUTH ---
+export const onAuthChange = (callback: (user: FirebaseUser | null) => void) => {
+  return onAuthStateChanged(auth, callback);
+};
+
+export const signInWithGoogle = async () => {
+  try { return (await signInWithPopup(auth, googleProvider)).user; } 
+  catch (error) { console.error(error); throw error; }
+};
+
+export const logout = () => firebaseSignOut(auth);
+
+// --- STORAGE ---
+export const uploadImage = async (file: File, path: string): Promise<string> => {
+  try {
+    const storageRef = ref(storage, path);
+    await uploadBytes(storageRef, file);
+    return await getDownloadURL(storageRef);
+  } catch (error) { console.error(error); throw error; }
+};
+
+export const uploadBase64Image = async (base64String: string, path: string): Promise<string> => {
+  try {
+    const storageRef = ref(storage, path);
+    await uploadString(storageRef, base64String, 'data_url');
+    return await getDownloadURL(storageRef);
+  } catch (error) { console.error(error); throw error; }
+}
+
+// --- LIFETREES ---
+const lifetreesCollection = collection(db, 'lifetrees');
+const visionsCollection = collection(db, 'visions');
+
+export const plantLifetree = async (data: {
+  ownerId: string, 
+  name: string, 
+  body: string, 
+  imageUrl?: string,
+  lat?: number,
+  lng?: number,
+  locName?: string
+}) => {
+  // Check if user already has an unvalidated tree
+  const q = query(lifetreesCollection, where('ownerId', '==', data.ownerId));
+  const snapshot = await getDocs(q);
+  
+  if (!snapshot.empty) {
+      const trees = snapshot.docs.map(d => d.data() as Lifetree);
+      const allValidated = trees.every(t => t.validated);
+      if (!allValidated) {
+          throw new Error("Your existing Lifetree is not validated yet. You cannot plant another.");
+      }
+  }
+
+  // Check if this is the FIRST tree in the entire system (Genesis)
+  const allTreesQuery = query(lifetreesCollection, limit(1));
+  const allTreesSnap = await getDocs(allTreesQuery);
+  const isFirstTree = allTreesSnap.empty;
+
+  const isValid = isFirstTree || data.name.trim().toLowerCase() === "phoenix";
+  const genesisData = { message: "Genesis Pulse", owner: data.ownerId, timestamp: Date.now() };
+  const genesisHash = await createBlock("0", genesisData, Date.now());
+
+  const treeDoc = await addDoc(lifetreesCollection, {
+    ownerId: data.ownerId,
+    name: data.name,
+    body: data.body,
+    imageUrl: data.imageUrl || null,
+    latitude: data.lat || null,
+    longitude: data.lng || null,
+    locationName: data.locName || "Unknown Soil",
+    createdAt: serverTimestamp(),
+    genesisHash: genesisHash,
+    latestHash: genesisHash,
+    blockHeight: 0,
+    validated: isValid,
+    validatorId: isValid ? (isFirstTree ? "GENESIS" : "SYSTEM") : null
+  });
+
+  // Automatically create the first Vision (Branch) for this tree
+  await addDoc(visionsCollection, {
+      lifetreeId: treeDoc.id,
+      authorId: data.ownerId,
+      title: "Root Vision",
+      body: data.body, // The Vision comes from the tree planting
+      imageUrl: data.imageUrl || null,
+      createdAt: serverTimestamp(),
+      link: ""
+  });
+
+  return treeDoc;
+};
+
+export const validateLifetree = async (targetTreeId: string, validatorTreeId: string) => {
+    const targetRef = doc(db, 'lifetrees', targetTreeId);
+    const validatorRef = doc(db, 'lifetrees', validatorTreeId);
+
+    return runTransaction(db, async (t) => {
+        const vDoc = await t.get(validatorRef);
+        const tDoc = await t.get(targetRef);
+
+        if (!vDoc.exists() || !tDoc.exists()) throw new Error("Tree not found");
+        
+        const validator = vDoc.data() as Lifetree;
+        if (!validator.validated) throw new Error("Only a Validated Lifetree can validate others.");
+
+        t.update(targetRef, {
+            validated: true,
+            validatorId: validatorTreeId
+        });
+    });
+}
+
+export const fetchLifetrees = async (): Promise<Lifetree[]> => {
+  const q = query(lifetreesCollection, orderBy('createdAt', 'desc'));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Lifetree));
+};
+
+export const getMyLifetrees = async (userId: string): Promise<Lifetree[]> => {
+    if (!userId) return [];
+    const q = query(lifetreesCollection, where('ownerId', '==', userId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Lifetree));
+};
+
+// --- VISIONS ---
+export const fetchVisions = async (): Promise<Vision[]> => {
+    const q = query(visionsCollection, orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({id: d.id, ...(d.data() as any)} as Vision));
+}
+
+export const getMyVisions = async (userId: string): Promise<Vision[]> => {
+    if (!userId) return [];
+    const q = query(visionsCollection, where('authorId', '==', userId));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({id: d.id, ...(d.data() as any)} as Vision));
+}
+
+export const createVision = async (data: {
+    lifetreeId: string,
+    authorId: string,
+    title: string,
+    body: string,
+    link?: string,
+    imageUrl?: string
+}) => {
+    return addDoc(visionsCollection, {
+        ...data,
+        createdAt: serverTimestamp()
+    });
+}
+
+// --- PULSES & MATCHING ---
+const pulsesCollection = collection(db, 'pulses');
+const matchesCollection = collection(db, 'matches');
+
+export const fetchPulses = async (): Promise<Pulse[]> => {
+  const q = query(pulsesCollection, orderBy('createdAt', 'desc'));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Pulse));
+};
+
+export const getMyPulses = async (userId: string): Promise<Pulse[]> => {
+    if (!userId) return [];
+    // Note: Use orderBy client-side if missing index
+    const q = query(pulsesCollection, where('authorId', '==', userId));
+    const snapshot = await getDocs(q);
+    const pulses = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Pulse));
+    return pulses.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+};
+
+export const fetchGrowthPulses = async (treeId: string): Promise<Pulse[]> => {
+    // Removed orderBy to prevent 'Missing Index' errors on new deployments.
+    // Sorting happens client-side.
+    const q = query(
+        pulsesCollection, 
+        where('lifetreeId', '==', treeId), 
+        where('type', '==', 'GROWTH')
+    );
+    const snap = await getDocs(q);
+    const pulses = snap.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Pulse));
+    // Client-side sort
+    return pulses.sort((a,b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
+}
+
+// Mint a single Pulse (Growth or Standard)
+export const mintPulse = async (pulseData: {
+  lifetreeId: string,
+  type: PulseType,
+  title: string,
+  body: string,
+  imageUrl?: string,
+  authorId: string,
+  authorName: string,
+  authorPhoto?: string,
+}) => {
+  return runTransaction(db, async (transaction) => {
+    const timestamp = Date.now();
+    
+    const sourceTreeRef = doc(db, 'lifetrees', pulseData.lifetreeId);
+    const sourceTreeDoc = await transaction.get(sourceTreeRef);
+    if (!sourceTreeDoc.exists()) throw new Error("Source tree missing");
+    
+    const sourceTree = sourceTreeDoc.data() as Lifetree;
+    const prevHashSource = sourceTree.latestHash || sourceTree.genesisHash || "0";
+    
+    // Hash Payload (excludes comments)
+    const blockData = {
+      title: pulseData.title,
+      body: pulseData.body,
+      image: pulseData.imageUrl || "",
+      author: pulseData.authorId,
+      type: pulseData.type
+    };
+    
+    const newHash = await createBlock(prevHashSource, blockData, timestamp);
+    const newPulseRef = doc(pulsesCollection);
+    
+    transaction.set(newPulseRef, {
+      ...pulseData,
+      id: newPulseRef.id,
+      isMatch: false,
+      loveCount: 0,
+      commentCount: 0,
+      createdAt: serverTimestamp(),
+      previousHash: prevHashSource,
+      hash: newHash,
+    });
+
+    transaction.update(sourceTreeRef, {
+      latestHash: newHash,
+      blockHeight: (sourceTree.blockHeight || 0) + 1,
+      // If growth, maybe update tree image? Optional.
+      ...(pulseData.type === 'GROWTH' && pulseData.imageUrl ? { imageUrl: pulseData.imageUrl } : {})
+    });
+  });
+};
+
+// --- MATCHING SYSTEM ---
+
+export const proposeMatch = async (data: {
+    initiatorPulseId: string,
+    initiatorTreeId: string,
+    initiatorUid: string,
+    targetPulseId: string,
+    targetTreeId: string, // Requires us to look up the pulse's tree first usually
+    targetUid: string
+}) => {
+    return addDoc(matchesCollection, {
+        ...data,
+        status: 'PENDING',
+        createdAt: serverTimestamp()
+    });
+}
+
+export const getPendingMatches = async (userId: string): Promise<MatchProposal[]> => {
+    const q = query(matchesCollection, where('targetUid', '==', userId), where('status', '==', 'PENDING'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({id: d.id, ...d.data() as any} as MatchProposal));
+}
+
+// Get completed matches where user was involved
+export const getMyMatchesHistory = async (userId: string): Promise<MatchProposal[]> => {
+    // Requires multiple queries or an OR clause (not fully supported in simple queries without index)
+    // Simpler: Fetch accepted matches for target, accepted for initiator
+    const q1 = query(matchesCollection, where('targetUid', '==', userId), where('status', '==', 'ACCEPTED'));
+    const q2 = query(matchesCollection, where('initiatorUid', '==', userId), where('status', '==', 'ACCEPTED'));
+    
+    const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+    const matches = [...s1.docs, ...s2.docs].map(d => ({id: d.id, ...d.data() as any} as MatchProposal));
+    return matches.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+}
+
+// Accepts match and writes to blockchain
+export const acceptMatch = async (proposalId: string) => {
+    const matchRef = doc(db, 'matches', proposalId);
+    
+    return runTransaction(db, async (t) => {
+        const matchDoc = await t.get(matchRef);
+        if (!matchDoc.exists()) throw new Error("Match expired");
+        const proposal = matchDoc.data() as MatchProposal;
+
+        if (proposal.status !== 'PENDING') throw new Error("Match already processed");
+
+        // Mint Match Block on Initiator Tree
+        const initTreeRef = doc(db, 'lifetrees', proposal.initiatorTreeId);
+        const initTree = (await t.get(initTreeRef)).data() as Lifetree;
+        const initHash = await createBlock(initTree.latestHash, { match: proposal.id, with: proposal.targetPulseId }, Date.now());
+        
+        const pulseRef1 = doc(pulsesCollection);
+        t.set(pulseRef1, {
+            lifetreeId: proposal.initiatorTreeId,
+            type: 'STANDARD',
+            title: 'Pulse Match',
+            body: 'Two pulses met and connected.',
+            isMatch: true,
+            matchedLifetreeId: proposal.targetTreeId,
+            matchId: proposal.id,
+            authorId: proposal.initiatorUid,
+            authorName: 'System', 
+            createdAt: serverTimestamp(),
+            previousHash: initTree.latestHash,
+            hash: initHash,
+            loveCount: 0,
+            commentCount: 0
+        });
+        t.update(initTreeRef, { latestHash: initHash, blockHeight: initTree.blockHeight + 1 });
+
+        // Mint Match Block on Target Tree
+        const targetTreeRef = doc(db, 'lifetrees', proposal.targetTreeId);
+        const targetTree = (await t.get(targetTreeRef)).data() as Lifetree;
+        const targetHash = await createBlock(targetTree.latestHash, { match: proposal.id, with: proposal.initiatorPulseId }, Date.now());
+
+        const pulseRef2 = doc(pulsesCollection);
+        t.set(pulseRef2, {
+            lifetreeId: proposal.targetTreeId,
+            type: 'STANDARD',
+            title: 'Pulse Match',
+            body: 'Two pulses met and connected.',
+            isMatch: true,
+            matchedLifetreeId: proposal.initiatorTreeId,
+            matchId: proposal.id,
+            authorId: proposal.targetUid,
+            authorName: 'System',
+            createdAt: serverTimestamp(),
+            previousHash: targetTree.latestHash,
+            hash: targetHash,
+            loveCount: 0,
+            commentCount: 0
+        });
+        t.update(targetTreeRef, { latestHash: targetHash, blockHeight: targetTree.blockHeight + 1 });
+
+        // Close Proposal
+        t.update(matchRef, { status: 'ACCEPTED' });
+    });
+}
+
+// --- INTERACTIONS (Off Chain) ---
+
+export const isPulseLoved = async (pulseId: string, userId: string): Promise<boolean> => {
+    if (!userId) return false;
+    const loveDocRef = doc(db, 'pulses', pulseId, 'loves', userId);
+    const docSnap = await getDoc(loveDocRef);
+    return docSnap.exists();
+};
+
+export const lovePulse = async (pulseId: string, userId: string): Promise<number> => {
+  const pulseRef = doc(db, 'pulses', pulseId);
+  const loveRef = doc(pulseRef, 'loves', userId);
+
+  return runTransaction(db, async (transaction) => {
+    const postDoc = await transaction.get(pulseRef);
+    if (!postDoc.exists()) throw new Error("Pulse dissolved.");
+    
+    const loveDoc = await transaction.get(loveRef);
+    let newLoveCount = postDoc.data().loveCount || 0;
+
+    if (loveDoc.exists()) {
+      transaction.delete(loveRef);
+      newLoveCount = Math.max(0, newLoveCount - 1);
+    } else {
+      transaction.set(loveRef, { userId, createdAt: serverTimestamp() });
+      newLoveCount += 1;
+    }
+    
+    transaction.update(pulseRef, { loveCount: newLoveCount });
+    return newLoveCount;
+  });
+};
+
+
+=== ./services/gemini.ts ===
+
+import { GoogleGenAI, GenerateContentResponse, Chat } from "@google/genai";
+
+// Helper to get a fresh client instance every time.
+// This ensures we capture the API Key if it is injected dynamically by the UI (window.aistudio).
+const getAiClient = (): GoogleGenAI | null => {
+    // process.env.API_KEY is the strict requirement.
+    // We access it dynamically to support runtime injection.
+    const apiKey = process.env.API_KEY ? process.env.API_KEY.trim() : "";
+    
+    if (!apiKey) {
+        console.warn("LifeSeed: process.env.API_KEY is missing. Please select an API key via the UI or check your .env file.");
+        return null;
+    }
+    
+    return new GoogleGenAI({ apiKey });
+}
+
+export const generatePostTitle = async (body: string): Promise<string> => {
+  if (!body.trim()) {
+    return "";
+  }
+  
+  const ai = getAiClient();
+  if (!ai) return "";
+
+  try {
+    const prompt = `Generate a short, engaging title (maximum 10 words) for the following post body. Do not use quotation marks in the title:\n\n---\n${body}\n---`;
+    
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+    });
+
+    return response.text ? response.text.trim().replace(/["']/g, '') : ""; // Remove quotes
+
+  } catch (error) {
+    console.error("Error generating title with Gemini:", error);
+    return "";
+  }
+};
+
+export const generateLifetreeBio = async (seed: string): Promise<string> => {
+  if (!seed.trim()) return "";
+  
+  const ai = getAiClient();
+  if (!ai) {
+      // Return a fallback so the UI doesn't crash, but warn user
+      console.warn("Gemini API Key missing");
+      return "Roots run deep... (Please connect AI Key via the Key icon)";
+  }
+
+  try {
+    const prompt = `
+      You are LifeSeed AI, a poetic and nature-loving assistant.
+      The user wants to grow a "Lifetree" (a digital profile representation of their soul).
+      They provided this seed thought: "${seed}".
+      
+      Write a short (max 40 words), mystical, and nature-inspired bio/description for their Lifetree.
+      It should sound organic, peaceful, and connected to the earth.
+    `;
+
+    const response: GenerateContentResponse = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+    });
+    
+    return response.text ? response.text.trim() : "";
+  } catch (error) {
+    console.error("Error generating bio:", error);
+    return "The forest whispers quietly... (AI Error)";
+  }
+}
+
+// Generate Image for Visions (Nano Banana)
+export const generateVisionImage = async (prompt: string): Promise<string | null> => {
+    if (!prompt.trim()) return null;
+    const ai = getAiClient();
+    if (!ai) {
+        throw new Error("API Key Missing. Please ensure API_KEY is set in your .env file or connected via the UI.");
+    }
+
+    try {
+        console.log("Generating vision image with Nano Banana...");
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash-image', // Nano Banana
+            contents: [
+                { 
+                    parts: [{ text: `A mystical, nature-inspired, abstract painting representing: ${prompt}` }] 
+                }
+            ],
+            config: {
+                imageConfig: {
+                    aspectRatio: "1:1",
+                    // imageSize is NOT supported by gemini-2.5-flash-image
+                }
+            }
+        });
+
+        // The response will contain base64 image data
+        for (const part of response.candidates?.[0]?.content?.parts || []) {
+            if (part.inlineData) {
+                return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+            }
+        }
+        console.warn("Nano Banana: No image data returned in response.");
+        return null;
+    } catch (e: any) {
+        console.error("Error generating image:", e);
+        
+        // Handle Rate Limiting / Quota issues specifically
+        const errorMsg = e.toString().toLowerCase();
+        if (errorMsg.includes("429") || errorMsg.includes("quota") || errorMsg.includes("resource_exhausted")) {
+             throw new Error("Daily quota or rate limit exceeded. Please wait 30 seconds and try again.");
+        }
+        if (errorMsg.includes("key not valid") || errorMsg.includes("api_key_invalid") || errorMsg.includes("403")) {
+            throw new Error("Invalid API Key. Please check your .env file or re-select your key using the Key icon.");
+        }
+
+        // Throw specific error message to be caught by UI
+        throw new Error(e.message || "Unknown GenAI Error");
+    }
+}
+
+// New Chat Interface
+export const createOracleChat = (systemInstruction?: string) => {
+    const ai = getAiClient();
+    if (!ai) throw new Error("API Key Missing");
+
+    return ai.chats.create({
+        model: 'gemini-2.5-flash',
+        config: {
+            systemInstruction: systemInstruction || "You are the LifeSeed Oracle, an ancient digital spirit of the forest. You speak in metaphors, trees, and roots. You are wise, calm, and helpful, but always maintain your mystical forest persona. Keep answers relatively short and poetic.",
+        }
+    });
+}
+
+
+=== ./firestore.indexes.json ===
+{
+  "indexes": [],
+  "fieldOverrides": []
+}
+
