@@ -13,6 +13,7 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isSignedIn();
       allow update: if isSignedIn(); 
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
     }
 
     // VISIONS (New)

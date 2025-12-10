@@ -14,7 +14,8 @@ import {
   getPendingMatches,
   acceptMatch,
   fetchVisions,
-  createVision
+  createVision,
+  deleteLifetree
 } from './services/firebase';
 import { generateLifetreeBio, generateVisionImage } from './services/gemini';
 import { type Pulse, type Lifetree, type MatchProposal } from './types';
@@ -73,6 +74,12 @@ const AppContent = () => {
     const [visionLink, setVisionLink] = useState('');
     const [visionImageUrl, setVisionImageUrl] = useState('');
 
+    // Background Configuration
+    const pageBackground = {
+        className: "min-h-screen font-sans text-slate-800 bg-fixed bg-cover bg-center bg-no-repeat",
+        style: { backgroundImage: "url('/background.jpg')" }
+    };
+
     const checkKey = async () => {
          const aiStudio = (window as any).aistudio;
          if (aiStudio && aiStudio.hasSelectedApiKey) {
@@ -90,8 +97,6 @@ const AppContent = () => {
         loadContent(); 
     }, [tab, lightseed]);
     
-    useEffect(() => { if (lightseed && myTrees.length === 0 && !authLoading) setShowPlantModal(true); }, [lightseed, myTrees]);
-
     const loadContent = async () => {
         setData([]); // Clear data before loading
         if (tab === 'forest') setData(await fetchLifetrees());
@@ -153,6 +158,17 @@ const AppContent = () => {
             } catch(e: any) { alert(e.message); }
         });
     };
+
+    const handleDeleteTree = async (treeId: string) => {
+        if (!window.confirm("Are you sure you want to delete this Lifetree? This cannot be undone.")) return;
+        try {
+            await deleteLifetree(treeId);
+            await refreshTrees();
+            loadContent();
+        } catch (e: any) {
+            alert("Error deleting tree: " + e.message);
+        }
+    }
 
     const handleEmitPulse = async (e: FormEvent) => {
         e.preventDefault();
@@ -251,7 +267,7 @@ const AppContent = () => {
     
     if (selectedTree) {
         return (
-            <div className={`min-h-screen ${colors.snow} font-sans text-slate-800`}>
+            <div {...pageBackground}>
                 <LifetreeDetail 
                     tree={selectedTree} 
                     onClose={() => setSelectedTree(null)} 
@@ -266,7 +282,7 @@ const AppContent = () => {
 
     if (tab === 'profile' && lightseed) {
         return (
-            <div className={`min-h-screen ${colors.snow} font-sans text-slate-800`}>
+            <div {...pageBackground}>
                 <Navigation 
                     lightseed={lightseed} 
                     activeTab={tab} 
@@ -284,13 +300,14 @@ const AppContent = () => {
                     lightseed={lightseed} 
                     myTrees={myTrees} 
                     onViewTree={(tree: Lifetree) => setSelectedTree(tree)}
+                    onDeleteTree={handleDeleteTree}
                 />
             </div>
         )
     }
 
     return (
-        <div className={`min-h-screen ${colors.snow} font-sans text-slate-800`}>
+        <div {...pageBackground}>
             <Navigation 
                 lightseed={lightseed} 
                 activeTab={tab} 
@@ -407,7 +424,7 @@ const AppContent = () => {
 
             {/* Plant Modal (Simplified) */}
             {showPlantModal && (
-                <Modal title={t('plant_lifetree')} onClose={() => myTrees.length > 0 && setShowPlantModal(false)}>
+                <Modal title={t('plant_lifetree')} onClose={() => setShowPlantModal(false)}>
                     <form onSubmit={handlePlant} className="space-y-4">
                         <ImagePicker onChange={(e: any) => handleImageUpload(e.target.files[0], `trees/${Date.now()}`).then(setTreeImageUrl)} previewUrl={treeImageUrl} loading={uploading} />
                         <input className="block w-full border p-2 rounded" placeholder="Tree Name" value={treeName} onChange={e=>setTreeName(e.target.value)} required />

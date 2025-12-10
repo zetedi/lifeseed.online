@@ -1,11 +1,12 @@
-
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
     // Use process.cwd() to ensure we look in the project root for .env
-    const env = loadEnv(mode, process.cwd(), '');
+    // Casting process to any to avoid TS errors if types are incomplete
+    const cwd = (process as any).cwd();
+    const env = loadEnv(mode, cwd, '');
     return {
       server: {
         port: 3000,
@@ -21,7 +22,7 @@ export default defineConfig(({ mode }) => {
       },
       resolve: {
         alias: {
-          '@': path.resolve(__dirname, '.'),
+          '@': path.resolve(cwd, '.'),
         }
       }
     };

@@ -6,7 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Icons } from './ui/Icons';
 import { VisionCard } from './VisionCard';
 
-export const LightseedProfile = ({ lightseed, myTrees, onViewTree }: any) => {
+export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree }: any) => {
     const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState<'trees' | 'pulses' | 'visions' | 'history'>('trees');
     const [pulses, setPulses] = useState<Pulse[]>([]);
@@ -36,7 +36,7 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree }: any) => {
     if (!lightseed) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen">
             <div className="relative bg-gradient-to-b from-slate-800 to-slate-900 text-white pb-20 pt-10 px-4">
                 <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
                     <div className="relative">
@@ -95,17 +95,26 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree }: any) => {
                                     <p className="text-slate-400 text-center py-10">No trees planted yet.</p>
                                 ) : (
                                     myTrees.map((tree: Lifetree) => (
-                                        <div key={tree.id} onClick={() => onViewTree(tree)} className="border border-slate-200 rounded-lg p-4 hover:shadow-md cursor-pointer transition-all flex items-center space-x-4">
-                                            <img src={tree.imageUrl || 'https://via.placeholder.com/100'} className="w-16 h-16 rounded object-cover bg-slate-100" />
-                                            <div>
-                                                <h3 className="font-bold text-slate-800">{tree.name}</h3>
-                                                <p className="text-xs text-slate-500">Block Height: {tree.blockHeight}</p>
-                                                {tree.validated ? (
-                                                    <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">VALIDATED</span>
-                                                ) : (
-                                                    <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">Pending</span>
-                                                )}
+                                        <div key={tree.id} onClick={() => onViewTree(tree)} className="border border-slate-200 rounded-lg p-4 hover:shadow-md cursor-pointer transition-all flex items-center justify-between group">
+                                            <div className="flex items-center space-x-4">
+                                                <img src={tree.imageUrl || 'https://via.placeholder.com/100'} className="w-16 h-16 rounded object-cover bg-slate-100" />
+                                                <div>
+                                                    <h3 className="font-bold text-slate-800">{tree.name}</h3>
+                                                    <p className="text-xs text-slate-500">Block Height: {tree.blockHeight}</p>
+                                                    {tree.validated ? (
+                                                        <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">VALIDATED</span>
+                                                    ) : (
+                                                        <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">Pending</span>
+                                                    )}
+                                                </div>
                                             </div>
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); onDeleteTree(tree.id); }} 
+                                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                                                title="Delete Tree"
+                                            >
+                                                <Icons.Trash />
+                                            </button>
                                         </div>
                                     ))
                                 )}

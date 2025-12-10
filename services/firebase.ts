@@ -151,6 +151,10 @@ export const plantLifetree = async (data: {
   return treeDoc;
 };
 
+export const deleteLifetree = async (treeId: string) => {
+    await deleteDoc(doc(db, 'lifetrees', treeId));
+}
+
 export const validateLifetree = async (targetTreeId: string, validatorTreeId: string) => {
     const targetRef = doc(db, 'lifetrees', targetTreeId);
     const validatorRef = doc(db, 'lifetrees', validatorTreeId);

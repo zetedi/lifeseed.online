@@ -8,7 +8,7 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
    const { t } = useLanguage();
     
     return (
-        <div className="min-h-screen bg-slate-50 animate-in fade-in zoom-in-95 duration-300">
+        <div className="min-h-screen animate-in fade-in zoom-in-95 duration-300">
             {/* Header */}
             <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 py-4 flex items-center justify-between">
                 <button onClick={onClose} className="flex items-center space-x-2 text-slate-600 hover:text-slate-900 font-medium">
