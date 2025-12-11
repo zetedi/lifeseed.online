@@ -85,12 +85,13 @@ const AppContent = () => {
 
     const mainContainerRef = useRef<HTMLDivElement>(null);
 
-    // Interconnected Mahameru Network
-    const svgBackground = `data:image/svg+xml,%3Csvg width='800' height='800' viewBox='0 0 800 800' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100%25' height='100%25' fill='%23064e3b'/%3E%3Cdefs%3E%3Csymbol id='mahameru' viewBox='0 0 262 262'%3E%3CclipPath id='clean'%3E%3Ccircle cx='131' cy='131' r='131'/%3E%3C/clipPath%3E%3Cg clip-path='url(%23clean)'%3E%3Ccircle cx='131' cy='131' r='131' fill='none' stroke='%23FFD700' stroke-width='7'/%3E%3Cg fill='none' stroke='white' stroke-width='1'%3E%3Ccircle cx='-35.28' cy='-29' r='64'/%3E%3Ccircle cx='-35.28' cy='35' r='64'/%3E%3Ccircle cx='-35.28' cy='99' r='64'/%3E%3Ccircle cx='-35.28' cy='163' r='64'/%3E%3Ccircle cx='-35.28' cy='227' r='64'/%3E%3Ccircle cx='-35.28' cy='291' r='64'/%3E%3Ccircle cx='20.15' cy='3' r='64'/%3E%3Ccircle cx='20.15' cy='67' r='64'/%3E%3Ccircle cx='20.15' cy='131' r='64'/%3E%3Ccircle cx='20.15' cy='195' r='64'/%3E%3Ccircle cx='20.15' cy='259' r='64'/%3E%3Ccircle cx='75.57' cy='-29' r='64'/%3E%3Ccircle cx='75.57' cy='35' r='64'/%3E%3Ccircle cx='75.57' cy='99' r='64'/%3E%3Ccircle cx='75.57' cy='163' r='64'/%3E%3Ccircle cx='75.57' cy='227' r='64'/%3E%3Ccircle cx='75.57' cy='291' r='64'/%3E%3Ccircle cx='131' cy='3' r='64'/%3E%3Ccircle cx='131' cy='67' r='64'/%3E%3Ccircle cx='131' cy='195' r='64'/%3E%3Ccircle cx='131' cy='259' r='64'/%3E%3Ccircle cx='186.43' cy='-29' r='64'/%3E%3Ccircle cx='186.43' cy='35' r='64'/%3E%3Ccircle cx='186.43' cy='99' r='64'/%3E%3Ccircle cx='186.43' cy='163' r='64'/%3E%3Ccircle cx='186.43' cy='227' r='64'/%3E%3Ccircle cx='186.43' cy='291' r='64'/%3E%3Ccircle cx='241.85' cy='3' r='64'/%3E%3Ccircle cx='241.85' cy='67' r='64'/%3E%3Ccircle cx='241.85' cy='131' r='64'/%3E%3Ccircle cx='241.85' cy='195' r='64'/%3E%3Ccircle cx='241.85' cy='259' r='64'/%3E%3Ccircle cx='297.28' cy='-29' r='64'/%3E%3Ccircle cx='297.28' cy='35' r='64'/%3E%3Ccircle cx='297.28' cy='99' r='64'/%3E%3Ccircle cx='297.28' cy='163' r='64'/%3E%3Ccircle cx='297.28' cy='227' r='64'/%3E%3Ccircle cx='297.28' cy='291' r='64'/%3E%3C/g%3E%3Ccircle cx='131' cy='131' r='64' fill='none' stroke='%23FFD700' stroke-width='3'/%3E%3C/g%3E%3C/symbol%3E%3C/defs%3E%3Cg stroke='%23FFD700' stroke-width='1' opacity='0.5'%3E%3Cline x1='400' y1='400' x2='400' y2='140'/%3E%3Cline x1='400' y1='400' x2='625' y2='270'/%3E%3Cline x1='400' y1='400' x2='625' y2='530'/%3E%3Cline x1='400' y1='400' x2='400' y2='660'/%3E%3Cline x1='400' y1='400' x2='175' y2='530'/%3E%3Cline x1='400' y1='400' x2='175' y2='270'/%3E%3C/g%3E%3Cuse href='%23mahameru' x='269' y='269' width='262' height='262'/%3E%3Cuse href='%23mahameru' x='269' y='9' width='262' height='262'/%3E%3Cuse href='%23mahameru' x='494' y='139' width='262' height='262'/%3E%3Cuse href='%23mahameru' x='494' y='399' width='262' height='262'/%3E%3Cuse href='%23mahameru' x='269' y='529' width='262' height='262'/%3E%3Cuse href='%23mahameru' x='44' y='399' width='262' height='262'/%3E%3Cuse href='%23mahameru' x='44' y='139' width='262' height='262'/%3E%3C/svg%3E`;
+    // Clay Background with Seed of Life Pattern
+    // Color: #B2713A (Clay)
+    const svgBackground = `data:image/svg+xml,%3Csvg width='332.5537705' height='320' xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E .outerCircle %7B fill: %23B2713A; stroke: %23fff; stroke-width: 7; stroke-opacity: .3; %7D .circle %7B fill: none; stroke: %23fff; stroke-width: .3; stroke-opacity: .3; %7D .innerCircle %7B fill: %23B2713A; stroke: %23fff; stroke-width: 1.7; stroke-opacity: .4; %7D %3C/style%3E%3Crect width='100%25' height='100%25' fill='%23B2713A'/%3E%3Cdefs%3E%3CclipPath id='clean'%3E%3Crect width='332.5537705' height='320' /%3E%3C/clipPath%3E%3C/defs%3E%3Cg%3E%3Ccircle cx='-38.2768775' cy='-32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='-38.2768775' cy='32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='-38.2768775' cy='96' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='-38.2768775' cy='160' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='-38.2768775' cy='224' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='-38.2768775' cy='288' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='-38.2768775' cy='352' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='17.1487483' cy='0' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='17.1487483' cy='64' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='17.1487483' cy='128' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='17.1487483' cy='192' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='17.1487483' cy='256' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='17.1487483' cy='320' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='-32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='96' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='160' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='224' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='288' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='352' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='0' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='64' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='128' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='192' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='256' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='320' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='-32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='96' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='160' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='224' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='288' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='352' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='238.8512516' cy='0' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='238.8512516' cy='64' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='238.8512516' cy='128' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='238.8512516' cy='192' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='238.8512516' cy='256' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='238.8512516' cy='320' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='-32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='96' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='160' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='224' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='288' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='352' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='349.7025033' cy='0' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='349.7025033' cy='64' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='349.7025033' cy='128' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='349.7025033' cy='192' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='349.7025033' cy='256' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='349.7025033' cy='320' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='96' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='160' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='64' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='128' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='192' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='96' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='160' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='288' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3C/g%3E%3C/svg%3E`;
 
     const backgroundStyle = {
         backgroundImage: `url("${svgBackground}")`,
-        backgroundSize: '800px', 
+        backgroundSize: '108px', 
         backgroundRepeat: 'repeat',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
@@ -359,7 +360,7 @@ const AppContent = () => {
     // Create unique suggestion list for datalist
     const searchSuggestions = Array.from(new Set(data.map((item: any) => item.title || item.name).filter(Boolean)));
 
-    if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-emerald-900"><Logo className="animate-pulse text-white" /></div>;
+    if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-[#B2713A]"><Logo className="animate-pulse text-white" /></div>;
     
     // DETAIL VIEWS WRAPPER to preserve background
     const DetailWrapper = ({children}: {children: React.ReactNode}) => (
@@ -395,7 +396,7 @@ const AppContent = () => {
                             <input 
                                 type="text"
                                 list="search-suggestions"
-                                className="block w-full pl-10 pr-3 py-2 border border-emerald-700 rounded-lg leading-5 bg-emerald-800/80 backdrop-blur placeholder-emerald-400 text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm shadow-sm"
+                                className="block w-full pl-10 pr-3 py-2 border border-emerald-700 rounded-lg leading-5 bg-[#B2713A]/80 backdrop-blur placeholder-slate-400 text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm shadow-sm"
                                 placeholder="Search..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -407,7 +408,7 @@ const AppContent = () => {
 
                         {/* View Switcher only for Forest */}
                         {tab === 'forest' && (
-                            <div className="bg-emerald-800/80 backdrop-blur p-1 rounded-lg border border-emerald-700 flex shadow-sm shrink-0">
+                            <div className="bg-[#B2713A]/80 backdrop-blur p-1 rounded-lg border border-emerald-700 flex shadow-sm shrink-0">
                                 <button 
                                     onClick={() => setViewMode('grid')}
                                     className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewMode === 'grid' ? 'bg-emerald-600 text-white shadow' : 'text-emerald-300 hover:text-white'}`}
@@ -435,7 +436,7 @@ const AppContent = () => {
                 {tab === 'matches' && (
                     <div className="max-w-2xl mx-auto text-white">
                         <h2 className="text-2xl font-light mb-6">Pending Matches</h2>
-                        {matches.length === 0 ? <p className="text-emerald-400">No pending requests.</p> : matches.map(m => (
+                        {matches.length === 0 ? <p className="text-slate-400">No pending requests.</p> : matches.map(m => (
                             <div key={m.id} className="bg-white/90 p-4 rounded shadow-sm border border-slate-200 mb-4 flex justify-between items-center text-slate-800">
                                 <div><p className="font-bold">Match Request</p><p className="text-sm text-slate-500">From another Tree</p></div>
                                 <button onClick={() => onAcceptMatch(m.id)} className="bg-sky-500 text-white px-4 py-2 rounded">Accept & Sync</button>
@@ -454,7 +455,7 @@ const AppContent = () => {
                     ) : (
                         <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                              {filteredData.length === 0 && !loadingMore ? (
-                                 <p className="col-span-full text-center text-emerald-400 py-10">No trees found matching your search.</p>
+                                 <p className="col-span-full text-center text-slate-400 py-10">No trees found matching your search.</p>
                              ) : (
                                 filteredData.map((item: any) => (
                                     <LifetreeCard 
@@ -472,7 +473,7 @@ const AppContent = () => {
                     )
                 ) : tab === 'visions' ? (
                     <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                        {filteredData.length === 0 && !loadingMore ? <p className="col-span-full text-center text-emerald-400 py-10">No visions found.</p> : 
+                        {filteredData.length === 0 && !loadingMore ? <p className="col-span-full text-center text-slate-400 py-10">No visions found.</p> : 
                             filteredData.map((item: any) => (
                                 <div key={item.id} onClick={() => setSelectedVision(item)} className="cursor-pointer">
                                     <VisionCard vision={item} />
