@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, FormEvent, useRef } from 'react';
 import {
   signInWithGoogle,
@@ -472,7 +471,7 @@ const AppContent = () => {
                         </div>
                     )
                 ) : tab === 'visions' ? (
-                    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {filteredData.length === 0 && !loadingMore ? <p className="col-span-full text-center text-slate-400 py-10">No visions found.</p> : 
                             filteredData.map((item: any) => (
                                 <div key={item.id} onClick={() => setSelectedVision(item)} className="cursor-pointer">
@@ -618,10 +617,12 @@ const AppContent = () => {
     );
 };
 
-const App = () => (
+const App = () => {
+  return (
     <LanguageProvider>
-        <AppContent />
+      <AppContent />
     </LanguageProvider>
-);
+  );
+};
 
 export default App;
