@@ -44,6 +44,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
             if (key === 'forest') return `bg-emerald-600 text-white shadow-lg shadow-emerald-500/30`;
             if (key === 'pulses') return `bg-sky-600 text-white shadow-lg shadow-sky-500/30`;
             if (key === 'oracle') return `bg-indigo-600 text-white shadow-lg shadow-indigo-500/30`;
+            if (key === 'about') return `bg-purple-600 text-white shadow-lg shadow-purple-500/30`;
             return `bg-slate-700 text-white`;
         }
         return `text-emerald-100 hover:text-white hover:bg-white/10`;
@@ -63,7 +64,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                     </div>
 
                     <div className="hidden md:flex space-x-3 rtl:space-x-reverse">
-                        {['forest', 'pulses', 'visions', 'oracle', 'matches'].map((tabKey) => (
+                        {['forest', 'pulses', 'visions', 'oracle', 'matches', 'about'].map((tabKey) => (
                             <button 
                                 key={tabKey}
                                 onClick={() => setTab(tabKey)}
@@ -177,7 +178,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                                 <span className="text-white font-medium">{t('profile')}</span>
                              </button>
                          )}
-                        {['forest', 'pulses', 'visions', 'oracle', 'matches'].map((tabKey) => (
+                        {['forest', 'pulses', 'visions', 'oracle', 'matches', 'about'].map((tabKey) => (
                             <button 
                                 key={tabKey}
                                 onClick={() => { setTab(tabKey); setIsMenuOpen(false); }}

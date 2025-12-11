@@ -17,6 +17,5 @@ jobs:
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          # Update these with your new project ID and secret name in GitHub Secrets
-          # firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_NEW_PROJECT_ID }}
-          # projectId: your-new-project-id
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LIFESEED_75DFE }}
+          projectId: lifeseed-75dfe

@@ -38,6 +38,7 @@ import { VisionDetail } from './components/VisionDetail';
 import { GrowthPlayerModal } from './components/GrowthPlayerModal';
 import { OracleChat } from './components/OracleChat';
 import { LightseedProfile } from './components/LightseedProfile';
+import { AboutPage } from './components/AboutPage';
 
 const AppContent = () => {
     const { t } = useLanguage();
@@ -119,7 +120,7 @@ const AppContent = () => {
     useEffect(() => {
         const handleScroll = () => {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
-                if (!loadingMore && hasMore && tab !== 'matches' && tab !== 'oracle' && tab !== 'profile') {
+                if (!loadingMore && hasMore && tab !== 'matches' && tab !== 'oracle' && tab !== 'profile' && tab !== 'about') {
                     loadContent(false);
                 }
             }
@@ -383,11 +384,15 @@ const AppContent = () => {
                 />
             );
         }
+        
+        if (tab === 'about') {
+            return <AboutPage />;
+        }
 
         return (
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 min-h-[80vh]">
-                {/* Search Bar for all tabs except matches/profile/oracle */}
-                {tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && (
+                {/* Search Bar for all tabs except matches/profile/oracle/about */}
+                {tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && tab !== 'about' && (
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                         <div className="relative w-full md:max-w-md">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -481,7 +486,7 @@ const AppContent = () => {
                             ))
                         }
                     </div>
-                ) : tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && (
+                ) : tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && tab !== 'about' && (
                     <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {data.map((item) => (
                              <PulseCard key={item.id} pulse={item} lightseed={lightseed} onMatch={(p: Pulse) => { setMatchCandidate(p); setShowPulseModal(true); }} />

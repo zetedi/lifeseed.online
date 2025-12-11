@@ -1,3 +1,4 @@
+
 export type Language = 'en' | 'es' | 'hu' | 'qu' | 'sa' | 'ja' | 'ar' | 'sw';
 
 export const translations = {
@@ -6,6 +7,7 @@ export const translations = {
     pulses: "Pulses",
     visions: "Visions",
     oracle: "Oracle",
+    about: "About",
     sign_in: "Sign in",
     sign_out: "Sign out",
     emit_pulse: "Emit Pulse",
@@ -59,6 +61,7 @@ export const translations = {
     pulses: "Pulsos",
     visions: "Visiones",
     oracle: "Oráculo",
+    about: "Acerca de",
     sign_in: "Iniciar sesión",
     sign_out: "Cerrar sesión",
     emit_pulse: "Emitir Pulso",
@@ -112,6 +115,7 @@ export const translations = {
     pulses: "Pulzusok",
     visions: "Víziók",
     oracle: "Orákulum",
+    about: "Rólunk",
     sign_in: "Bejelentkezés",
     sign_out: "Kijelentkezés",
     emit_pulse: "Pulzus Kibocsátása",
@@ -165,6 +169,7 @@ export const translations = {
     pulses: "Sirkaykuna",
     visions: "Musquykuna",
     oracle: "Willaq",
+    about: "Kaymanta",
     sign_in: "Yaykuy",
     sign_out: "Lloqsiy",
     emit_pulse: "Sirkayta Kachay",
@@ -218,6 +223,7 @@ export const translations = {
     pulses: "स्पन्दनानि (Spandanāni)",
     visions: "दृष्टयः (Dṛṣṭayaḥ)",
     oracle: "दैववाणी (Daivavāṇī)",
+    about: "विषये",
     sign_in: "प्रविशतु (Praviśatu)",
     sign_out: "निर्गच्छतु (Nirgacchatu)",
     emit_pulse: "स्पन्दनं सृजतु",
@@ -271,6 +277,7 @@ export const translations = {
     pulses: "パルス (鼓動)",
     visions: "ビジョン (枝)",
     oracle: "オラクル",
+    about: "約",
     sign_in: "ログイン",
     sign_out: "ログアウト",
     emit_pulse: "パルスを放つ",
@@ -324,6 +331,7 @@ export const translations = {
     pulses: "نبضات",
     visions: "الرؤى",
     oracle: "العراف",
+    about: "عن",
     sign_in: "دخول",
     sign_out: "خروج",
     emit_pulse: "إصدار نبضة",
@@ -377,6 +385,7 @@ export const translations = {
     pulses: "Mapigo",
     visions: "Maono",
     oracle: "Mtabiri",
+    about: "Kuhusu",
     sign_in: "Ingia",
     sign_out: "Toka",
     emit_pulse: "Toa Pigo",
