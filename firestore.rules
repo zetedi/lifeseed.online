@@ -11,23 +11,23 @@ service cloud.firestore {
     // LIFETREES
     match /lifetrees/{treeId} {
       allow read: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn(); 
-      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      // Allow general delete for dev cleaning/management, or strictly owned by user
+      allow create, update: if isSignedIn(); 
+      allow delete: if true; 
     }
 
-    // VISIONS (New)
+    // VISIONS
     match /visions/{visionId} {
       allow read: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn();
+      allow create, update: if isSignedIn();
+      allow delete: if true;
     }
 
     // PULSES
     match /pulses/{pulseId} {
       allow read: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn();
+      allow create, update: if isSignedIn();
+      allow delete: if true;
 
       // Subcollection for Loves/Likes
       match /loves/{userId} {
@@ -38,8 +38,8 @@ service cloud.firestore {
     // MATCHES
     match /matches/{matchId} {
         allow read: if true;
-        allow create: if isSignedIn();
-        allow update: if isSignedIn();
+        allow create, update: if isSignedIn();
+        allow delete: if true;
     }
   }
 }

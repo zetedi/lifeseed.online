@@ -113,7 +113,7 @@ export const createOracleChat = (systemInstruction?: string) => {
     const ai = getAiClient();
     if (!ai) throw new Error("API Key Missing. Please click the Key icon.");
 
-    const defaultInstruction = `You are the LifeSeed Oracle. 
+    const defaultInstruction = `You are the Oracle. 
     Your tone is neutral, friendly, and grounded. 
     Use the following Vision of the Genesis Tree as your core context and philosophy:
     "${GENESIS_VISION}"
