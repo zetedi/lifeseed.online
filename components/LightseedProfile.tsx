@@ -113,7 +113,7 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                             </div>
                             <div className="text-center sm:text-left">
                                 <h4 className="font-bold text-emerald-400">Contributor Access Unlocked</h4>
-                                <p className="text-xs text-slate-300">You are a validated node in the LifeSeed network.</p>
+                                <p className="text-xs text-slate-300">You are a validated node in the .seed network.</p>
                             </div>
                         </div>
                         <a 

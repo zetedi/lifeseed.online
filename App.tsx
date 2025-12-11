@@ -349,50 +349,10 @@ const AppContent = () => {
         </div>
     );
 
-    if (selectedTree) {
-        return (
-            <DetailWrapper>
-                <LifetreeDetail 
-                    tree={selectedTree} 
-                    onClose={() => setSelectedTree(null)} 
-                    onPlayGrowth={setShowGrowthPlayer}
-                    onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); setSelectedTree(null); loadContent(true); })}
-                    myActiveTree={activeTree}
-                />
-                 {showGrowthPlayer && <GrowthPlayerModal treeId={showGrowthPlayer} onClose={() => setShowGrowthPlayer(null)} />}
-            </DetailWrapper>
-        )
-    }
-
-    if (selectedVision) {
-        return (
-            <DetailWrapper>
-                <VisionDetail vision={selectedVision} onClose={() => setSelectedVision(null)} />
-            </DetailWrapper>
-        )
-    }
-
-    if (tab === 'profile' && lightseed) {
-        return (
-             <div className="min-h-screen relative font-sans text-slate-800">
-                <div className="fixed inset-0 z-[-1]" style={backgroundStyle}></div>
-                <div className="fixed inset-0 z-[-1] bg-white/85"></div> {/* Increased Opacity Overlay */}
-
-                <Navigation 
-                    lightseed={lightseed} 
-                    activeTab={tab} 
-                    setTab={setTab} 
-                    onLogin={signInWithGoogle} 
-                    onLogout={logout} 
-                    onPlant={() => setShowPlantModal(true)} 
-                    onPulse={() => setShowPulseModal(true)}
-                    onCreateVision={() => setShowVisionModal(true)}
-                    onProfile={() => setTab('profile')} 
-                    hasApiKey={hasApiKey}
-                    onCheckKey={checkKey}
-                    pendingMatchesCount={matches.length}
-                    myTreesCount={myTrees.length}
-                />
+    // Main Content Renderer based on active tab
+    const renderMainContent = () => {
+        if (tab === 'profile' && lightseed) {
+            return (
                 <LightseedProfile 
                     lightseed={lightseed} 
                     myTrees={myTrees} 
@@ -401,33 +361,10 @@ const AppContent = () => {
                     onViewVision={(v: Vision) => setSelectedVision(v)}
                     onPlant={() => setShowPlantModal(true)}
                 />
-            </div>
-        )
-    }
+            );
+        }
 
-    return (
-        <div className="min-h-screen relative font-sans text-slate-800">
-            {/* Fixed Background */}
-            <div className="fixed inset-0 z-[-1]" style={backgroundStyle}></div>
-            {/* Overlay to increase opacity (whiten) the background */}
-            <div className="fixed inset-0 z-[-1] bg-white/85"></div> 
-
-            <Navigation 
-                lightseed={lightseed} 
-                activeTab={tab} 
-                setTab={setTab} 
-                onLogin={signInWithGoogle} 
-                onLogout={logout} 
-                onPlant={() => setShowPlantModal(true)} 
-                onPulse={() => setShowPulseModal(true)}
-                onCreateVision={() => setShowVisionModal(true)}
-                onProfile={() => setTab('profile')} 
-                hasApiKey={hasApiKey}
-                onCheckKey={checkKey}
-                pendingMatchesCount={matches.length}
-                myTreesCount={myTrees.length}
-            />
-            
+        return (
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 min-h-[80vh]">
                 {/* Search Bar for all tabs except matches/profile/oracle */}
                 {tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && (
@@ -534,9 +471,56 @@ const AppContent = () => {
 
                 {loadingMore && <div className="text-center py-4 text-slate-500 text-sm animate-pulse">Growing root network...</div>}
             </main>
+        );
+    }
 
-            {/* Growth Player Modal */}
-            {showGrowthPlayer && <GrowthPlayerModal treeId={showGrowthPlayer} onClose={() => setShowGrowthPlayer(null)} />}
+    return (
+        <div className="min-h-screen relative font-sans text-slate-800">
+            {/* Fixed Background */}
+            <div className="fixed inset-0 z-[-1]" style={backgroundStyle}></div>
+            {/* Overlay to increase opacity (whiten) the background */}
+            <div className="fixed inset-0 z-[-1] bg-white/85"></div> 
+
+            <Navigation 
+                lightseed={lightseed} 
+                activeTab={tab} 
+                setTab={setTab} 
+                onLogin={signInWithGoogle} 
+                onLogout={logout} 
+                onPlant={() => setShowPlantModal(true)} 
+                onPulse={() => setShowPulseModal(true)}
+                onCreateVision={() => setShowVisionModal(true)}
+                onProfile={() => setTab('profile')} 
+                hasApiKey={hasApiKey}
+                onCheckKey={checkKey}
+                pendingMatchesCount={matches.length}
+                myTreesCount={myTrees.length}
+            />
+            
+            {renderMainContent()}
+
+            {/* Modals & Overlays - Rendered at top level to ensure they appear even in Profile view */}
+            {selectedTree && (
+                <DetailWrapper>
+                    <LifetreeDetail 
+                        tree={selectedTree} 
+                        onClose={() => setSelectedTree(null)} 
+                        onPlayGrowth={setShowGrowthPlayer}
+                        onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); setSelectedTree(null); loadContent(true); })}
+                        myActiveTree={activeTree}
+                    />
+                    {showGrowthPlayer && <GrowthPlayerModal treeId={showGrowthPlayer} onClose={() => setShowGrowthPlayer(null)} />}
+                </DetailWrapper>
+            )}
+
+            {selectedVision && (
+                <DetailWrapper>
+                    <VisionDetail vision={selectedVision} onClose={() => setSelectedVision(null)} />
+                </DetailWrapper>
+            )}
+
+            {/* Growth Player Modal (Standalone) */}
+            {showGrowthPlayer && !selectedTree && <GrowthPlayerModal treeId={showGrowthPlayer} onClose={() => setShowGrowthPlayer(null)} />}
 
             {/* Plant Modal (Simplified) */}
             {showPlantModal && (

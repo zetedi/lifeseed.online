@@ -59,7 +59,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                         <div className="bg-white p-1 rounded-full shadow-inner animate-[pulse_3s_ease-in-out_infinite]">
                              <Logo width={40} height={40} />
                         </div>
-                        <span className="font-light text-2xl tracking-wide lowercase hidden sm:block text-white">lifeseed</span>
+                        <span className="font-light text-2xl tracking-wide lowercase hidden sm:block text-white">.seed</span>
                     </div>
 
                     <div className="hidden md:flex space-x-3 rtl:space-x-reverse">

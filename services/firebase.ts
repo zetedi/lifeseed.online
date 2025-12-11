@@ -109,7 +109,31 @@ export const uploadBase64Image = async (base64String: string, path: string): Pro
 const lifetreesCollection = collection(db, 'lifetrees');
 const visionsCollection = collection(db, 'visions');
 
+// Wipe Database Function
+const wipeDatabase = async () => {
+    console.warn("!!! WIPING DATABASE !!!");
+    const collections = ['lifetrees', 'pulses', 'visions', 'matches'];
+    for (const colName of collections) {
+        const q = query(collection(db, colName));
+        const snap = await getDocs(q);
+        const promises = snap.docs.map(d => deleteDoc(doc(db, colName, d.id)));
+        await Promise.all(promises);
+        console.log(`Cleared ${colName}`);
+    }
+}
+
 export const ensureGenesis = async () => {
+    // Check for CLEAN mode from build
+    if (import.meta.env.MODE === 'clean') {
+        // Prevent infinite loops in dev or repeated wipes in same session if desirable,
+        // but user requested explicit clean build switch. 
+        // We use a session storage flag to ensure it only happens once per page load/session
+        if (!sessionStorage.getItem('db_cleaned')) {
+             await wipeDatabase();
+             sessionStorage.setItem('db_cleaned', 'true');
+        }
+    }
+
     // Check if Genesis exists
     const q = query(lifetreesCollection, where('ownerId', '==', 'GENESIS_SYSTEM'));
     const snap = await getDocs(q);
@@ -126,9 +150,10 @@ export const ensureGenesis = async () => {
             name: 'Live Light',
             body: genesisBody,
             imageUrl: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=2070&auto=format&fit=crop', 
-            latitude: 0,
-            longitude: 0,
-            locationName: 'The Source',
+            // Updated Location: Rue de l'Armée 24, Brussels
+            latitude: 50.8354,
+            longitude: 4.4145,
+            locationName: 'The Source (Brussels)',
             createdAt: serverTimestamp(),
             genesisHash: genesisHash,
             latestHash: genesisHash,
