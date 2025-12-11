@@ -36,7 +36,6 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                 console.error("API Key selection cancelled or failed", e);
             }
         }
-        // Fallback removed as manual entry is disabled.
     }
     
     // Helper to get active button style
@@ -48,18 +47,19 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
             if (key === 'oracle') return `bg-indigo-600 text-white shadow-lg shadow-indigo-500/30`;
             return `bg-slate-700 text-white`;
         }
-        return `text-slate-300 hover:text-white hover:bg-white/5`;
+        return `text-emerald-100 hover:text-white hover:bg-white/10`;
     }
 
+    // Dark Green Header
     return (
-        <nav className={`sticky top-0 z-30 bg-slate-900 border-b border-slate-800 text-white backdrop-blur-md bg-opacity-95`}>
+        <nav className={`sticky top-0 z-30 bg-emerald-900 border-b border-emerald-800 text-white shadow-md`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-20 items-center">
                     <div className="flex items-center space-x-3 cursor-pointer rtl:space-x-reverse" onClick={() => setTab('forest')}>
                         <div className="bg-white p-1 rounded-full shadow-inner animate-[pulse_3s_ease-in-out_infinite]">
                              <Logo width={40} height={40} />
                         </div>
-                        <span className="font-light text-2xl tracking-wide lowercase hidden sm:block text-white">.seed</span>
+                        <span className="font-light text-2xl tracking-wide lowercase hidden sm:block text-white drop-shadow-sm">.seed</span>
                     </div>
 
                     <div className="hidden md:flex space-x-3 rtl:space-x-reverse">
@@ -84,7 +84,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                          {/* Only show button if we are in AI Studio environment or if key is present to indicate status */}
                          <button 
                              onClick={handleApiKeySelect}
-                             className={`p-2 rounded-full transition-all flex items-center space-x-2 ${!hasApiKey ? 'bg-amber-500/20 text-amber-500 ring-1 ring-amber-500' : 'text-slate-400 hover:text-white hover:bg-white/10'}`}
+                             className={`p-2 rounded-full transition-all flex items-center space-x-2 ${!hasApiKey ? 'bg-amber-500/20 text-amber-500 ring-1 ring-amber-500' : 'text-emerald-100 hover:text-white hover:bg-white/10'}`}
                              title={hasApiKey ? "Gemini Connected" : "Connect Gemini API (AI Studio Only)"}
                          >
                              <Icons.Key />
@@ -94,15 +94,15 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                          <select 
                             value={language} 
                             onChange={(e) => setLanguage(e.target.value as Language)}
-                            className="bg-black/20 text-white text-xs rounded border-none py-1 pl-2 pr-6 cursor-pointer"
+                            className="bg-black/20 text-white text-xs rounded border-none py-1 pl-2 pr-6 cursor-pointer hover:bg-black/30"
                         >
-                            <option value="en">EN</option>
-                            <option value="es">ES</option>
-                            <option value="hu">HU</option>
-                            <option value="qu">QU</option>
-                            <option value="sa">SA</option>
-                            <option value="ja">JA</option>
-                            <option value="ar">AR</option>
+                            <option className="text-slate-800" value="en">EN</option>
+                            <option className="text-slate-800" value="es">ES</option>
+                            <option className="text-slate-800" value="hu">HU</option>
+                            <option className="text-slate-800" value="qu">QU</option>
+                            <option className="text-slate-800" value="sa">SA</option>
+                            <option className="text-slate-800" value="ja">JA</option>
+                            <option className="text-slate-800" value="ar">AR</option>
                         </select>
 
                         {lightseed ? (
@@ -125,11 +125,11 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                                 
                                 <img 
                                     src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} 
-                                    className="w-9 h-9 rounded-full border-2 border-white/50 cursor-pointer hover:border-white transition-colors" 
+                                    className="w-9 h-9 rounded-full border-2 border-emerald-700 cursor-pointer hover:border-emerald-500 transition-colors" 
                                     alt="Seed" 
                                     onClick={onProfile}
                                 />
-                                <button onClick={onLogout} className="text-white/80 hover:text-white text-sm">{t('sign_out')}</button>
+                                <button onClick={onLogout} className="text-emerald-100 hover:text-white text-sm font-medium shadow-sm">{t('sign_out')}</button>
                             </>
                         ) : (
                             <button onClick={onLogin} className={`flex items-center space-x-2 rtl:space-x-reverse bg-white text-slate-900 px-5 py-2 rounded-full text-sm font-bold shadow-md hover:bg-slate-100 transition-colors`}>
@@ -141,7 +141,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                     <div className="flex md:hidden items-center space-x-4 rtl:space-x-reverse">
                          <button 
                              onClick={handleApiKeySelect}
-                             className={`p-1 ${!hasApiKey ? 'text-amber-500' : 'text-slate-400'}`}
+                             className={`p-1 ${!hasApiKey ? 'text-amber-500' : 'text-emerald-100'}`}
                          >
                              <Icons.Key />
                          </button>
@@ -150,11 +150,11 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                             onChange={(e) => setLanguage(e.target.value as Language)}
                             className="bg-black/20 text-white text-xs rounded border-none py-1 pl-1 pr-1 cursor-pointer w-12"
                         >
-                            <option value="en">EN</option>
-                            <option value="es">ES</option>
-                            <option value="hu">HU</option>
+                            <option className="text-slate-800" value="en">EN</option>
+                            <option className="text-slate-800" value="es">ES</option>
+                            <option className="text-slate-800" value="hu">HU</option>
                         </select>
-                        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white p-2 relative">
+                        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white p-2 relative hover:bg-white/10 rounded">
                             {isMenuOpen ? <Icons.Close /> : <Icons.Menu />}
                             {pendingMatchesCount > 0 && !isMenuOpen && <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></div>}
                         </button>
@@ -163,10 +163,10 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
             </div>
 
             {isMenuOpen && (
-                 <div className="md:hidden bg-slate-900 border-t border-slate-800 pb-4 px-4">
+                 <div className="md:hidden bg-emerald-800 border-t border-emerald-700 pb-4 px-4 shadow-xl">
                     <div className="flex flex-col space-y-2 mt-4">
                          {lightseed && (
-                             <button onClick={() => { onProfile(); setIsMenuOpen(false); }} className="flex items-center space-x-3 px-3 py-3 rounded-md bg-slate-800">
+                             <button onClick={() => { onProfile(); setIsMenuOpen(false); }} className="flex items-center space-x-3 px-3 py-3 rounded-md bg-black/20">
                                 <img src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} className="w-8 h-8 rounded-full" />
                                 <span className="text-white font-medium">{t('profile')}</span>
                              </button>
@@ -175,7 +175,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                             <button 
                                 key={tabKey}
                                 onClick={() => { setTab(tabKey); setIsMenuOpen(false); }}
-                                className={`flex justify-between items-center text-left px-3 py-3 rounded-md text-base font-medium ${activeTab === tabKey ? 'bg-slate-800 text-white' : 'text-slate-400'}`}
+                                className={`flex justify-between items-center text-left px-3 py-3 rounded-md text-base font-medium ${activeTab === tabKey ? 'bg-emerald-700 text-white' : 'text-emerald-100 hover:bg-white/10'}`}
                             >
                                 <span>{tabKey === 'matches' ? 'Matches' : t(tabKey as any)}</span>
                                 {tabKey === 'matches' && pendingMatchesCount > 0 && (
@@ -196,12 +196,12 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                                         {t('emit_pulse')}
                                     </button>
                                 )}
-                                <button onClick={onLogout} className="text-left px-3 py-3 text-slate-400">
+                                <button onClick={onLogout} className="text-left px-3 py-3 text-emerald-300 hover:text-white">
                                     {t('sign_out')}
                                 </button>
                             </>
                         ) : (
-                             <button onClick={() => { onLogin(); setIsMenuOpen(false); }} className="bg-white text-slate-900 px-3 py-3 rounded-md text-base font-bold mt-4">
+                             <button onClick={() => { onLogin(); setIsMenuOpen(false); }} className="bg-white text-slate-900 px-3 py-3 rounded-md text-base font-bold mt-4 shadow">
                                 {t('sign_in')}
                             </button>
                         )}

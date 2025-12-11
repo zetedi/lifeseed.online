@@ -145,11 +145,14 @@ export const ensureGenesis = async () => {
         const timestamp = Date.now();
         const genesisHash = await createBlock("0", { message: "Genesis Pulse" }, timestamp);
 
+        // Seed of Life SVG Data URI
+        const genesisSymbol = `data:image/svg+xml,%3Csvg width='500' height='500' viewBox='0 0 262 262' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='262' height='262' fill='%23064e3b' /%3E%3Cg transform='translate(0,0)'%3E%3Ccircle cx='131' cy='131' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3Ccircle cx='131' cy='67' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3Ccircle cx='186.43' cy='99' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3Ccircle cx='186.43' cy='163' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3Ccircle cx='131' cy='195' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3Ccircle cx='75.57' cy='163' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3Ccircle cx='75.57' cy='99' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3C/g%3E%3C/svg%3E`;
+
         const treeRef = await addDoc(lifetreesCollection, {
             ownerId: 'GENESIS_SYSTEM',
             name: 'Live Light',
             body: genesisBody,
-            imageUrl: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=2070&auto=format&fit=crop', 
+            imageUrl: genesisSymbol, 
             // Updated Location: Rue de l'Armée 24, Brussels
             latitude: 50.8354,
             longitude: 4.4145,
@@ -168,7 +171,7 @@ export const ensureGenesis = async () => {
             authorId: 'GENESIS_SYSTEM',
             title: "Live Light",
             body: genesisBody,
-            imageUrl: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560&auto=format&fit=crop',
+            imageUrl: genesisSymbol,
             createdAt: serverTimestamp(),
             link: "https://lifeseed.online"
         });
@@ -239,6 +242,11 @@ export const plantLifetree = async (data: {
 
   return treeDoc;
 };
+
+export const updateLifetree = async (treeId: string, data: { name?: string, latitude?: number, longitude?: number }) => {
+    const treeRef = doc(db, 'lifetrees', treeId);
+    await updateDoc(treeRef, data);
+}
 
 export const deleteLifetree = async (treeId: string) => {
     await deleteDoc(doc(db, 'lifetrees', treeId));

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode development",
+    "dev:clean": "vite --mode clean",
     "prod": "vite build --mode production",
     "build": "vite build",
     "build:clean": "vite build --mode clean",
