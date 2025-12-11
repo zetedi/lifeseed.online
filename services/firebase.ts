@@ -1,4 +1,7 @@
 
+// Ensure polyfill runs first to populate process.env
+import '../utils/polyfill';
+
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
@@ -36,20 +39,27 @@ import {
 import { type Pulse, type PulseType, type Lifetree, type MatchProposal, type Vision } from '../types';
 import { createBlock } from '../utils/crypto';
 
-// We use process.env because vite.config.ts explicitly polyfills it to merge 
-// local .env vars with runtime injected vars (window.process.env).
-// This prevents "undefined" errors that can happen with import.meta.env in some environments.
+// ------------------------------------------------------------------
+// CONFIGURATION
+// ------------------------------------------------------------------
+
+// By default, we use the .env variables which are polyfilled into process.env
+// This setup supports:
+// 1. DEV: Loading variables from a local .env file via Vite + Polyfill
+// 2. PROD: Falling back to hardcoded strings if .env vars are missing during build
 const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY,
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.VITE_FIREBASE_APP_ID
+  apiKey: process.env.VITE_FIREBASE_API_KEY || "AIzaSyCDcg27BljgJsVGuzNgS0NQWOgFIuDMlYI",
+  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || "lifeseed-75dfe.firebaseapp.com",
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID || "lifeseed-75dfe",
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || "lifeseed-75dfe.firebasestorage.app",
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "110675956366",
+  appId: process.env.VITE_FIREBASE_APP_ID || "1:110675956366:web:3cbc94aff415a800e6efdf",
+  measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID || "G-L95JY61SWQ"
 };
 
-if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("YOUR_")) {
-  console.warn("LifeSeed Configuration Warning: .env file might be missing or invalid.");
+// Debugging check
+if (!firebaseConfig.apiKey) {
+    console.error("CRITICAL: VITE_FIREBASE_API_KEY is missing from .env configuration.");
 }
 
 const app = initializeApp(firebaseConfig);
@@ -67,7 +77,13 @@ export const onAuthChange = (callback: (user: FirebaseUser | null) => void) => {
 
 export const signInWithGoogle = async () => {
   try { return (await signInWithPopup(auth, googleProvider)).user; } 
-  catch (error) { console.error(error); throw error; }
+  catch (error: any) { 
+      console.error("Login Failed:", error); 
+      if (error.code === 'auth/invalid-api-key') {
+          alert(`Login Failed: Invalid API Key.\n\nPlease check your .env file.`);
+      }
+      throw error; 
+  }
 };
 
 export const logout = () => firebaseSignOut(auth);

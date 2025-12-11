@@ -1,21 +1,91 @@
+
 <div align="center">
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Lifeseed
 
-This contains everything you need to run your app locally.
+A decentralized social sharing platform where every lifetree is a blockchain of presents.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1eBSglJJDv9P5IVCTX6YihXiQBwDVGWAg
+## 🚀 Fresh Start Deployment Guide
 
-## Run Locally
+If you are setting this up from scratch or facing "configuration not found" errors, follow these steps exactly.
 
-**Prerequisites:**  Node.js
+### 1. Create Firebase Project
+1. Go to [console.firebase.google.com](https://console.firebase.google.com).
+2. Create a new project (e.g., `lifeseed-v2`).
+3. Turn off Google Analytics (optional, makes setup faster).
 
+### 2. Enable Authentication (Crucial)
+1. Go to **Authentication** -> **Sign-in method**.
+2. Click **Google**.
+3. Toggle **Enable**.
+4. **Important**: Select your email in the "Project support email" dropdown.
+5. Click **Save**.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `API_KEY` in `.env` to your Gemini API key (see `.env.example`).
-3. Set the Firebase configuration keys in `.env` (see `.env.example`).
-4. Run the app:
-   `npm run dev`
+### 3. Enable Database & Storage
+1. **Firestore**: Go to **Firestore Database** -> **Create database** -> Start in **Production mode** -> Select a region -> Create.
+2. **Storage**: Go to **Storage** -> **Get started** -> Start in **Production mode** -> Done.
+
+### 4. Get Configuration
+1. Click the **Project Settings** (gear icon) -> **General**.
+2. Scroll to "Your apps". Click the **Web icon (</>)**.
+3. Register app as `lifeseed-web`.
+4. Copy the `firebaseConfig` keys shown.
+
+### 5. Environment Variables (.env)
+Create a file named `.env` in the root folder and fill it with your new keys:
+
+```env
+API_KEY=AIzaSy... (Your Gemini API Key)
+
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
+VITE_FIREBASE_MEASUREMENT_ID=...
+```
+
+### 6. Apply Security Rules
+Manually copy the content of `firestore.rules` and `storage.rules` from this project into the **Rules** tab of your Firestore and Storage sections in the Firebase Console.
+
+### 7. Run Locally
+```bash
+npm install
+npm run dev
+```
+
+## 🌍 Deploying to Production
+
+Since you created a new project, you must tell the Firebase CLI which project to use.
+
+1. **List your projects** to find the new ID:
+   ```bash
+   npx firebase projects:list
+   ```
+
+2. **Switch to the new project**:
+   ```bash
+   npx firebase use <YOUR_NEW_PROJECT_ID>
+   ```
+   *(Example: `npx firebase use lifeseed-v2`)*
+
+3. **Deploy**:
+   ```bash
+   npm run build
+   npx firebase deploy
+   ```
+
+## Troubleshooting
+
+### Error 400: redirect_uri_mismatch or Access Blocked
+This means your current website URL (e.g., `localhost:3000` or `https://xyz.idx.dev`) is not allowed by Firebase.
+1. Copy your current browser domain (e.g., `xyz.idx.dev`).
+2. Go to **Firebase Console** -> **Authentication** -> **Settings**.
+3. Click **Authorized domains** -> **Add domain**.
+4. Paste your domain and save.
+
+### HTTP Error: 403, Permission denied on resource project...
+Your CLI is trying to deploy to an old or deleted project. Follow the "Deploying to Production" steps above to switch to your new project ID.

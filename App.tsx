@@ -98,8 +98,8 @@ const AppContent = () => {
              const has = await aiStudio.hasSelectedApiKey();
              setHasApiKey(has);
          } else {
-             // Safe check thanks to vite config
-             const key = process.env.API_KEY;
+             // Check global process only
+             const key = (window as any).process?.env?.API_KEY;
              setHasApiKey(!!key);
          }
     }

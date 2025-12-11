@@ -4,13 +4,17 @@ import { Vision, VisionSynergy } from "../types";
 
 // Helper to get a fresh client instance every time.
 const getAiClient = (): GoogleGenAI | null => {
-    // We explicitly check window.process.env to get the dynamic key injected by the UI
-    // falling back to the standard process.env (handled by polyfill)
+    // Safe access to global scope
     const win = window as any;
-    const apiKey = (win.process?.env?.API_KEY || process.env.API_KEY || "").trim();
+    
+    // Priority:
+    // 1. window.process.env.API_KEY (Injected by polyfill from build or runtime prompt)
+    const apiKey = (win.process?.env?.API_KEY || "").trim();
     
     if (!apiKey) {
-        console.warn("LifeSeed: API Key is missing.");
+        // Only warn once per session to avoid console spam? 
+        // For now, simple warn is fine.
+        console.warn("LifeSeed: API Key is missing. Please click the Key icon in the top right to connect.");
         return null;
     }
     
@@ -38,7 +42,7 @@ export const generatePostTitle = async (body: string): Promise<string> => {
 export const generateLifetreeBio = async (seed: string): Promise<string> => {
   if (!seed.trim()) return "";
   const ai = getAiClient();
-  if (!ai) return "Roots run deep... (Please connect AI Key)";
+  if (!ai) return "Roots run deep... (Click the Key icon to connect AI)";
 
   try {
     const prompt = `
@@ -62,7 +66,7 @@ export const generateLifetreeBio = async (seed: string): Promise<string> => {
 export const generateVisionImage = async (prompt: string): Promise<string | null> => {
     if (!prompt.trim()) return null;
     const ai = getAiClient();
-    if (!ai) throw new Error("API Key Missing. Please select your key using the Key icon.");
+    if (!ai) throw new Error("API Key Missing. Please click the Key icon in the top right to connect.");
 
     try {
         console.log("Generating image for:", prompt);
@@ -104,7 +108,7 @@ export const generateVisionImage = async (prompt: string): Promise<string | null
 // New Chat Interface
 export const createOracleChat = (systemInstruction?: string) => {
     const ai = getAiClient();
-    if (!ai) throw new Error("API Key Missing");
+    if (!ai) throw new Error("API Key Missing. Please click the Key icon.");
 
     return ai.chats.create({
         model: 'gemini-2.5-flash',

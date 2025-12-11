@@ -34,9 +34,8 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
             } catch (e) {
                 console.error("API Key selection cancelled or failed", e);
             }
-        } else {
-            alert("Local environment detected. Please set API_KEY in your .env file.");
         }
+        // Fallback removed as manual entry is disabled.
     }
     
     // Helper to get active button style
@@ -81,10 +80,11 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                     </div>
 
                     <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">
+                         {/* Only show button if we are in AI Studio environment or if key is present to indicate status */}
                          <button 
                              onClick={handleApiKeySelect}
-                             className={`p-2 rounded-full transition-all flex items-center space-x-2 ${!hasApiKey ? 'bg-amber-500/20 text-amber-500 animate-pulse ring-1 ring-amber-500' : 'text-slate-400 hover:text-white hover:bg-white/10'}`}
-                             title={hasApiKey ? "Gemini Connected" : "Connect Gemini API"}
+                             className={`p-2 rounded-full transition-all flex items-center space-x-2 ${!hasApiKey ? 'bg-amber-500/20 text-amber-500 ring-1 ring-amber-500' : 'text-slate-400 hover:text-white hover:bg-white/10'}`}
+                             title={hasApiKey ? "Gemini Connected" : "Connect Gemini API (AI Studio Only)"}
                          >
                              <Icons.Key />
                              {!hasApiKey && <span className="text-xs font-bold">Connect AI</span>}
@@ -135,7 +135,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                     <div className="flex md:hidden items-center space-x-4 rtl:space-x-reverse">
                          <button 
                              onClick={handleApiKeySelect}
-                             className={`p-1 ${!hasApiKey ? 'text-amber-500 animate-pulse' : 'text-slate-400'}`}
+                             className={`p-1 ${!hasApiKey ? 'text-amber-500' : 'text-slate-400'}`}
                          >
                              <Icons.Key />
                          </button>
