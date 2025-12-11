@@ -1,4 +1,5 @@
 
+
 export type Language = 'en' | 'es' | 'hu' | 'qu' | 'sa' | 'ja' | 'ar' | 'sw';
 
 export const translations = {
@@ -54,7 +55,8 @@ export const translations = {
     my_matches: "My Matches",
     joined: "Joined",
     total_love: "Total Love",
-    edit: "Edit"
+    edit: "Edit",
+    be_mother_tree: "Be a Mother Tree"
   },
   es: {
     forest: "Bosque",
@@ -108,7 +110,8 @@ export const translations = {
     my_matches: "Mis Coincidencias",
     joined: "Se unió",
     total_love: "Amor Total",
-    edit: "Editar"
+    edit: "Editar",
+    be_mother_tree: "Sé un Árbol Madre"
   },
   hu: {
     forest: "Erdő",
@@ -162,7 +165,8 @@ export const translations = {
     my_matches: "Párosításaim",
     joined: "Csatlakozott",
     total_love: "Összes Szeretet",
-    edit: "Szerkesztés"
+    edit: "Szerkesztés",
+    be_mother_tree: "Légy Anyafa"
   },
   qu: { 
     forest: "Sach'a-sach'a",
@@ -216,7 +220,8 @@ export const translations = {
     my_matches: "Tupachisqaykuna",
     joined: "Yaykurqa",
     total_love: "Tukuy Munakuynin",
-    edit: "Allichay"
+    edit: "Allichay",
+    be_mother_tree: "Mama Sach'a Kay"
   },
   sa: { 
     forest: "अरण्यम् (Araṇyam)",
@@ -270,7 +275,8 @@ export const translations = {
     my_matches: "मम मेलनानि",
     joined: "सम्बद्धः",
     total_love: "सम्पूर्ण स्नेह",
-    edit: "सम्पादयतु"
+    edit: "सम्पादयतु",
+    be_mother_tree: "मातृवृक्षः भव"
   },
   ja: {
     forest: "森",
@@ -324,7 +330,8 @@ export const translations = {
     my_matches: "私のマッチ",
     joined: "参加日",
     total_love: "総ラブ数",
-    edit: "編集"
+    edit: "編集",
+    be_mother_tree: "マザーツリーになる"
   },
   ar: {
     forest: "الغابة",
@@ -378,7 +385,8 @@ export const translations = {
     my_matches: "مطابقاتي",
     joined: "انضم",
     total_love: "مجموع الحب",
-    edit: "تعديل"
+    edit: "تعديل",
+    be_mother_tree: "كن شجرة أم"
   },
   sw: {
     forest: "Msitu",
@@ -432,6 +440,7 @@ export const translations = {
     my_matches: "Mechi Zangu",
     joined: "Amejiunga",
     total_love: "Upendo Jumla",
-    edit: "Hariri"
+    edit: "Hariri",
+    be_mother_tree: "Kuwa Mti Mama"
   }
 };

@@ -458,27 +458,50 @@ const AppContent = () => {
 
                 {/* Content Area */}
                 {tab === 'forest' ? (
-                    viewMode === 'map' ? (
-                        <ForestMap trees={filteredData} />
-                    ) : (
-                        <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                             {filteredData.length === 0 && !loadingMore ? (
-                                 <p className="col-span-full text-center text-slate-400 py-10">No trees found matching your search.</p>
-                             ) : (
-                                filteredData.map((item: any) => (
-                                    <LifetreeCard 
-                                        key={item.id} 
-                                        tree={item} 
-                                        myActiveTree={activeTree} 
-                                        onPlayGrowth={setShowGrowthPlayer} 
-                                        onQuickSnap={handleQuickSnap}
-                                        onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); loadContent(true); })}
-                                        onView={setSelectedTree}
-                                    />
-                                ))
-                             )}
+                    <>
+                        {/* Mother Tree Banner */}
+                        <div className="relative w-full h-40 mb-8 rounded-2xl overflow-hidden shadow-lg group">
+                            <img 
+                                src="/mother.jpg" 
+                                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
+                                alt="Mother Tree"
+                                onError={(e) => {
+                                    // If image missing, show a nice gradient placeholder
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    target.parentElement!.classList.add('bg-gradient-to-r', 'from-emerald-800', 'to-emerald-900');
+                                }}
+                            />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <h2 className="text-3xl font-light text-white tracking-[0.2em] uppercase drop-shadow-xl border-y border-white/20 py-2 px-6 backdrop-blur-sm bg-white/5">
+                                    {t('be_mother_tree')}
+                                </h2>
+                            </div>
                         </div>
-                    )
+
+                        {viewMode === 'map' ? (
+                            <ForestMap trees={filteredData} />
+                        ) : (
+                            <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                                {filteredData.length === 0 && !loadingMore ? (
+                                    <p className="col-span-full text-center text-slate-400 py-10">No trees found matching your search.</p>
+                                ) : (
+                                    filteredData.map((item: any) => (
+                                        <LifetreeCard 
+                                            key={item.id} 
+                                            tree={item} 
+                                            myActiveTree={activeTree} 
+                                            onPlayGrowth={setShowGrowthPlayer} 
+                                            onQuickSnap={handleQuickSnap}
+                                            onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); loadContent(true); })}
+                                            onView={setSelectedTree}
+                                        />
+                                    ))
+                                )}
+                            </div>
+                        )}
+                    </>
                 ) : tab === 'visions' ? (
                     <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {filteredData.length === 0 && !loadingMore ? <p className="col-span-full text-center text-slate-400 py-10">No visions found.</p> : 
