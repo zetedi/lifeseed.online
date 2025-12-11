@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Logo from './Logo';
+import { Icons } from './ui/Icons';
 
 // Helper Component for Images to replace missing ArticleImage
 const ArticleImage = ({ src, alt }: { src: string, alt: string }) => {
@@ -28,7 +29,49 @@ const LinkButton = ({ href, children }: { href: string, children: React.ReactNod
 );
 
 export const AboutPage = () => {
-    const [activeTab, setActiveTab] = useState<'phoenix' | 'tss' | 'whitepaper' | 'yantra'>('phoenix');
+    const [activeTab, setActiveTab] = useState<'phoenix' | 'tss' | 'whitepaper' | 'yantra' | 'steps'>('phoenix');
+
+    const stepsContent = [
+      {
+        title: "The first steps",
+        content: (
+          <div className="text-justify leading-relaxed">
+            <p className="mb-4 text-lg font-light text-slate-800">
+              We plant lightseed (our vision) with the seed of a tree we have a deep connection with in four realms:
+            </p>
+            <ul className="list-disc pl-6 space-y-3 mb-6 text-slate-700">
+              <li>in our <b>spiritual heart</b>, with the intention of realization (or our highest goal)</li>
+              <li>in the <b>soil</b> of an important place for us (or in a pot if we haven't found that place yet) for the tree to flourish (this will be our first lifetree)</li>
+              <li>in our <b>community</b> or culture as an inspiration (e.g. The Secret Sun)</li>
+              <li>in the <b>light</b>, in virtual (by creating our servers and online projects to be guided by nature)</li>
+            </ul>
+            <p className="italic text-slate-600 border-l-4 border-emerald-400 pl-4 py-2 bg-slate-50 rounded-r-lg">
+              All four quadrants are ultimately (and intimately) connected with the animating force or lifeforce - the beginning of creation.
+            </p>
+          </div>
+        )
+      },
+      {
+        title: "We stand for trees",
+        content: (
+          <div className="flex flex-col items-center justify-center py-8 text-center space-y-6">
+            <div className="p-4 bg-emerald-50 rounded-full">
+                <Icons.Tree />
+            </div>
+            <p className="text-lg text-slate-700 max-w-md">
+                Subscribe to a very rare newsletter with the button below:
+            </p>
+            <a 
+              href="mailto:contact@lightseed.online?subject=Subscribe to Lightseed Newsletter&body=Hi, I would like to subscribe to the newsletter."
+              className="group bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all active:scale-95 flex items-center space-x-3"
+            >
+              <Icons.Send />
+              <span>Subscribe to Newsletter</span>
+            </a>
+          </div>
+        )
+      }
+    ];
 
     const phoenixContent = [
       {
@@ -619,7 +662,8 @@ export const AboutPage = () => {
                             { id: 'phoenix', label: 'Phoenix' },
                             { id: 'tss', label: 'The Secret Sun' },
                             { id: 'whitepaper', label: 'White Paper' },
-                            { id: 'yantra', label: 'The Yantra' }
+                            { id: 'yantra', label: 'The Yantra' },
+                            { id: 'steps', label: 'The First Steps' }
                         ].map((tab) => (
                             <button 
                                 key={tab.id}
@@ -639,6 +683,7 @@ export const AboutPage = () => {
                         {activeTab === 'phoenix' && renderContent(phoenixContent)}
                         {activeTab === 'tss' && renderContent(tssContent)}
                         {activeTab === 'whitepaper' && renderContent(whitePaperContent)}
+                        {activeTab === 'steps' && renderContent(stepsContent)}
                         {activeTab === 'yantra' && (
                             <div className="flex flex-col items-center justify-center space-y-8 py-10 animate-in fade-in zoom-in-95 duration-500">
                                 <div className="p-8 bg-white rounded-full shadow-xl">
