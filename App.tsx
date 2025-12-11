@@ -15,7 +15,8 @@ import {
   acceptMatch,
   fetchVisions,
   createVision,
-  deleteLifetree
+  deleteLifetree,
+  ensureGenesis
 } from './services/firebase';
 import { generateLifetreeBio, generateVisionImage } from './services/gemini';
 import { type Pulse, type Lifetree, type MatchProposal, type Vision } from './types';
@@ -62,6 +63,7 @@ const AppContent = () => {
     const [showVisionModal, setShowVisionModal] = useState(false);
     const [showGrowthPlayer, setShowGrowthPlayer] = useState<string | null>(null);
     const [matchCandidate, setMatchCandidate] = useState<Pulse | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Form State
     const [treeName, setTreeName] = useState('');
@@ -107,6 +109,7 @@ const AppContent = () => {
     useEffect(() => { 
         checkKey();
         loadContent(true); 
+        ensureGenesis(); // Ensure Genesis tree exists on app load
     }, [tab, lightseed]);
     
     // Infinite Scroll Listener
@@ -210,12 +213,21 @@ const AppContent = () => {
 
     const handlePlant = async (e: FormEvent) => {
         e.preventDefault();
-        if (!lightseed) return;
+        if (!lightseed || isSubmitting) return;
+        setIsSubmitting(true);
+        
         navigator.geolocation.getCurrentPosition(async (pos) => {
             try {
                 await plantLifetree({ ownerId: lightseed.uid, name: treeName, body: treeBio, imageUrl: treeImageUrl, lat: pos.coords.latitude, lng: pos.coords.longitude });
                 await refreshTrees(); setShowPlantModal(false); loadContent(true);
             } catch(e: any) { alert(e.message); }
+            finally { setIsSubmitting(false); }
+        }, (err) => {
+            // Handle geo error fallback
+             plantLifetree({ ownerId: lightseed.uid, name: treeName, body: treeBio, imageUrl: treeImageUrl })
+                .then(async () => { await refreshTrees(); setShowPlantModal(false); loadContent(true); })
+                .catch(e => alert(e.message))
+                .finally(() => setIsSubmitting(false));
         });
     };
 
@@ -232,22 +244,21 @@ const AppContent = () => {
 
     const handleEmitPulse = async (e: FormEvent) => {
         e.preventDefault();
-        if (!lightseed || !activeTree) return;
+        if (!lightseed || !activeTree || isSubmitting) return;
+        setIsSubmitting(true);
         
-        let finalImageUrl = pulseImageUrl;
-        if (pulseImageUrl.startsWith('data:')) {
-             setUploading(true);
-             try {
-                 finalImageUrl = await uploadBase64Image(pulseImageUrl, `pulses/ai/${Date.now()}`);
-             } catch(e) {
-                 setUploading(false);
-                 alert("Failed to upload AI image");
-                 return;
-             }
-             setUploading(false);
-        }
-
         try {
+            let finalImageUrl = pulseImageUrl;
+            if (pulseImageUrl.startsWith('data:')) {
+                 try {
+                     finalImageUrl = await uploadBase64Image(pulseImageUrl, `pulses/ai/${Date.now()}`);
+                 } catch(e) {
+                     alert("Failed to upload AI image");
+                     setIsSubmitting(false);
+                     return;
+                 }
+            }
+
             await mintPulse({
                 lifetreeId: activeTree.id,
                 type: isGrowth ? 'GROWTH' : 'STANDARD',
@@ -260,26 +271,26 @@ const AppContent = () => {
             });
             setShowPulseModal(false); setPulseTitle(''); setPulseBody(''); setPulseImageUrl(''); setIsGrowth(false); loadContent(true);
         } catch(e: any) { alert(e.message); }
+        finally { setIsSubmitting(false); }
     };
     
     const handleCreateVision = async (e: FormEvent) => {
         e.preventDefault();
-        if (!lightseed || !activeTree) return;
-
-        let finalImageUrl = visionImageUrl;
-        if (visionImageUrl.startsWith('data:')) {
-             setUploading(true);
-             try {
-                 finalImageUrl = await uploadBase64Image(visionImageUrl, `visions/ai/${Date.now()}`);
-             } catch(e) {
-                 setUploading(false);
-                 alert("Failed to upload AI image");
-                 return;
-             }
-             setUploading(false);
-        }
+        if (!lightseed || !activeTree || isSubmitting) return;
+        setIsSubmitting(true);
 
         try {
+            let finalImageUrl = visionImageUrl;
+            if (visionImageUrl.startsWith('data:')) {
+                 try {
+                     finalImageUrl = await uploadBase64Image(visionImageUrl, `visions/ai/${Date.now()}`);
+                 } catch(e) {
+                     alert("Failed to upload AI image");
+                     setIsSubmitting(false);
+                     return;
+                 }
+            }
+
             await createVision({
                 lifetreeId: activeTree.id,
                 authorId: lightseed.uid,
@@ -290,11 +301,13 @@ const AppContent = () => {
             });
             setShowVisionModal(false); setVisionTitle(''); setVisionBody(''); setVisionLink(''); setVisionImageUrl(''); loadContent(true);
         } catch(e:any) { alert(e.message); }
+        finally { setIsSubmitting(false); }
     }
     
     const initiateMatch = async (e: FormEvent) => {
         e.preventDefault();
-        if (!lightseed || !activeTree || !matchCandidate) return;
+        if (!lightseed || !activeTree || !matchCandidate || isSubmitting) return;
+        setIsSubmitting(true);
         try {
              await proposeMatch({
                  initiatorPulseId: "PENDING_CREATION",
@@ -307,6 +320,7 @@ const AppContent = () => {
              alert("Match Proposed! Waiting for acceptance.");
              setShowPulseModal(false); setMatchCandidate(null);
         } catch(e:any) { alert(e.message); }
+        finally { setIsSubmitting(false); }
     }
 
     const onAcceptMatch = async (id: string) => {
@@ -530,9 +544,11 @@ const AppContent = () => {
                     <form onSubmit={handlePlant} className="space-y-4">
                         <ImagePicker onChange={(e: any) => handleImageUpload(e.target.files[0], `trees/${Date.now()}`).then(setTreeImageUrl)} previewUrl={treeImageUrl} loading={uploading} />
                         <input className="block w-full border p-2 rounded" placeholder="Tree Name" value={treeName} onChange={e=>setTreeName(e.target.value)} required />
-                        <div className="flex gap-2"><input className="flex-1 border p-2 rounded" placeholder="Seed keywords" value={treeSeed} onChange={e=>setTreeSeed(e.target.value)} /><button type="button" onClick={() => generateLifetreeBio(treeSeed).then(setTreeBio)} className="bg-emerald-600 text-white px-4 rounded">AI</button></div>
+                        <div className="flex gap-2"><input className="flex-1 border p-2 rounded" placeholder="Seed keywords" value={treeSeed} onChange={e=>setTreeSeed(e.target.value)} /><button type="button" onClick={() => generateLifetreeBio(treeSeed).then(setTreeBio)} disabled={uploading} className="bg-emerald-600 text-white px-4 rounded disabled:opacity-50">AI</button></div>
                         <textarea className="block w-full border p-2 rounded" placeholder="Vision" value={treeBio} onChange={e=>setTreeBio(e.target.value)} required />
-                        <button type="submit" disabled={uploading} className="w-full bg-emerald-600 text-white py-2 rounded">Plant</button>
+                        <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-emerald-600 text-white py-2 rounded disabled:opacity-50">
+                            {isSubmitting ? 'Planting...' : 'Plant'}
+                        </button>
                     </form>
                 </Modal>
             )}
@@ -552,7 +568,7 @@ const AppContent = () => {
                                     <button type="button" className="text-sm text-slate-500 hover:text-slate-800 px-3 py-1 border rounded">{t('upload_photo')}</button>
                                     <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => { if(e.target.files?.[0]) handleImageUpload(e.target.files[0], `visions/${Date.now()}`).then(setVisionImageUrl) }} />
                                  </div>
-                                 <button type="button" onClick={handleGenerateVisionImage} disabled={uploading} className="text-sm bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600">{t('generate_image')}</button>
+                                 <button type="button" onClick={handleGenerateVisionImage} disabled={uploading} className="text-sm bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600 disabled:opacity-50">{t('generate_image')}</button>
                              </div>
                          </div>
 
@@ -560,7 +576,9 @@ const AppContent = () => {
                         <textarea className="block w-full border p-2 rounded h-24" placeholder={t('body')} value={visionBody} onChange={e=>setVisionBody(e.target.value)} required />
                         <input className="block w-full border p-2 rounded" placeholder={t('webpage')} value={visionLink} onChange={e=>setVisionLink(e.target.value)} />
                         
-                        <button type="submit" disabled={uploading} className="w-full bg-amber-500 text-white py-2 rounded font-bold hover:bg-amber-600 transition-colors">{t('create_vision')}</button>
+                        <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-amber-500 text-white py-2 rounded font-bold hover:bg-amber-600 transition-colors disabled:opacity-50">
+                             {isSubmitting ? 'Creating...' : t('create_vision')}
+                        </button>
                     </form>
                 </Modal>
             )}
@@ -585,7 +603,9 @@ const AppContent = () => {
                                 <textarea className="block w-full border p-2 rounded" placeholder="Body" value={pulseBody} onChange={e=>setPulseBody(e.target.value)} required />
                             </>
                         )}
-                        <button type="submit" disabled={uploading} className="w-full bg-emerald-600 text-white py-2 rounded">{matchCandidate ? "Send Request" : t('mint')}</button>
+                        <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-emerald-600 text-white py-2 rounded disabled:opacity-50">
+                            {isSubmitting ? 'Processing...' : (matchCandidate ? "Send Request" : t('mint'))}
+                        </button>
                     </form>
                 </Modal>
             )}

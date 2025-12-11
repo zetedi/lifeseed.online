@@ -109,6 +109,49 @@ export const uploadBase64Image = async (base64String: string, path: string): Pro
 const lifetreesCollection = collection(db, 'lifetrees');
 const visionsCollection = collection(db, 'visions');
 
+export const ensureGenesis = async () => {
+    // Check if Genesis exists
+    const q = query(lifetreesCollection, where('ownerId', '==', 'GENESIS_SYSTEM'));
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+        console.log("Creating Genesis Tree...");
+        const genesisBody = `The purpose of lightseed is to bring joy. The joy of realizing the bliss of conscious, compassionate, grateful existence by opening a portal to the center of life. By creating a bridge between creator and creation, science and spirituality, virtual and real, nothing and everything. It is designed to intimately connect our inner Self, our culture, our trees and the tree of life, the material and the digital, online world into a sustainable and sustaining circle of unified vibration, sound and light. It aims to merge us into a common flow for all beings to be liberated, wise, strong, courageous and connected. It is rooted in nonviolence, compassion, generosity, gratitude and love. It is blockchain (truthfulness), cloud (global, distributed, resilient), ai (for connecting dreams and technology), regen (nature centric) native. It is an inspiration, an impulse towards a quantum leap in consciousness, a prompt both for human and artificial intelligence for action towards transcending humanity into a new era, a New Earth, Universe and Field with the help of our most important evolutionary sisters and brothers, the trees.`;
+
+        const timestamp = Date.now();
+        const genesisHash = await createBlock("0", { message: "Genesis Pulse" }, timestamp);
+
+        const treeRef = await addDoc(lifetreesCollection, {
+            ownerId: 'GENESIS_SYSTEM',
+            name: 'Live Light',
+            body: genesisBody,
+            imageUrl: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=2070&auto=format&fit=crop', 
+            latitude: 0,
+            longitude: 0,
+            locationName: 'The Source',
+            createdAt: serverTimestamp(),
+            genesisHash: genesisHash,
+            latestHash: genesisHash,
+            blockHeight: 0,
+            validated: true,
+            validatorId: 'SYSTEM'
+        });
+
+         // Create Vision for Genesis
+        await addDoc(visionsCollection, {
+            lifetreeId: treeRef.id,
+            authorId: 'GENESIS_SYSTEM',
+            title: "Live Light",
+            body: genesisBody,
+            imageUrl: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560&auto=format&fit=crop',
+            createdAt: serverTimestamp(),
+            link: "https://lifeseed.online"
+        });
+        
+        console.log("Genesis Tree Planted");
+    }
+}
+
 export const plantLifetree = async (data: {
   ownerId: string, 
   name: string, 
@@ -130,12 +173,15 @@ export const plantLifetree = async (data: {
       }
   }
 
-  // Check if this is the FIRST tree in the entire system (Genesis)
+  // Check if this is the FIRST tree in the entire system (Genesis) - legacy check, ensureGenesis handles true genesis
   const allTreesQuery = query(lifetreesCollection, limit(1));
   const allTreesSnap = await getDocs(allTreesQuery);
   const isFirstTree = allTreesSnap.empty;
 
-  const isValid = isFirstTree || data.name.trim().toLowerCase() === "phoenix";
+  // Zetedi Validation Override
+  const isZetedi = auth.currentUser?.email === 'zetedi@gmail.com';
+
+  const isValid = isFirstTree || isZetedi || data.name.trim().toLowerCase() === "phoenix";
   const genesisData = { message: "Genesis Pulse", owner: data.ownerId, timestamp: Date.now() };
   const genesisHash = await createBlock("0", genesisData, Date.now());
 
@@ -310,6 +356,15 @@ export const mintPulse = async (pulseData: {
     if (!sourceTreeDoc.exists()) throw new Error("Source tree missing");
     
     const sourceTree = sourceTreeDoc.data() as Lifetree;
+    
+    // Genesis Protection: Only zetedi can update Genesis pictures
+    if (sourceTree.ownerId === 'GENESIS_SYSTEM' && pulseData.type === 'GROWTH') {
+        const currentUserEmail = auth.currentUser?.email;
+        if (currentUserEmail !== 'zetedi@gmail.com') {
+            throw new Error("Only the Steward (zetedi@gmail.com) can update the Genesis Tree.");
+        }
+    }
+
     const prevHashSource = sourceTree.latestHash || sourceTree.genesisHash || "0";
     
     // Hash Payload (excludes comments)

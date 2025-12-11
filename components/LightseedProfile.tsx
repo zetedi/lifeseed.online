@@ -74,7 +74,7 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
 
     return (
         <div className="min-h-screen">
-            <div className="relative bg-gradient-to-b from-slate-800 to-slate-900 text-white pb-20 pt-10 px-4">
+            <div className="relative bg-gradient-to-b from-slate-800 to-slate-900 text-white pb-10 pt-10 px-4">
                 <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
                     <div className="relative">
                         <img 
@@ -83,28 +83,35 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                         />
                         <div className="absolute bottom-1 right-1 bg-emerald-500 w-6 h-6 rounded-full border-4 border-slate-900"></div>
                     </div>
-                    <div className="text-center md:text-left">
+                    <div className="text-center md:text-left flex-1">
                         <h1 className="text-3xl font-light tracking-wide">{lightseed.displayName}</h1>
                         <p className="text-slate-400 text-sm font-mono mt-1">{lightseed.email}</p>
-                        <div className="flex items-center justify-center md:justify-start space-x-6 mt-6">
+                        
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 mt-6">
                             <div className="text-center">
                                 <span className="block text-2xl font-bold">{myTrees.length}</span>
                                 <span className="text-xs text-slate-400 uppercase tracking-wider">{t('my_trees')}</span>
                             </div>
+                            
+                            {/* Create Tree Button for Validated Users */}
+                            {allValidated && (
+                                <button onClick={onPlant} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-transform active:scale-95 flex items-center space-x-2">
+                                    <Icons.Leaf />
+                                    <span>Create Tree</span>
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="max-w-4xl mx-auto px-4 -mt-12">
-                
+                {/* Validation Banner moved inside dark header for better visibility and contrast */}
                 {hasValidatedTree && (
-                    <div className="bg-slate-800 text-white p-4 rounded-xl shadow-lg border border-slate-700 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="max-w-4xl mx-auto mt-8 bg-slate-700/50 backdrop-blur border border-slate-600 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="flex items-center space-x-3">
-                            <div className="bg-emerald-500 p-2 rounded-full">
+                            <div className="bg-emerald-500 p-2 rounded-full shrink-0">
                                 <Icons.ShieldCheck />
                             </div>
-                            <div>
+                            <div className="text-center sm:text-left">
                                 <h4 className="font-bold text-emerald-400">Contributor Access Unlocked</h4>
                                 <p className="text-xs text-slate-300">You are a validated node in the LifeSeed network.</p>
                             </div>
@@ -113,14 +120,16 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                             href="https://github.com/zetedi/lifeseed.online" 
                             target="_blank" 
                             rel="noreferrer" 
-                            className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-mono transition-colors border border-white/10 flex items-center space-x-2"
+                            className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-mono transition-colors border border-white/10 flex items-center space-x-2 whitespace-nowrap"
                         >
                             <span>zetedi/lifeseed.online</span>
                             <Icons.Link />
                         </a>
                     </div>
                 )}
+            </div>
 
+            <div className="max-w-4xl mx-auto px-4 mt-8">
                 <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden min-h-[500px]">
                     <div className="flex border-b border-slate-100 overflow-x-auto">
                         <button 
