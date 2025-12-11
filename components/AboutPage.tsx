@@ -35,39 +35,40 @@ export const AboutPage = () => {
       {
         title: "The first steps",
         content: (
-          <div className="text-justify leading-relaxed">
-            <p className="mb-4 text-lg font-light text-slate-800">
-              We plant lightseed (our vision) with the seed of a tree we have a deep connection with in four realms:
-            </p>
-            <ul className="list-disc pl-6 space-y-3 mb-6 text-slate-700">
-              <li>in our <b>spiritual heart</b>, with the intention of realization (or our highest goal)</li>
-              <li>in the <b>soil</b> of an important place for us (or in a pot if we haven't found that place yet) for the tree to flourish (this will be our first lifetree)</li>
-              <li>in our <b>community</b> or culture as an inspiration (e.g. The Secret Sun)</li>
-              <li>in the <b>light</b>, in virtual (by creating our servers and online projects to be guided by nature)</li>
-            </ul>
-            <p className="italic text-slate-600 border-l-4 border-emerald-400 pl-4 py-2 bg-slate-50 rounded-r-lg">
-              All four quadrants are ultimately (and intimately) connected with the animating force or lifeforce - the beginning of creation.
-            </p>
-          </div>
-        )
-      },
-      {
-        title: "We stand for trees",
-        content: (
-          <div className="flex flex-col items-center justify-center py-8 text-center space-y-6">
-            <div className="p-4 bg-emerald-50 rounded-full">
-                <Icons.Tree />
+          <div className="text-justify leading-relaxed space-y-12">
+            <div>
+                <p className="mb-4 text-lg font-light text-slate-800">
+                We plant lightseed (our vision) with the seed of a tree we have a deep connection with in four realms:
+                </p>
+                <ul className="list-disc pl-6 space-y-3 mb-6 text-slate-700">
+                <li>in our <b>spiritual heart</b>, with the intention of realization (or our highest goal)</li>
+                <li>in the <b>soil</b> of an important place for us (or in a pot if we haven't found that place yet) for the tree to flourish (this will be our first lifetree)</li>
+                <li>in our <b>community</b> or culture as an inspiration (e.g. The Secret Sun)</li>
+                <li>in the <b>light</b>, in virtual (by creating our servers and online projects to be guided by nature)</li>
+                </ul>
+                <p className="italic text-slate-600 border-l-4 border-emerald-400 pl-4 py-2 bg-slate-50 rounded-r-lg">
+                All four quadrants are ultimately (and intimately) connected with the animating force or lifeforce - the beginning of creation.
+                </p>
             </div>
-            <p className="text-lg text-slate-700 max-w-md">
-                Subscribe to a very rare newsletter with the button below:
-            </p>
-            <a 
-              href="mailto:contact@lightseed.online?subject=Subscribe to Lightseed Newsletter&body=Hi, I would like to subscribe to the newsletter."
-              className="group bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all active:scale-95 flex items-center space-x-3"
-            >
-              <Icons.Send />
-              <span>Subscribe to Newsletter</span>
-            </a>
+
+            <div className="flex flex-col items-center justify-center pt-10 pb-8 border-t border-slate-100 text-center space-y-6 bg-gradient-to-b from-transparent to-emerald-50/50 rounded-b-2xl -mx-6 px-6 mt-8">
+                <div className="space-y-2">
+                    <h3 className="text-2xl font-light text-emerald-800">We stand for trees</h3>
+                    <p className="text-lg text-slate-600 max-w-md mx-auto">
+                        Subscribe to a very rare newsletter with the button below:
+                    </p>
+                </div>
+                <div className="p-4 bg-white rounded-full text-emerald-600 shadow-sm border border-emerald-100">
+                    <Icons.Tree />
+                </div>
+                <a 
+                href="mailto:contact@lightseed.online?subject=Subscribe to Lightseed Newsletter&body=Hi, I would like to subscribe to the newsletter."
+                className="group bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all active:scale-95 flex items-center space-x-3 transform hover:-translate-y-0.5"
+                >
+                <Icons.Send />
+                <span>Subscribe to Newsletter</span>
+                </a>
+            </div>
           </div>
         )
       }

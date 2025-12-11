@@ -59,6 +59,18 @@ npm run dev
 
 ## 🌍 Deploying to Production
 
+### Step 1: Set up GitHub Secrets (Critical for Oracle/AI)
+For the Oracle and Firebase connection to work on the deployed site, you **must** add your keys to GitHub Secrets.
+
+1. Go to your GitHub Repository.
+2. Click **Settings** -> **Secrets and variables** -> **Actions**.
+3. Click **New repository secret**.
+4. Add the following secret:
+   - **Name:** `API_KEY`
+   - **Value:** Your Gemini API Key (`AIzaSy...`)
+5. (Recommended) Add your Firebase keys as well (`VITE_FIREBASE_API_KEY`, etc.) to ensure the production build connects to the correct database.
+
+### Step 2: Configure Firebase CLI
 Since you created a new project, you must tell the Firebase CLI which project to use.
 
 1. **List your projects** to find the new ID:
@@ -79,6 +91,18 @@ Since you created a new project, you must tell the Firebase CLI which project to
    ```
 
 ## Troubleshooting
+
+### Error: Service account ... does not exist (HTTP 404)
+This means the Service Account credential stored in your GitHub Secrets has been deleted from Google Cloud or is invalid.
+
+**Fix:**
+1. Run `firebase init hosting:github` in your terminal.
+2. Overwrite the existing workflow files if asked.
+3. This command will create a **new** Service Account key.
+4. **If it fails to update GitHub Secrets automatically:**
+   - It will print the new key to your terminal (starts with `{"type": "service_account"...}`).
+   - Go to your GitHub Repository -> Settings -> Secrets and variables -> Actions.
+   - Update `FIREBASE_SERVICE_ACCOUNT_LIFESEED_75DFE` with the new key content.
 
 ### Error 400: redirect_uri_mismatch or Access Blocked
 This means your current website URL (e.g., `localhost:3000` or `https://xyz.idx.dev`) is not allowed by Firebase.
