@@ -9,9 +9,10 @@ interface PulseCardProps {
     pulse: Pulse;
     lightseed: Lightseed | null;
     onMatch: (p: Pulse) => void;
+    onView?: (p: Pulse) => void;
 }
 
-export const PulseCard = ({ pulse, lightseed, onMatch }: PulseCardProps) => {
+export const PulseCard = ({ pulse, lightseed, onMatch, onView }: PulseCardProps) => {
     const { t } = useLanguage();
     const [loved, setLoved] = useState(false);
     const [count, setCount] = useState(pulse.loveCount);
@@ -20,7 +21,8 @@ export const PulseCard = ({ pulse, lightseed, onMatch }: PulseCardProps) => {
         if (lightseed) isPulseLoved(pulse.id, lightseed.uid).then(setLoved);
     }, [pulse, lightseed]);
 
-    const handleLove = async () => {
+    const handleLove = async (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent opening detail view
         if (!lightseed) return;
         const newStatus = !loved;
         setLoved(newStatus);
@@ -28,8 +30,16 @@ export const PulseCard = ({ pulse, lightseed, onMatch }: PulseCardProps) => {
         await lovePulse(pulse.id, lightseed.uid);
     }
 
+    const handleMatchClick = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent opening detail view
+        onMatch(pulse);
+    }
+
     return (
-        <div className={`bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 group ${pulse.type === 'GROWTH' ? 'ring-2 ring-emerald-500 ring-opacity-20' : ''}`}>
+        <div 
+            onClick={() => onView && onView(pulse)}
+            className={`bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 group cursor-pointer ${pulse.type === 'GROWTH' ? 'ring-2 ring-emerald-500 ring-opacity-20' : ''}`}
+        >
              <div className="relative h-36 bg-slate-100 overflow-hidden group">
                  <div className="absolute top-2 right-2 z-20 flex space-x-1">
                     {pulse.type === 'GROWTH' && <span className="bg-emerald-100 text-emerald-600 text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm">GROWTH</span>}
@@ -61,7 +71,7 @@ export const PulseCard = ({ pulse, lightseed, onMatch }: PulseCardProps) => {
                     </button>
 
                     {lightseed && lightseed.uid !== pulse.authorId && !pulse.isMatch && (
-                        <button onClick={() => onMatch(pulse)} className="text-[10px] bg-slate-50 text-slate-500 hover:bg-sky-50 hover:text-sky-600 px-2 py-1 rounded transition-colors flex items-center space-x-1">
+                        <button onClick={handleMatchClick} className="text-[10px] bg-slate-50 text-slate-500 hover:bg-sky-50 hover:text-sky-600 px-2 py-1 rounded transition-colors flex items-center space-x-1">
                             <Icons.Link /> <span>Match</span>
                         </button>
                     )}

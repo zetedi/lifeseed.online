@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, FormEvent, useRef } from 'react';
 import {
   signInWithGoogle,
@@ -35,6 +36,7 @@ import { PulseCard } from './components/PulseCard';
 import { ForestMap } from './components/ForestMap';
 import { LifetreeDetail } from './components/LifetreeDetail';
 import { VisionDetail } from './components/VisionDetail';
+import { PulseDetail } from './components/PulseDetail';
 import { GrowthPlayerModal } from './components/GrowthPlayerModal';
 import { OracleChat } from './components/OracleChat';
 import { LightseedProfile } from './components/LightseedProfile';
@@ -49,6 +51,7 @@ const AppContent = () => {
     const [matches, setMatches] = useState<MatchProposal[]>([]);
     const [selectedTree, setSelectedTree] = useState<Lifetree | null>(null);
     const [selectedVision, setSelectedVision] = useState<Vision | null>(null);
+    const [selectedPulse, setSelectedPulse] = useState<Pulse | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [hasApiKey, setHasApiKey] = useState(false);
     
@@ -489,7 +492,13 @@ const AppContent = () => {
                 ) : tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && tab !== 'about' && (
                     <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {data.map((item) => (
-                             <PulseCard key={item.id} pulse={item} lightseed={lightseed} onMatch={(p: Pulse) => { setMatchCandidate(p); setShowPulseModal(true); }} />
+                             <PulseCard 
+                                key={item.id} 
+                                pulse={item} 
+                                lightseed={lightseed} 
+                                onMatch={(p: Pulse) => { setMatchCandidate(p); setShowPulseModal(true); }}
+                                onView={(p: Pulse) => setSelectedPulse(p)} 
+                            />
                         ))}
                     </div>
                 )}
@@ -541,6 +550,13 @@ const AppContent = () => {
             {selectedVision && (
                 <DetailWrapper>
                     <VisionDetail vision={selectedVision} onClose={() => setSelectedVision(null)} />
+                </DetailWrapper>
+            )}
+            
+            {/* NEW: Pulse Detail Overlay */}
+            {selectedPulse && (
+                <DetailWrapper>
+                    <PulseDetail pulse={selectedPulse} onClose={() => setSelectedPulse(null)} />
                 </DetailWrapper>
             )}
 
