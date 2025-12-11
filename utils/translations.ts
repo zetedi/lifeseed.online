@@ -1,10 +1,4 @@
-
-
-
-
-
-
-export type Language = 'en' | 'es' | 'hu' | 'qu' | 'sa' | 'ja' | 'ar';
+export type Language = 'en' | 'es' | 'hu' | 'qu' | 'sa' | 'ja' | 'ar' | 'sw';
 
 export const translations = {
   en: {
@@ -377,5 +371,58 @@ export const translations = {
     joined: "انضم",
     total_love: "مجموع الحب",
     edit: "تعديل"
+  },
+  sw: {
+    forest: "Msitu",
+    pulses: "Mapigo",
+    visions: "Maono",
+    oracle: "Mtabiri",
+    sign_in: "Ingia",
+    sign_out: "Toka",
+    emit_pulse: "Toa Pigo",
+    plant_lifetree: "Panda Mti wa Uzima",
+    create_vision: "Ono Jipya",
+    connect_roots: "Tunahitaji mizizi (mahali) yako.",
+    tree_name: "Jina la Mti",
+    short_title: "Kichwa Kifupi",
+    vision: "Ono (Mwili)",
+    title: "Kichwa",
+    body: "Mwili",
+    webpage: "Kiungo cha Wavuti",
+    mint: "Piga Chapa (Mint)",
+    generate: "Zalisha",
+    generate_image: "Zalisha picha",
+    ai_prompt: "Tumia AI",
+    dormant: "Udongo umelala hapa.",
+    latest_hash: "Hash ya Karibuni",
+    prev: "KABLA",
+    block: "KITALU",
+    loading: "Inapakia...",
+    login_failed: "Kuingia kumeshindikana",
+    geo_error: "Hitilafu ya Mahali",
+    planting: "Inapanda...",
+    minting: "Inapiga...",
+    creating: "Inatengeneza...",
+    map_view: "Ramani",
+    list_view: "Orodha",
+    upload_photo: "Pakia Picha",
+    validated: "IMETHIBITISHWA",
+    unvalidated: "Haijathibitishwa",
+    validate_action: "Thibitisha Mti",
+    cant_plant: "Lazima uthibitishe mti wako kabla ya kupanda mwingine.",
+    match_pulse: "Linganisha / Tuma?",
+    quick_snap: "Picha Haraka",
+    back_forest: "Rudi Msituni",
+    genesis: "Hash ya Mwanzo",
+    steward: "Msimamizi",
+    location: "Mahali",
+    tree_details: "Maelezo ya Mti",
+    profile: "Wasifu",
+    my_trees: "Miti Yangu",
+    my_pulses: "Mapigo Yangu",
+    my_matches: "Mechi Zangu",
+    joined: "Amejiunga",
+    total_love: "Upendo Jumla",
+    edit: "Hariri"
   }
 };

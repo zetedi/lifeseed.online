@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { type Language } from '../utils/translations';
@@ -104,6 +103,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                             <option className="text-slate-800" value="sa">SA</option>
                             <option className="text-slate-800" value="ja">JA</option>
                             <option className="text-slate-800" value="ar">AR</option>
+                            <option className="text-slate-800" value="sw">SW</option>
                         </select>
 
                         {lightseed ? (
@@ -154,6 +154,11 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                             <option className="text-slate-800" value="en">EN</option>
                             <option className="text-slate-800" value="es">ES</option>
                             <option className="text-slate-800" value="hu">HU</option>
+                            <option className="text-slate-800" value="qu">QU</option>
+                            <option className="text-slate-800" value="sa">SA</option>
+                            <option className="text-slate-800" value="ja">JA</option>
+                            <option className="text-slate-800" value="ar">AR</option>
+                            <option className="text-slate-800" value="sw">SW</option>
                         </select>
                         <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white p-2 relative hover:bg-white/10 rounded">
                             {isMenuOpen ? <Icons.Close /> : <Icons.Menu />}
