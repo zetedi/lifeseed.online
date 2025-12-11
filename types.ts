@@ -11,6 +11,7 @@ export interface Lifetree {
   id: string;
   ownerId: string;
   name: string;
+  shortTitle?: string;
   body: string; // The Vision
   imageUrl?: string;
   latitude?: number;

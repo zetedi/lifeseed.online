@@ -11,6 +11,8 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
    
    const [isEditing, setIsEditing] = useState(false);
    const [editName, setEditName] = useState(tree.name);
+   const [editShortTitle, setEditShortTitle] = useState(tree.shortTitle || '');
+   const [editBody, setEditBody] = useState(tree.body);
    const [editLat, setEditLat] = useState(tree.latitude || 0);
    const [editLng, setEditLng] = useState(tree.longitude || 0);
    const [isSaving, setIsSaving] = useState(false);
@@ -20,17 +22,15 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
        try {
            await updateLifetree(tree.id, {
                name: editName,
+               shortTitle: editShortTitle,
+               body: editBody,
                latitude: Number(editLat),
                longitude: Number(editLng)
            });
            setIsEditing(false);
-           // Simple visual feedback; real data will update via parent fetch or listeners in a real app, 
-           // but here we just rely on parent reload or optimistic UI if we had it.
-           // For this structure, we close edit mode. The parent might need a refresh trigger 
-           // but since we don't have a callback for that here easily without prop drilling, 
-           // we assume the user will see changes next time or we alert.
-           // Ideally, we'd call a refresh function passed from parent.
-           // For now, let's just close.
+           // In a real app with proper state management, this would auto-refresh. 
+           // Since we are using simple props, the user sees the optimistic update 
+           // or waits for a re-fetch.
        } catch (e) {
            console.error(e);
            alert("Failed to save changes.");
@@ -46,11 +46,16 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                     <Icons.ArrowLeft />
                     <span>{t('back_forest')}</span>
                 </button>
-                <h2 className="text-xl font-light tracking-wide truncate max-w-[200px]">{isEditing ? "Editing Tree" : tree.name}</h2>
-                <div className="w-8">
+                <div className="flex flex-col items-center">
+                    <h2 className="text-xl font-light tracking-wide truncate max-w-[200px]">{isEditing ? "Editing..." : tree.name}</h2>
+                    {tree.shortTitle && !isEditing && <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">{tree.shortTitle}</span>}
+                </div>
+                {/* CHANGED: More prominent Edit button */}
+                <div className="min-w-[80px] flex justify-end">
                     {isOwner && !isEditing && (
-                        <button onClick={() => setIsEditing(true)} className="text-sm text-slate-500 hover:text-emerald-600 underline">
-                            Edit
+                        <button onClick={() => setIsEditing(true)} className="bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 px-4 py-2 rounded-full font-bold text-sm shadow-sm transition-colors flex items-center gap-1 border border-slate-200">
+                            <Icons.Sparkles /> 
+                            <span>{t('edit')}</span>
                         </button>
                     )}
                 </div> 
@@ -79,13 +84,25 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                             </button>
                         </div>
                         {isEditing ? (
-                            <input 
-                                className="text-3xl md:text-4xl font-thin tracking-tight bg-black/30 border-b border-white/50 text-white w-full focus:outline-none p-1"
-                                value={editName}
-                                onChange={(e) => setEditName(e.target.value)}
-                            />
+                            <div className="space-y-2 max-w-md">
+                                <input 
+                                    className="text-3xl md:text-4xl font-thin tracking-tight bg-black/40 border-b border-white/50 text-white w-full focus:outline-none p-1"
+                                    value={editName}
+                                    onChange={(e) => setEditName(e.target.value)}
+                                    placeholder="Tree Name"
+                                />
+                                <input 
+                                    className="text-sm font-bold tracking-widest uppercase bg-black/40 border-b border-white/50 text-white w-full focus:outline-none p-1"
+                                    value={editShortTitle}
+                                    onChange={(e) => setEditShortTitle(e.target.value)}
+                                    placeholder="SHORT TITLE"
+                                />
+                            </div>
                         ) : (
-                            <h1 className="text-4xl md:text-5xl font-thin tracking-tight">{tree.name}</h1>
+                            <>
+                                <h1 className="text-4xl md:text-5xl font-thin tracking-tight">{tree.name}</h1>
+                                {tree.shortTitle && <p className="text-emerald-300 font-bold tracking-widest text-sm uppercase mt-1">{tree.shortTitle}</p>}
+                            </>
                         )}
                     </div>
                 </div>
@@ -100,9 +117,17 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                                 <Icons.FingerPrint />
                                 <span className="ml-2">{t('vision')}</span>
                             </h3>
-                            <p className="text-lg font-serif italic text-slate-700 leading-relaxed">
-                                "{tree.body}"
-                            </p>
+                            {isEditing ? (
+                                <textarea 
+                                    className="w-full h-40 border border-slate-300 rounded p-2 text-lg font-serif italic text-slate-700 leading-relaxed focus:ring-2 focus:ring-emerald-500 outline-none"
+                                    value={editBody}
+                                    onChange={(e) => setEditBody(e.target.value)}
+                                />
+                            ) : (
+                                <p className="text-lg font-serif italic text-slate-700 leading-relaxed">
+                                    "{tree.body}"
+                                </p>
+                            )}
                         </div>
 
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
@@ -149,7 +174,7 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                                     <button onClick={handleSave} disabled={isSaving} className="flex-1 bg-emerald-600 text-white py-2 rounded-lg text-sm font-bold hover:bg-emerald-700">
                                         {isSaving ? "Saving..." : "Save Changes"}
                                     </button>
-                                    <button onClick={() => { setIsEditing(false); setEditName(tree.name); setEditLat(tree.latitude); setEditLng(tree.longitude); }} disabled={isSaving} className="flex-1 bg-slate-200 text-slate-700 py-2 rounded-lg text-sm font-bold hover:bg-slate-300">
+                                    <button onClick={() => { setIsEditing(false); setEditName(tree.name); setEditShortTitle(tree.shortTitle || ''); setEditBody(tree.body); setEditLat(tree.latitude); setEditLng(tree.longitude); }} disabled={isSaving} className="flex-1 bg-slate-200 text-slate-700 py-2 rounded-lg text-sm font-bold hover:bg-slate-300">
                                         Cancel
                                     </button>
                                 </div>

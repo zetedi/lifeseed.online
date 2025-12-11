@@ -96,7 +96,7 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                             {/* Create Tree Button for Validated Users */}
                             {allValidated && (
                                 <button onClick={onPlant} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-transform active:scale-95 flex items-center space-x-2">
-                                    <Icons.Leaf />
+                                    <Icons.Tree />
                                     <span>Create Tree</span>
                                 </button>
                             )}
@@ -164,7 +164,7 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                                 {allValidated && (
                                      <div onClick={onPlant} className="border-2 border-dashed border-slate-300 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:border-emerald-500 hover:bg-slate-50 min-h-[100px] text-slate-400 hover:text-emerald-600 transition-all group">
                                         <div className="bg-slate-100 p-3 rounded-full group-hover:bg-emerald-100 transition-colors">
-                                             <Icons.Leaf />
+                                             <Icons.Tree />
                                         </div>
                                         <span className="font-bold mt-2 text-sm">Plant New Tree</span>
                                         <span className="text-[10px] text-slate-400">Expand your network</span>

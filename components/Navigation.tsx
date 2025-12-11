@@ -59,7 +59,8 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                         <div className="bg-white p-1 rounded-full shadow-inner animate-[pulse_3s_ease-in-out_infinite]">
                              <Logo width={40} height={40} />
                         </div>
-                        <span className="font-light text-2xl tracking-wide lowercase hidden sm:block text-white drop-shadow-sm">.seed</span>
+                        {/* CHANGED: Removed hidden sm:block to make visible on mobile */}
+                        <span className="font-light text-2xl tracking-wide lowercase block text-white drop-shadow-sm">.seed</span>
                     </div>
 
                     <div className="hidden md:flex space-x-3 rtl:space-x-reverse">
@@ -109,7 +110,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                             <>
                                 {myTreesCount === 0 ? (
                                      <button onClick={onPlant} className={`hidden sm:flex ${colors.grass} hover:bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
-                                        <Icons.Leaf />
+                                        <Icons.Tree />
                                         <span className="ml-1">{t('plant_lifetree')}</span>
                                     </button>
                                 ) : activeTab === 'visions' ? (
@@ -187,7 +188,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                             <>
                                 {myTreesCount === 0 ? (
                                     <button onClick={() => { onPlant(); setIsMenuOpen(false); }} className={`${colors.grass} text-white px-3 py-3 rounded-md text-base font-medium mt-4 flex items-center`}>
-                                        <Icons.Leaf />
+                                        <Icons.Tree />
                                         <span className="ml-2">{t('plant_lifetree')}</span>
                                     </button>
                                 ) : (

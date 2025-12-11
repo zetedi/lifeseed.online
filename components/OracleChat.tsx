@@ -23,7 +23,8 @@ export const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
         try {
             const c = createOracleChat();
             setChat(c);
-            setMessages([{role: 'model', text: "Greetings. I am the Oracle. Can I assist you with the vision of your Lifetree, help you find its location, or shall we decide on the journey ahead?"}]);
+            // Updated greeting as requested
+            setMessages([{role: 'model', text: "I am the Oracle. Can I assist you with the vision of your Lifetree, help you find its location, or shall we simply decide on the journey ahead?"}]);
         } catch(e) {
             setMessages([{role: 'model', text: "The connection to the spirits (API) is severed."}]);
         }

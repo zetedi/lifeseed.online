@@ -1,6 +1,9 @@
 
 
 
+
+
+
 export type Language = 'en' | 'es' | 'hu' | 'qu' | 'sa' | 'ja' | 'ar';
 
 export const translations = {
@@ -16,6 +19,7 @@ export const translations = {
     create_vision: "New Vision",
     connect_roots: "We need your roots (location) to plant a tree.",
     tree_name: "Tree Name",
+    short_title: "Short Title",
     vision: "Vision (The Body)",
     title: "Title",
     body: "Body",
@@ -53,7 +57,8 @@ export const translations = {
     my_pulses: "My Pulses",
     my_matches: "My Matches",
     joined: "Joined",
-    total_love: "Total Love"
+    total_love: "Total Love",
+    edit: "Edit"
   },
   es: {
     forest: "Bosque",
@@ -67,6 +72,7 @@ export const translations = {
     create_vision: "Nueva Visión",
     connect_roots: "Necesitamos tus raíces (ubicación) para plantar.",
     tree_name: "Nombre del Árbol",
+    short_title: "Título Corto",
     vision: "Visión (El Cuerpo)",
     title: "Título",
     body: "Cuerpo",
@@ -104,7 +110,8 @@ export const translations = {
     my_pulses: "Mis Pulsos",
     my_matches: "Mis Coincidencias",
     joined: "Se unió",
-    total_love: "Amor Total"
+    total_love: "Amor Total",
+    edit: "Editar"
   },
   hu: {
     forest: "Erdő",
@@ -118,6 +125,7 @@ export const translations = {
     create_vision: "Új Vízió",
     connect_roots: "Szükségünk van a gyökereire (helyzetére) az ültetéshez.",
     tree_name: "Fa Neve",
+    short_title: "Rövid Cím",
     vision: "Jövőkép (A Test)",
     title: "Cím",
     body: "Szöveg",
@@ -155,7 +163,8 @@ export const translations = {
     my_pulses: "Pulzusaim",
     my_matches: "Párosításaim",
     joined: "Csatlakozott",
-    total_love: "Összes Szeretet"
+    total_love: "Összes Szeretet",
+    edit: "Szerkesztés"
   },
   qu: { 
     forest: "Sach'a-sach'a",
@@ -169,6 +178,7 @@ export const translations = {
     create_vision: "Musuq Musquy",
     connect_roots: "Saphikiykita (tiyayniykita) necesitayku.",
     tree_name: "Mallki Suti",
+    short_title: "Huch'uy Suti",
     vision: "Rikuy (Ukhu)",
     title: "Suti",
     body: "Kurku",
@@ -206,7 +216,8 @@ export const translations = {
     my_pulses: "Sirkaykuna",
     my_matches: "Tupachisqaykuna",
     joined: "Yaykurqa",
-    total_love: "Tukuy Munakuynin"
+    total_love: "Tukuy Munakuynin",
+    edit: "Allichay"
   },
   sa: { 
     forest: "अरण्यम् (Araṇyam)",
@@ -220,6 +231,7 @@ export const translations = {
     create_vision: "नूतन दृष्टिः",
     connect_roots: "वृक्षारोपणार्थं भवतः मूलानि आवश्यकानि।",
     tree_name: "वृक्षनाम",
+    short_title: "लघु शीर्षकम्",
     vision: "दर्शनम्",
     title: "शीर्षकम्",
     body: "शरीरम्",
@@ -257,7 +269,8 @@ export const translations = {
     my_pulses: "मम स्पन्दनानि",
     my_matches: "मम मेलनानि",
     joined: "सम्बद्धः",
-    total_love: "सम्पूर्ण स्नेह"
+    total_love: "सम्पूर्ण स्नेह",
+    edit: "सम्पादयतु"
   },
   ja: {
     forest: "森",
@@ -271,6 +284,7 @@ export const translations = {
     create_vision: "新しいビジョン",
     connect_roots: "位置情報が必要です。",
     tree_name: "木の名前",
+    short_title: "短いタイトル",
     vision: "ビジョン",
     title: "タイトル",
     body: "本文",
@@ -308,7 +322,8 @@ export const translations = {
     my_pulses: "私のパルス",
     my_matches: "私のマッチ",
     joined: "参加日",
-    total_love: "総ラブ数"
+    total_love: "総ラブ数",
+    edit: "編集"
   },
   ar: {
     forest: "الغابة",
@@ -322,6 +337,7 @@ export const translations = {
     create_vision: "رؤية جديدة",
     connect_roots: "نحتاج لموقعك.",
     tree_name: "اسم الشجرة",
+    short_title: "العنوان القصير",
     vision: "الرؤية",
     title: "العنوان",
     body: "المحتوى",
@@ -359,6 +375,7 @@ export const translations = {
     my_pulses: "نبضاتي",
     my_matches: "مطابقاتي",
     joined: "انضم",
-    total_love: "مجموع الحب"
+    total_love: "مجموع الحب",
+    edit: "تعديل"
   }
 };

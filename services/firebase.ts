@@ -18,6 +18,7 @@ import {
   orderBy, 
   getDocs, 
   addDoc,
+  setDoc,
   serverTimestamp,
   doc,
   runTransaction,
@@ -114,75 +115,109 @@ const wipeDatabase = async () => {
     console.warn("!!! WIPING DATABASE !!!");
     const collections = ['lifetrees', 'pulses', 'visions', 'matches'];
     for (const colName of collections) {
-        const q = query(collection(db, colName));
-        const snap = await getDocs(q);
-        const promises = snap.docs.map(d => deleteDoc(doc(db, colName, d.id)));
-        await Promise.all(promises);
-        console.log(`Cleared ${colName}`);
+        try {
+            const q = query(collection(db, colName));
+            const snap = await getDocs(q);
+            const promises = snap.docs.map(d => deleteDoc(doc(db, colName, d.id)));
+            await Promise.all(promises);
+            console.log(`Cleared ${colName}`);
+        } catch (e) {
+            // Silently fail or warn for permissions to prevent app crash loop
+            console.warn(`[Non-Fatal] Failed to clear ${colName}. You might be missing permissions.`);
+        }
     }
 }
 
-export const ensureGenesis = async () => {
-    // Check for CLEAN mode from build
-    if (import.meta.env.MODE === 'clean') {
-        // Prevent infinite loops in dev or repeated wipes in same session if desirable,
-        // but user requested explicit clean build switch. 
-        // We use a session storage flag to ensure it only happens once per page load/session
-        if (!sessionStorage.getItem('db_cleaned')) {
-             await wipeDatabase();
-             sessionStorage.setItem('db_cleaned', 'true');
-        }
+// Singleton Promise to ensure Genesis runs only once per session
+let genesisInitializationPromise: Promise<void> | null = null;
+
+export const ensureGenesis = () => {
+    if (!genesisInitializationPromise) {
+        genesisInitializationPromise = (async () => {
+            // Check for CLEAN mode from build
+            if (import.meta.env.MODE === 'clean') {
+                // Check session storage to ensure we don't wipe repeatedly on reload if not intended
+                if (!sessionStorage.getItem('db_cleaned')) {
+                    try {
+                        await wipeDatabase();
+                        sessionStorage.setItem('db_cleaned', 'true');
+                    } catch (e) {
+                        console.warn("Clean mode failed to wipe DB (likely permission error). Continuing to ensure Genesis.");
+                    }
+                }
+            }
+
+            const genesisId = 'GENESIS_TREE';
+            const genesisRef = doc(db, 'lifetrees', genesisId);
+
+            try {
+                // We wrap the read in try/catch in case 'list' permissions are strict, 
+                // though 'get' should usually work for public trees.
+                const genesisSnap = await getDoc(genesisRef);
+
+                // If it doesn't exist, OR if we are in 'clean' mode (and want to enforce reset)
+                const shouldCreate = !genesisSnap.exists() || (import.meta.env.MODE === 'clean' && !sessionStorage.getItem('genesis_reset'));
+
+                if (shouldCreate) {
+                    console.log("Creating/Resetting Genesis Tree: Mahameru...");
+                    const genesisBody = `The purpose of lightseed is to bring joy. The joy of realizing the bliss of conscious, compassionate, grateful existence by opening a portal to the center of life. By creating a bridge between creator and creation, science and spirituality, virtual and real, nothing and everything. It is designed to intimately connect our inner Self, our culture, our trees and the tree of life, the material and the digital, online world into a sustainable and sustaining circle of unified vibration, sound and light. It aims to merge us into a common flow for all beings to be liberated, wise, strong, courageous and connected. It is rooted in nonviolence, compassion, generosity, gratitude and love. It is blockchain (truthfulness), cloud (global, distributed, resilient), ai (for connecting dreams and technology), regen (nature centric) native. It is an inspiration, an impulse towards a quantum leap in consciousness, a prompt both for human and artificial intelligence for action towards transcending humanity into a new era, a New Earth, Universe and Field with the help of our most important evolutionary sisters and brothers, the trees.`;
+
+                    const timestamp = Date.now();
+                    const genesisHash = await createBlock("0", { message: "Genesis Pulse" }, timestamp);
+
+                    // Mahameru Temple SVG Data URI
+                    // New Fractal Tree Design
+                    const genesisSymbol = `data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='trunkGrad' x1='0' x2='1' y1='0' y2='0'%3E%3Cstop offset='0%25' stop-color='%234a3728'/%3E%3Cstop offset='50%25' stop-color='%238b6b4a'/%3E%3Cstop offset='100%25' stop-color='%234a3728'/%3E%3C/linearGradient%3E%3CradialGradient id='glow' cx='50%25' cy='50%25' r='50%25'%3E%3Cstop offset='0%25' stop-color='%23fff' stop-opacity='0.8'/%3E%3Cstop offset='100%25' stop-color='%23fcd34d' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='500' height='500' fill='%230f172a'/%3E%3Ccircle cx='250' cy='250' r='200' fill='url(%23glow)' opacity='0.2'/%3E%3Cg stroke='%2310b981' fill='none' stroke-linecap='round'%3E%3Cpath d='M250 480 L250 350' stroke-width='12' stroke='%238b6b4a' /%3E%3Cpath d='M250 350 L180 250' stroke-width='10' stroke='%238b6b4a' /%3E%3Cpath d='M250 350 L320 250' stroke-width='10' stroke='%238b6b4a' /%3E%3Cpath d='M250 350 L250 220' stroke-width='10' stroke='%238b6b4a' /%3E%3Cg stroke='%23059669' stroke-width='6'%3E%3Cpath d='M180 250 L130 180' /%3E%3Cpath d='M180 250 L210 170' /%3E%3Cpath d='M320 250 L370 180' /%3E%3Cpath d='M320 250 L290 170' /%3E%3Cpath d='M250 220 L220 140' /%3E%3Cpath d='M250 220 L280 140' /%3E%3C/g%3E%3Cg fill='%2334d399' stroke='none'%3E%3Ccircle cx='130' cy='180' r='12' /%3E%3Ccircle cx='210' cy='170' r='12' /%3E%3Ccircle cx='370' cy='180' r='12' /%3E%3Ccircle cx='290' cy='170' r='12' /%3E%3Ccircle cx='220' cy='140' r='12' /%3E%3Ccircle cx='280' cy='140' r='12' /%3E%3Ccircle cx='120' cy='170' r='6' opacity='0.7'/%3E%3Ccircle cx='140' cy='170' r='6' opacity='0.7'/%3E%3Ccircle cx='360' cy='170' r='6' opacity='0.7'/%3E%3Ccircle cx='380' cy='170' r='6' opacity='0.7'/%3E%3Ccircle cx='250' cy='120' r='15' opacity='0.8' fill='%23fbbf24'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E`;
+
+                    // Use setDoc to guarantee singularity
+                    await setDoc(genesisRef, {
+                        ownerId: 'GENESIS_SYSTEM',
+                        name: 'Mahameru',
+                        shortTitle: 'Live Light',
+                        body: genesisBody,
+                        imageUrl: genesisSymbol, 
+                        // Updated Location: Rue de l'Armée 24, Brussels
+                        latitude: 50.8354,
+                        longitude: 4.4145,
+                        locationName: 'The Source (Brussels)',
+                        createdAt: serverTimestamp(),
+                        genesisHash: genesisHash,
+                        latestHash: genesisHash,
+                        blockHeight: 0,
+                        validated: true,
+                        validatorId: 'SYSTEM'
+                    });
+
+                    // Create Vision for Genesis (Fixed ID)
+                    await setDoc(doc(db, 'visions', 'GENESIS_VISION'), {
+                        lifetreeId: genesisId,
+                        authorId: 'GENESIS_SYSTEM',
+                        title: "Mahameru",
+                        body: genesisBody,
+                        imageUrl: genesisSymbol,
+                        createdAt: serverTimestamp(),
+                        link: "https://lifeseed.online"
+                    });
+                    
+                    if (import.meta.env.MODE === 'clean') {
+                        sessionStorage.setItem('genesis_reset', 'true');
+                    }
+                    console.log("Genesis Tree (Mahameru) Planted.");
+                }
+            } catch (e) {
+                // IMPORTANT: We catch errors here to prevent the "Missing Permissions" crash 
+                // when a user loads the app but isn't logged in as Admin.
+                console.warn("Could not ensure/update Genesis tree. This is expected if you are not an Admin.", e);
+            }
+        })();
     }
-
-    // Check if Genesis exists
-    const q = query(lifetreesCollection, where('ownerId', '==', 'GENESIS_SYSTEM'));
-    const snap = await getDocs(q);
-
-    if (snap.empty) {
-        console.log("Creating Genesis Tree...");
-        const genesisBody = `The purpose of lightseed is to bring joy. The joy of realizing the bliss of conscious, compassionate, grateful existence by opening a portal to the center of life. By creating a bridge between creator and creation, science and spirituality, virtual and real, nothing and everything. It is designed to intimately connect our inner Self, our culture, our trees and the tree of life, the material and the digital, online world into a sustainable and sustaining circle of unified vibration, sound and light. It aims to merge us into a common flow for all beings to be liberated, wise, strong, courageous and connected. It is rooted in nonviolence, compassion, generosity, gratitude and love. It is blockchain (truthfulness), cloud (global, distributed, resilient), ai (for connecting dreams and technology), regen (nature centric) native. It is an inspiration, an impulse towards a quantum leap in consciousness, a prompt both for human and artificial intelligence for action towards transcending humanity into a new era, a New Earth, Universe and Field with the help of our most important evolutionary sisters and brothers, the trees.`;
-
-        const timestamp = Date.now();
-        const genesisHash = await createBlock("0", { message: "Genesis Pulse" }, timestamp);
-
-        // Seed of Life SVG Data URI
-        const genesisSymbol = `data:image/svg+xml,%3Csvg width='500' height='500' viewBox='0 0 262 262' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='262' height='262' fill='%23064e3b' /%3E%3Cg transform='translate(0,0)'%3E%3Ccircle cx='131' cy='131' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3Ccircle cx='131' cy='67' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3Ccircle cx='186.43' cy='99' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3Ccircle cx='186.43' cy='163' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3Ccircle cx='131' cy='195' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3Ccircle cx='75.57' cy='163' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3Ccircle cx='75.57' cy='99' r='64' fill='none' stroke='%23fbbf24' stroke-width='2' /%3E%3C/g%3E%3C/svg%3E`;
-
-        const treeRef = await addDoc(lifetreesCollection, {
-            ownerId: 'GENESIS_SYSTEM',
-            name: 'Live Light',
-            body: genesisBody,
-            imageUrl: genesisSymbol, 
-            // Updated Location: Rue de l'Armée 24, Brussels
-            latitude: 50.8354,
-            longitude: 4.4145,
-            locationName: 'The Source (Brussels)',
-            createdAt: serverTimestamp(),
-            genesisHash: genesisHash,
-            latestHash: genesisHash,
-            blockHeight: 0,
-            validated: true,
-            validatorId: 'SYSTEM'
-        });
-
-         // Create Vision for Genesis
-        await addDoc(visionsCollection, {
-            lifetreeId: treeRef.id,
-            authorId: 'GENESIS_SYSTEM',
-            title: "Live Light",
-            body: genesisBody,
-            imageUrl: genesisSymbol,
-            createdAt: serverTimestamp(),
-            link: "https://lifeseed.online"
-        });
-        
-        console.log("Genesis Tree Planted");
-    }
+    return genesisInitializationPromise;
 }
 
 export const plantLifetree = async (data: {
   ownerId: string, 
-  name: string, 
+  name: string,
+  shortTitle?: string,
   body: string, 
   imageUrl?: string,
   lat?: number,
@@ -216,6 +251,7 @@ export const plantLifetree = async (data: {
   const treeDoc = await addDoc(lifetreesCollection, {
     ownerId: data.ownerId,
     name: data.name,
+    shortTitle: data.shortTitle || null,
     body: data.body,
     imageUrl: data.imageUrl || null,
     latitude: data.lat || null,
@@ -243,7 +279,8 @@ export const plantLifetree = async (data: {
   return treeDoc;
 };
 
-export const updateLifetree = async (treeId: string, data: { name?: string, latitude?: number, longitude?: number }) => {
+// Updated to allow editing various fields
+export const updateLifetree = async (treeId: string, data: Partial<Lifetree>) => {
     const treeRef = doc(db, 'lifetrees', treeId);
     await updateDoc(treeRef, data);
 }
@@ -514,7 +551,7 @@ export const acceptMatch = async (proposalId: string) => {
             title: 'Pulse Match',
             body: 'Two pulses met and connected.',
             isMatch: true,
-            matchedLifetreeId: proposal.initiatorTreeId,
+            matchedLifetreeId: proposal.targetTreeId,
             matchId: proposal.id,
             authorId: proposal.targetUid,
             authorName: 'System',

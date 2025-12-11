@@ -67,6 +67,7 @@ const AppContent = () => {
 
     // Form State
     const [treeName, setTreeName] = useState('');
+    const [treeShortTitle, setTreeShortTitle] = useState('');
     const [treeSeed, setTreeSeed] = useState('');
     const [treeBio, setTreeBio] = useState('');
     const [treeImageUrl, setTreeImageUrl] = useState('');
@@ -223,13 +224,27 @@ const AppContent = () => {
 
         navigator.geolocation.getCurrentPosition(async (pos) => {
             try {
-                await plantLifetree({ ownerId: lightseed.uid, name: finalName, body: treeBio, imageUrl: treeImageUrl, lat: pos.coords.latitude, lng: pos.coords.longitude });
+                await plantLifetree({ 
+                    ownerId: lightseed.uid, 
+                    name: finalName, 
+                    shortTitle: treeShortTitle,
+                    body: treeBio, 
+                    imageUrl: treeImageUrl, 
+                    lat: pos.coords.latitude, 
+                    lng: pos.coords.longitude 
+                });
                 await refreshTrees(); setShowPlantModal(false); loadContent(true);
             } catch(e: any) { alert(e.message); }
             finally { setIsSubmitting(false); }
         }, (err) => {
             // Handle geo error fallback
-             plantLifetree({ ownerId: lightseed.uid, name: finalName, body: treeBio, imageUrl: treeImageUrl })
+             plantLifetree({ 
+                 ownerId: lightseed.uid, 
+                 name: finalName, 
+                 shortTitle: treeShortTitle,
+                 body: treeBio, 
+                 imageUrl: treeImageUrl 
+             })
                 .then(async () => { await refreshTrees(); setShowPlantModal(false); loadContent(true); })
                 .catch(e => alert(e.message))
                 .finally(() => setIsSubmitting(false));
@@ -533,6 +548,7 @@ const AppContent = () => {
                     <form onSubmit={handlePlant} className="space-y-4">
                         <ImagePicker onChange={(e: any) => handleImageUpload(e.target.files[0], `trees/${Date.now()}`).then(setTreeImageUrl)} previewUrl={treeImageUrl} loading={uploading} />
                         <input className="block w-full border p-2 rounded" placeholder={`Tree Name (Default: ${lightseed?.displayName || 'Anonymous'})`} value={treeName} onChange={e=>setTreeName(e.target.value)} />
+                        <input className="block w-full border p-2 rounded" placeholder={t('short_title')} value={treeShortTitle} onChange={e=>setTreeShortTitle(e.target.value)} />
                         <div className="flex gap-2"><input className="flex-1 border p-2 rounded" placeholder="Seed keywords" value={treeSeed} onChange={e=>setTreeSeed(e.target.value)} /><button type="button" onClick={() => generateLifetreeBio(treeSeed).then(setTreeBio)} disabled={uploading} className="bg-emerald-600 text-white px-4 rounded disabled:opacity-50">AI</button></div>
                         <textarea className="block w-full border p-2 rounded" placeholder="Vision" value={treeBio} onChange={e=>setTreeBio(e.target.value)} required />
                         <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-emerald-600 text-white py-2 rounded disabled:opacity-50">
@@ -602,5 +618,10 @@ const AppContent = () => {
     );
 };
 
-const App = () => (<LanguageProvider><AppContent /></LanguageProvider>);
+const App = () => (
+    <LanguageProvider>
+        <AppContent />
+    </LanguageProvider>
+);
+
 export default App;

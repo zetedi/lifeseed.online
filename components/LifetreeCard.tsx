@@ -83,6 +83,7 @@ export const LifetreeCard = ({ tree, myActiveTree, onValidate, onPlayGrowth, onQ
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent pointer-events-none"></div>
                 <div className="absolute bottom-2 left-3 right-3 text-white pointer-events-none">
                     <h3 className="text-lg font-light tracking-wide truncate">{tree.name}</h3>
+                    {tree.shortTitle && <p className="text-xs font-bold text-emerald-200 uppercase tracking-widest truncate">{tree.shortTitle}</p>}
                     <div className="flex items-center text-xs text-slate-300 mt-0.5 space-x-2 rtl:space-x-reverse">
                          <span className="px-1.5 py-0 border border-slate-500 rounded-full text-[9px] bg-slate-800/50 backdrop-blur">
                             Block: {tree.blockHeight || 0}
