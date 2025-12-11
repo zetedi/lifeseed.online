@@ -377,6 +377,7 @@ const AppContent = () => {
                     hasApiKey={hasApiKey}
                     onCheckKey={checkKey}
                     pendingMatchesCount={matches.length}
+                    myTreesCount={myTrees.length}
                 />
                 <LightseedProfile 
                     lightseed={lightseed} 
@@ -384,6 +385,7 @@ const AppContent = () => {
                     onViewTree={(tree: Lifetree) => setSelectedTree(tree)}
                     onDeleteTree={handleDeleteTree}
                     onViewVision={(v: Vision) => setSelectedVision(v)}
+                    onPlant={() => setShowPlantModal(true)}
                 />
             </div>
         )
@@ -409,6 +411,7 @@ const AppContent = () => {
                 hasApiKey={hasApiKey}
                 onCheckKey={checkKey}
                 pendingMatchesCount={matches.length}
+                myTreesCount={myTrees.length}
             />
             
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 min-h-[80vh]">

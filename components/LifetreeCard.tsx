@@ -102,7 +102,7 @@ export const LifetreeCard = ({ tree, myActiveTree, onValidate, onPlayGrowth, onQ
                     
                     <div className="flex space-x-2">
                         {myActiveTree && myActiveTree.validated && !tree.validated && myActiveTree.id !== tree.id && (
-                            <button onClick={(e) => { e.stopPropagation(); onValidate(tree.id); }} className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-100 transition-colors uppercase font-bold">
+                            <button onClick={(e) => { e.stopPropagation(); onValidate(tree.id); }} className="text-[10px] bg-emerald-600 text-white px-3 py-1.5 rounded-full shadow hover:bg-emerald-700 transition-colors uppercase font-bold tracking-wider animate-pulse">
                                 {t('validate_action')}
                             </button>
                         )}

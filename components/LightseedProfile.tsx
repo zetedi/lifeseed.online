@@ -7,7 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Icons } from './ui/Icons';
 import { VisionCard } from './VisionCard';
 
-export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree, onViewVision }: any) => {
+export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree, onViewVision, onPlant }: any) => {
     const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState<'trees' | 'pulses' | 'visions' | 'history'>('trees');
     const [pulses, setPulses] = useState<Pulse[]>([]);
@@ -18,6 +18,11 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
     // AI Matchmaking State
     const [synergies, setSynergies] = useState<VisionSynergy[]>([]);
     const [analyzing, setAnalyzing] = useState(false);
+
+    // Check if any tree is validated to show source code
+    const hasValidatedTree = myTrees.some((t: Lifetree) => t.validated);
+    // Check if all trees are validated to allow planting new ones
+    const allValidated = myTrees.length > 0 && myTrees.every((t: Lifetree) => t.validated);
 
     useEffect(() => {
         if (!lightseed) return;
@@ -92,6 +97,30 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
             </div>
 
             <div className="max-w-4xl mx-auto px-4 -mt-12">
+                
+                {hasValidatedTree && (
+                    <div className="bg-slate-800 text-white p-4 rounded-xl shadow-lg border border-slate-700 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center space-x-3">
+                            <div className="bg-emerald-500 p-2 rounded-full">
+                                <Icons.ShieldCheck />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-emerald-400">Contributor Access Unlocked</h4>
+                                <p className="text-xs text-slate-300">You are a validated node in the LifeSeed network.</p>
+                            </div>
+                        </div>
+                        <a 
+                            href="https://github.com/zetedi/lifeseed.online" 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-mono transition-colors border border-white/10 flex items-center space-x-2"
+                        >
+                            <span>zetedi/lifeseed.online</span>
+                            <Icons.Link />
+                        </a>
+                    </div>
+                )}
+
                 <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden min-h-[500px]">
                     <div className="flex border-b border-slate-100 overflow-x-auto">
                         <button 
@@ -123,11 +152,21 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                     <div className="p-6">
                         {activeTab === 'trees' && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {allValidated && (
+                                     <div onClick={onPlant} className="border-2 border-dashed border-slate-300 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:border-emerald-500 hover:bg-slate-50 min-h-[100px] text-slate-400 hover:text-emerald-600 transition-all group">
+                                        <div className="bg-slate-100 p-3 rounded-full group-hover:bg-emerald-100 transition-colors">
+                                             <Icons.Leaf />
+                                        </div>
+                                        <span className="font-bold mt-2 text-sm">Plant New Tree</span>
+                                        <span className="text-[10px] text-slate-400">Expand your network</span>
+                                    </div>
+                                )}
+
                                 {myTrees.length === 0 ? (
-                                    <p className="text-slate-400 text-center py-10">No trees planted yet.</p>
+                                    !allValidated && <p className="text-slate-400 text-center py-10 col-span-full">No trees planted yet.</p>
                                 ) : (
                                     myTrees.map((tree: Lifetree) => (
-                                        <div key={tree.id} onClick={() => onViewTree(tree)} className="border border-slate-200 rounded-lg p-4 hover:shadow-md cursor-pointer transition-all flex items-center justify-between group">
+                                        <div key={tree.id} onClick={() => onViewTree(tree)} className="border border-slate-200 rounded-lg p-4 hover:shadow-md cursor-pointer transition-all flex items-center justify-between group bg-white">
                                             <div className="flex items-center space-x-4">
                                                 <img src={tree.imageUrl || 'https://via.placeholder.com/100'} className="w-16 h-16 rounded object-cover bg-slate-100" />
                                                 <div>

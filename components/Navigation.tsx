@@ -19,9 +19,10 @@ interface NavigationProps {
     hasApiKey: boolean;
     onCheckKey: () => void;
     pendingMatchesCount: number;
+    myTreesCount: number;
 }
 
-export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout, onProfile, onCreateVision, hasApiKey, onCheckKey, pendingMatchesCount }: NavigationProps) => {
+export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout, onProfile, onCreateVision, hasApiKey, onCheckKey, pendingMatchesCount, myTreesCount = 0 }: NavigationProps) => {
     const { t, language, setLanguage } = useLanguage();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -106,7 +107,12 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
 
                         {lightseed ? (
                             <>
-                                {activeTab === 'visions' ? (
+                                {myTreesCount === 0 ? (
+                                     <button onClick={onPlant} className={`hidden sm:flex ${colors.grass} hover:bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
+                                        <Icons.Leaf />
+                                        <span className="ml-1">{t('plant_lifetree')}</span>
+                                    </button>
+                                ) : activeTab === 'visions' ? (
                                      <button onClick={onCreateVision} className={`hidden sm:flex ${colors.earth} hover:bg-[#78350f] text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
                                         {t('create_vision')}
                                     </button>
@@ -179,10 +185,17 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                         ))}
                          {lightseed ? (
                             <>
-                                <button onClick={() => { onPulse(); setIsMenuOpen(false); }} className={`${colors.earth} text-white px-3 py-3 rounded-md text-base font-medium mt-4 flex items-center`}>
-                                    <PulsatingDot />
-                                    {t('emit_pulse')}
-                                </button>
+                                {myTreesCount === 0 ? (
+                                    <button onClick={() => { onPlant(); setIsMenuOpen(false); }} className={`${colors.grass} text-white px-3 py-3 rounded-md text-base font-medium mt-4 flex items-center`}>
+                                        <Icons.Leaf />
+                                        <span className="ml-2">{t('plant_lifetree')}</span>
+                                    </button>
+                                ) : (
+                                    <button onClick={() => { onPulse(); setIsMenuOpen(false); }} className={`${colors.earth} text-white px-3 py-3 rounded-md text-base font-medium mt-4 flex items-center`}>
+                                        <PulsatingDot />
+                                        {t('emit_pulse')}
+                                    </button>
+                                )}
                                 <button onClick={onLogout} className="text-left px-3 py-3 text-slate-400">
                                     {t('sign_out')}
                                 </button>
