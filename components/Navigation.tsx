@@ -52,7 +52,8 @@ const LanguageSelector = ({ language, setLanguage }: { language: Language, setLa
         <div className="relative" ref={ref}>
             <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center space-x-1 px-2 py-1 rounded hover:bg-white/10 transition-colors group"
+                dir="ltr"
+                className="flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 transition-colors group"
                 title="Change Language"
             >
                 <span className="text-emerald-100 group-hover:text-white transition-colors"><Icons.Globe /></span>
@@ -147,7 +148,8 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                         <div className="bg-white p-1 rounded-full shadow-inner animate-[pulse_3s_ease-in-out_infinite]">
                              <Logo width={40} height={40} />
                         </div>
-                        <span className="font-light text-2xl tracking-wide lowercase block text-white drop-shadow-sm">.seed</span>
+                        {/* Force LTR to prevent dot from moving to the end in Arabic */}
+                        <span dir="ltr" className="font-light text-2xl tracking-wide lowercase block text-white drop-shadow-sm">.seed</span>
                     </div>
 
                     {/* Desktop Menu */}

@@ -127,8 +127,8 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                     <span>{t('back_forest')}</span>
                 </button>
                 <div className="flex flex-col items-center">
-                    <h2 className="text-xl font-light tracking-wide truncate max-w-[200px]">{isEditing ? "Editing..." : tree.name}</h2>
-                    {tree.shortTitle && !isEditing && <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">{tree.shortTitle}</span>}
+                    <h2 dir="auto" className="text-xl font-light tracking-wide truncate max-w-[200px]">{isEditing ? "Editing..." : tree.name}</h2>
+                    {tree.shortTitle && !isEditing && <span dir="auto" className="text-xs text-slate-400 font-bold uppercase tracking-widest">{tree.shortTitle}</span>}
                 </div>
                 <div className="min-w-[80px] flex justify-end">
                     {/* EDIT Button: Allowed for Owner OR Guardian */}
@@ -171,12 +171,14 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                         {isEditing ? (
                             <div className="space-y-2 max-w-md">
                                 <input 
+                                    dir="auto"
                                     className="text-3xl md:text-4xl font-thin tracking-tight bg-black/40 border-b border-white/50 text-white w-full focus:outline-none p-1"
                                     value={editName}
                                     onChange={(e) => setEditName(e.target.value)}
                                     placeholder="Tree Name"
                                 />
                                 <input 
+                                    dir="auto"
                                     className="text-sm font-bold tracking-widest uppercase bg-black/40 border-b border-white/50 text-white w-full focus:outline-none p-1"
                                     value={editShortTitle}
                                     onChange={(e) => setEditShortTitle(e.target.value)}
@@ -185,8 +187,8 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                             </div>
                         ) : (
                             <>
-                                <h1 className="text-4xl md:text-5xl font-thin tracking-tight">{tree.name}</h1>
-                                {tree.shortTitle && <p className="text-emerald-300 font-bold tracking-widest text-sm uppercase mt-1">{tree.shortTitle}</p>}
+                                <h1 dir="auto" className="text-4xl md:text-5xl font-thin tracking-tight">{tree.name}</h1>
+                                {tree.shortTitle && <p dir="auto" className="text-emerald-300 font-bold tracking-widest text-sm uppercase mt-1">{tree.shortTitle}</p>}
                             </>
                         )}
                     </div>
@@ -204,12 +206,13 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                             </h3>
                             {isEditing ? (
                                 <textarea 
+                                    dir="auto"
                                     className="w-full h-40 border border-slate-300 rounded p-2 text-lg font-serif italic text-slate-700 leading-relaxed focus:ring-2 focus:ring-emerald-500 outline-none"
                                     value={editBody}
                                     onChange={(e) => setEditBody(e.target.value)}
                                 />
                             ) : (
-                                <p className="text-lg font-serif italic text-slate-700 leading-relaxed">
+                                <p dir="auto" className="text-lg font-serif italic text-slate-700 leading-relaxed">
                                     "{tree.body}"
                                 </p>
                             )}
@@ -220,11 +223,11 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                             
                             <div className="flex justify-between py-2 border-b border-slate-50">
                                 <span className="text-slate-500 text-sm">{t('steward')}</span>
-                                <span className="text-slate-800 font-mono text-sm">{isNature ? "Nature (System)" : tree.ownerId.substring(0, 10) + "..."}</span>
+                                <span dir="ltr" className="text-slate-800 font-mono text-sm">{isNature ? "Nature (System)" : tree.ownerId.substring(0, 10) + "..."}</span>
                             </div>
                             <div className="flex justify-between py-2 border-b border-slate-50">
                                 <span className="text-slate-500 text-sm">{t('location')}</span>
-                                <span className="text-slate-800 font-mono text-sm">{tree.locationName}</span>
+                                <span dir="auto" className="text-slate-800 font-mono text-sm">{tree.locationName}</span>
                             </div>
                             <div className="py-2 border-b border-slate-50">
                                 <span className="text-slate-500 text-sm block mb-1">GPS Coordinates</span>
@@ -289,11 +292,11 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                                         </div>
                                         <div className="break-all">
                                             <p className="text-slate-500 mb-1 uppercase text-[10px]">{t('genesis')}</p>
-                                            <p className="text-emerald-500/80">{tree.genesisHash}</p>
+                                            <p className="text-emerald-500/80" dir="ltr">{tree.genesisHash}</p>
                                         </div>
                                         <div className="break-all">
                                             <p className="text-slate-500 mb-1 uppercase text-[10px]">{t('latest_hash')}</p>
-                                            <p className="text-emerald-300">{tree.latestHash}</p>
+                                            <p className="text-emerald-300" dir="ltr">{tree.latestHash}</p>
                                         </div>
                                     </div>
                                 </div>

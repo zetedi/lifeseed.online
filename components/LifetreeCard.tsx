@@ -96,11 +96,11 @@ export const LifetreeCard = ({ tree, myActiveTree, currentUserId, onValidate, on
 
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent pointer-events-none"></div>
                 <div className="absolute bottom-2 left-3 right-3 text-white pointer-events-none">
-                    <h3 className="text-lg font-light tracking-wide truncate">{tree.name}</h3>
-                    {tree.shortTitle && <p className="text-xs font-bold text-emerald-200 uppercase tracking-widest truncate">{tree.shortTitle}</p>}
+                    <h3 dir="auto" className="text-lg font-light tracking-wide truncate">{tree.name}</h3>
+                    {tree.shortTitle && <p dir="auto" className="text-xs font-bold text-emerald-200 uppercase tracking-widest truncate">{tree.shortTitle}</p>}
                     <div className="flex items-center text-xs text-slate-300 mt-0.5 space-x-2 rtl:space-x-reverse">
                          {!tree.isNature && <span className="px-1.5 py-0 border border-slate-500 rounded-full text-[9px] bg-slate-800/50 backdrop-blur">
-                            Block: {tree.blockHeight || 0}
+                            {t('block')}: {tree.blockHeight || 0}
                         </span>}
                         {tree.isNature && tree.status === 'DANGER' && (
                             <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-[9px] font-bold animate-pulse">DANGER</span>
@@ -109,7 +109,7 @@ export const LifetreeCard = ({ tree, myActiveTree, currentUserId, onValidate, on
                 </div>
             </div>
             <div className="p-3">
-                <p className="text-slate-600 text-xs font-light italic leading-relaxed line-clamp-2 h-8">
+                <p dir="auto" className="text-slate-600 text-xs font-light italic leading-relaxed line-clamp-2 h-8">
                     "{tree.body}"
                 </p>
                 <div className="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center">

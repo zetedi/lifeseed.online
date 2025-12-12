@@ -18,7 +18,7 @@ export const VisionCard = ({ vision }: { vision: Vision }) => {
                 {/* Title Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent pointer-events-none"></div>
                 <div className="absolute bottom-2 left-3 right-3 text-white pointer-events-none">
-                     <h3 className="text-lg font-light tracking-wide truncate">{vision.title}</h3>
+                     <h3 dir="auto" className="text-lg font-light tracking-wide truncate">{vision.title}</h3>
                 </div>
 
                 {vision.link && (
@@ -28,7 +28,7 @@ export const VisionCard = ({ vision }: { vision: Vision }) => {
                 )}
             </div>
             <div className="p-3">
-                <p className="text-slate-600 text-xs font-light italic leading-relaxed line-clamp-2 h-8">
+                <p dir="auto" className="text-slate-600 text-xs font-light italic leading-relaxed line-clamp-2 h-8">
                     "{vision.body}"
                 </p>
                 {/* Matches layout height roughly by having same p-3 and h-8 text */}

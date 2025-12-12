@@ -72,7 +72,7 @@ export const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
                 {messages.map((m, i) => (
                     <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
+                        <div dir="auto" className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
                             m.role === 'user' 
                                 ? 'bg-indigo-600 text-white rounded-br-none' 
                                 : 'bg-white border border-slate-200 text-slate-700 rounded-bl-none shadow-sm'

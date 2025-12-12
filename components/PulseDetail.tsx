@@ -17,7 +17,7 @@ export const PulseDetail = ({ pulse, onClose }: { pulse: Pulse; onClose: () => v
                     <Icons.ArrowLeft />
                     <span>Back</span>
                 </button>
-                <span className="text-xs font-mono text-slate-400">ERC-721: {pulse.id.substring(0,8)}...</span>
+                <span dir="ltr" className="text-xs font-mono text-slate-400">ERC-721: {pulse.id.substring(0,8)}...</span>
             </div>
 
             <div className="max-w-5xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -48,13 +48,13 @@ export const PulseDetail = ({ pulse, onClose }: { pulse: Pulse; onClose: () => v
 
                     {/* Metadata Card */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <h1 className="text-2xl font-bold text-slate-800 mb-2">{pulse.title}</h1>
+                        <h1 dir="auto" className="text-2xl font-bold text-slate-800 mb-2">{pulse.title}</h1>
                         <div className="flex items-center space-x-2 text-sm text-slate-500 mb-4">
                              <span>By {pulse.authorName}</span>
                              <span>•</span>
                              <span>{new Date(pulse.createdAt?.toMillis()).toLocaleDateString()}</span>
                         </div>
-                        <p className="text-slate-600 leading-relaxed whitespace-pre-wrap font-serif">
+                        <p dir="auto" className="text-slate-600 leading-relaxed whitespace-pre-wrap font-serif">
                             {pulse.body}
                         </p>
                     </div>

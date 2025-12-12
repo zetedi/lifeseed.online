@@ -29,7 +29,7 @@ export const VisionDetail = ({ vision, onClose }: { vision: Vision; onClose: () 
                      )}
                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                      <div className="absolute bottom-6 left-6 right-6 text-white">
-                         <h1 className="text-4xl md:text-5xl font-light tracking-tight mb-2">{vision.title}</h1>
+                         <h1 dir="auto" className="text-4xl md:text-5xl font-light tracking-tight mb-2">{vision.title}</h1>
                          <div className="flex items-center space-x-2 text-white/80 text-sm">
                              <span>Created by {vision.authorId.substring(0,6)}...</span>
                          </div>
@@ -41,7 +41,7 @@ export const VisionDetail = ({ vision, onClose }: { vision: Vision; onClose: () 
                          <Icons.FingerPrint /> 
                          <span className="ml-2">The Vision</span>
                      </h2>
-                     <p className="text-xl font-serif text-slate-700 leading-relaxed whitespace-pre-wrap">
+                     <p dir="auto" className="text-xl font-serif text-slate-700 leading-relaxed whitespace-pre-wrap">
                          {vision.body}
                      </p>
                      

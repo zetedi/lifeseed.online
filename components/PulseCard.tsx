@@ -56,12 +56,12 @@ export const PulseCard = ({ pulse, lightseed, onMatch, onView }: PulseCardProps)
                 
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent pointer-events-none"></div>
                 <div className="absolute bottom-2 left-3 right-3 text-white pointer-events-none">
-                     <h3 className="text-sm font-bold tracking-wide truncate">{pulse.title}</h3>
+                     <h3 dir="auto" className="text-sm font-bold tracking-wide truncate">{pulse.title}</h3>
                 </div>
             </div>
 
             <div className="p-3">
-                <p className="text-slate-600 text-xs font-light leading-relaxed line-clamp-2 h-8">
+                <p dir="auto" className="text-slate-600 text-xs font-light leading-relaxed line-clamp-2 h-8">
                     {pulse.body}
                 </p>
                 <div className="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center">
