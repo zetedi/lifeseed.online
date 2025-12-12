@@ -71,7 +71,7 @@ export const LifetreeCard = ({ tree, myActiveTree, currentUserId, onValidate, on
                         className="flex items-center space-x-1.5 bg-white/95 text-slate-800 px-2.5 py-1 rounded-full shadow-md hover:bg-white hover:text-emerald-700 transition-all active:scale-95"
                     >
                         {uploading ? <div className="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div> : <Icons.Camera />}
-                        <span className="text-[10px] font-bold uppercase tracking-wider">{t('quick_snap')}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider hidden sm:inline">{t('quick_snap')}</span>
                     </button>
                     <input 
                         type="file" 

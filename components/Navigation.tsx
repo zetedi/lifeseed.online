@@ -66,8 +66,8 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
         return `text-emerald-100 hover:text-white hover:bg-white/10`;
     }
 
-    const mainTabs = ['forest', 'visions', 'pulses', 'matches'];
-    const moreTabs = ['oracle', 'about'];
+    const mainTabs = ['forest', 'visions', 'pulses'];
+    const moreTabs = ['matches', 'oracle', 'about'];
 
     // Desktop Tab Renderer
     const renderTab = (tabKey: string) => (
@@ -98,33 +98,42 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                     </div>
 
                     {/* Desktop Menu */}
-                    <div className="hidden md:flex flex-1 justify-center space-x-1 lg:space-x-3 rtl:space-x-reverse px-4 overflow-hidden">
+                    {/* Removed overflow-hidden to allow dropdown to show */}
+                    <div className="hidden md:flex flex-1 justify-center space-x-1 lg:space-x-3 rtl:space-x-reverse px-4">
                         {/* Always visible on md+ */}
                         {mainTabs.map(tabKey => renderTab(tabKey))}
 
-                        {/* Visible on Large Screens Only */}
-                        <div className="hidden lg:flex space-x-3 rtl:space-x-reverse">
+                        {/* Visible on Large Screens Only (xl+) */}
+                        <div className="hidden xl:flex space-x-3 rtl:space-x-reverse">
                             {moreTabs.map(tabKey => renderTab(tabKey))}
                         </div>
 
-                        {/* Dropdown for Medium Screens (hides Oracle/About) */}
-                        <div className="lg:hidden relative" ref={moreRef}>
+                        {/* Dropdown for Medium/Large Screens (hides overflow items until XL) */}
+                        <div className="xl:hidden relative z-50" ref={moreRef}>
                             <button 
                                 onClick={() => setIsMoreOpen(!isMoreOpen)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center space-x-1 ${['oracle', 'about'].includes(activeTab) ? 'bg-white/20 text-white' : 'text-emerald-100 hover:text-white hover:bg-white/10'}`}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center space-x-1 ${moreTabs.includes(activeTab) ? 'bg-white/20 text-white' : 'text-emerald-100 hover:text-white hover:bg-white/10'}`}
                             >
                                 <span>{t('more')}</span>
                                 <svg className={`w-4 h-4 transition-transform ${isMoreOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                {pendingMatchesCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                    </span>
+                                )}
                             </button>
                             {isMoreOpen && (
-                                <div className="absolute top-full mt-2 right-0 w-40 bg-emerald-800 rounded-xl shadow-xl border border-emerald-700 overflow-hidden py-2 flex flex-col z-50">
+                                <div className="absolute top-full mt-2 right-0 w-48 bg-emerald-800 rounded-xl shadow-xl border border-emerald-700 overflow-hidden py-2 flex flex-col z-50 animate-in fade-in zoom-in-95 duration-100">
                                     {moreTabs.map(tabKey => (
                                         <button
                                             key={tabKey}
                                             onClick={() => { setTab(tabKey); setIsMoreOpen(false); }}
-                                            className={`text-left px-4 py-3 text-sm font-medium hover:bg-white/10 ${activeTab === tabKey ? 'text-white bg-white/10' : 'text-emerald-100'}`}
+                                            className={`text-left px-4 py-3 text-sm font-medium hover:bg-white/10 flex justify-between items-center ${activeTab === tabKey ? 'text-white bg-white/10' : 'text-emerald-100'}`}
                                         >
                                             {t(tabKey as any)}
+                                            {tabKey === 'matches' && pendingMatchesCount > 0 && (
+                                                <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{pendingMatchesCount}</span>
+                                            )}
                                         </button>
                                     ))}
                                 </div>
