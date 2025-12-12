@@ -9,16 +9,19 @@ import { colors } from '../utils/theme';
 interface LifetreeCardProps {
     tree: Lifetree;
     myActiveTree: Lifetree | null;
+    currentUserId?: string;
     onValidate: (id: string) => Promise<void>;
     onPlayGrowth: (id: string) => void;
     onQuickSnap: (id: string, file: File) => Promise<void>;
     onView: (tree: Lifetree) => void;
 }
 
-export const LifetreeCard = ({ tree, myActiveTree, onValidate, onPlayGrowth, onQuickSnap, onView }: LifetreeCardProps) => {
+export const LifetreeCard = ({ tree, myActiveTree, currentUserId, onValidate, onPlayGrowth, onQuickSnap, onView }: LifetreeCardProps) => {
     const { t } = useLanguage();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
+    
+    const isGuardian = currentUserId && tree.guardians && tree.guardians.includes(currentUserId);
 
     const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -37,19 +40,30 @@ export const LifetreeCard = ({ tree, myActiveTree, onValidate, onPlayGrowth, onQ
     return (
         <div 
             onClick={() => onView(tree)}
-            className={`bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 group relative cursor-pointer ${tree.validated ? 'ring-1 ring-emerald-100' : ''}`}
+            className={`bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 group relative cursor-pointer ${tree.isNature ? 'ring-1 ring-sky-100' : (tree.validated ? 'ring-1 ring-emerald-100' : '')}`}
         >
-             <div className="absolute top-2 right-2 z-20 flex space-x-2">
-                {tree.validated && (
+             <div className="absolute top-2 right-2 z-20 flex flex-col items-end space-y-1">
+                {tree.isNature ? (
+                    <span className="bg-sky-100 text-sky-800 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center shadow-sm">
+                        <Icons.Shield />
+                        <span className="ml-1 text-[9px]">NATURE</span>
+                    </span>
+                ) : tree.validated && (
                     <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center shadow-sm">
                         <Icons.ShieldCheck />
                         <span className="ml-1 text-[9px]">{t('validated')}</span>
                     </span>
                 )}
+                {isGuardian && (
+                    <span className="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center shadow-sm w-fit">
+                        <Icons.Shield />
+                        <span className="ml-1 text-[9px]">Guardian</span>
+                    </span>
+                )}
             </div>
 
-            {/* Quick Snap */}
-             {myActiveTree && myActiveTree.id === tree.id && (
+            {/* Quick Snap - For Owner OR Guardian */}
+             {(myActiveTree && myActiveTree.id === tree.id) || isGuardian ? (
                  <div className="absolute top-2 left-2 z-20">
                      <button 
                         onClick={triggerUpload} 
@@ -69,7 +83,7 @@ export const LifetreeCard = ({ tree, myActiveTree, onValidate, onPlayGrowth, onQ
                         onClick={(e) => e.stopPropagation()}
                     />
                  </div>
-            )}
+            ) : null}
 
             <div className="relative h-36 bg-slate-200 overflow-hidden group">
                 {tree.imageUrl ? (
@@ -85,9 +99,12 @@ export const LifetreeCard = ({ tree, myActiveTree, onValidate, onPlayGrowth, onQ
                     <h3 className="text-lg font-light tracking-wide truncate">{tree.name}</h3>
                     {tree.shortTitle && <p className="text-xs font-bold text-emerald-200 uppercase tracking-widest truncate">{tree.shortTitle}</p>}
                     <div className="flex items-center text-xs text-slate-300 mt-0.5 space-x-2 rtl:space-x-reverse">
-                         <span className="px-1.5 py-0 border border-slate-500 rounded-full text-[9px] bg-slate-800/50 backdrop-blur">
+                         {!tree.isNature && <span className="px-1.5 py-0 border border-slate-500 rounded-full text-[9px] bg-slate-800/50 backdrop-blur">
                             Block: {tree.blockHeight || 0}
-                        </span>
+                        </span>}
+                        {tree.isNature && tree.status === 'DANGER' && (
+                            <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-[9px] font-bold animate-pulse">DANGER</span>
+                        )}
                     </div>
                 </div>
             </div>
@@ -102,7 +119,7 @@ export const LifetreeCard = ({ tree, myActiveTree, onValidate, onPlayGrowth, onQ
                     </button>
                     
                     <div className="flex space-x-2">
-                        {myActiveTree && myActiveTree.validated && !tree.validated && myActiveTree.id !== tree.id && (
+                        {myActiveTree && myActiveTree.validated && !tree.validated && myActiveTree.id !== tree.id && !tree.isNature && (
                             <button onClick={(e) => { e.stopPropagation(); onValidate(tree.id); }} className="text-[10px] bg-emerald-600 text-white px-3 py-1.5 rounded-full shadow hover:bg-emerald-700 transition-colors uppercase font-bold tracking-wider animate-pulse">
                                 {t('validate_action')}
                             </button>

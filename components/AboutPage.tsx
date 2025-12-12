@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Logo from './Logo';
 import { Icons } from './ui/Icons';
@@ -650,7 +651,6 @@ export const AboutPage = () => {
             {/* Header Area */}
             <div className="relative bg-gradient-to-b from-purple-900 to-slate-900 text-white py-16 px-4">
                 <div className="max-w-4xl mx-auto text-center">
-                    <h1 className="text-4xl md:text-6xl font-thin tracking-widest mb-4">.seed</h1>
                     <p className="text-purple-200 text-lg font-light tracking-wide">The Story, The Science, The Spirit</p>
                 </div>
             </div>

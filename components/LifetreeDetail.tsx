@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Icons } from './ui/Icons';
 import Logo from './Logo';
-import { updateLifetree } from '../services/firebase';
+import { updateLifetree, toggleGuardianship, setTreeStatus } from '../services/firebase';
 
 export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActiveTree, currentUserId }: any) => {
    const { t } = useLanguage();
    const isOwner = currentUserId === tree.ownerId;
+   const isNature = tree.isNature;
+   const isGuardian = tree.guardians && currentUserId && tree.guardians.includes(currentUserId);
    
    const [isEditing, setIsEditing] = useState(false);
    const [editName, setEditName] = useState(tree.name);
@@ -16,6 +18,10 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
    const [editLat, setEditLat] = useState(tree.latitude || 0);
    const [editLng, setEditLng] = useState(tree.longitude || 0);
    const [isSaving, setIsSaving] = useState(false);
+   
+   // Local state for immediate UI feedback on actions
+   const [localIsGuardian, setLocalIsGuardian] = useState(isGuardian);
+   const [localStatus, setLocalStatus] = useState(tree.status || 'HEALTHY');
 
    const handleSave = async () => {
        setIsSaving(true);
@@ -28,20 +34,94 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                longitude: Number(editLng)
            });
            setIsEditing(false);
-           // In a real app with proper state management, this would auto-refresh. 
-           // Since we are using simple props, the user sees the optimistic update 
-           // or waits for a re-fetch.
        } catch (e) {
            console.error(e);
            alert("Failed to save changes.");
        }
        setIsSaving(false);
    };
+
+   const handleToggleGuardian = async () => {
+       if (!currentUserId) return;
+       setIsSaving(true);
+       try {
+           await toggleGuardianship(tree.id, currentUserId, !localIsGuardian);
+           setLocalIsGuardian(!localIsGuardian);
+       } catch(e: any) { alert(e.message); }
+       setIsSaving(false);
+   }
+
+   const handleToggleDanger = async () => {
+       if (!localIsGuardian) return;
+       const newStatus = localStatus === 'DANGER' ? 'HEALTHY' : 'DANGER';
+       if (newStatus === 'DANGER' && !confirm("Are you sure you want to report this tree is in DANGER? This will alert all guardians.")) return;
+       
+       setIsSaving(true);
+       try {
+           await setTreeStatus(tree.id, newStatus);
+           setLocalStatus(newStatus);
+       } catch(e: any) { alert(e.message); }
+       setIsSaving(false);
+   }
+
+   const GuardianshipPanel = () => (
+        <div className={`bg-sky-50 text-sky-900 p-6 rounded-2xl shadow-inner border border-sky-100 overflow-hidden relative ${!isNature ? 'mt-6' : ''}`}>
+            <h3 className="text-sky-600 font-bold uppercase tracking-wider mb-4 flex items-center">
+                <Icons.Shield />
+                <span className="ml-2">Guardians</span>
+            </h3>
+            <p className="text-sm mb-6 text-sky-800/80">
+                This tree is protected by the community. Join the guardians to monitor its health and add memories.
+            </p>
+            
+            <div className="space-y-3">
+                {currentUserId ? (
+                    <button 
+                        onClick={handleToggleGuardian}
+                        disabled={isSaving}
+                        className={`w-full py-3 rounded-xl font-bold uppercase tracking-widest shadow-lg transition-all active:scale-95 ${localIsGuardian ? 'bg-slate-200 text-slate-600 hover:bg-slate-300' : 'bg-sky-600 text-white hover:bg-sky-700'}`}
+                    >
+                        {localIsGuardian ? "Leave Guardianship" : "Join Guardianship"}
+                    </button>
+                ) : (
+                    <p className="text-xs text-center italic">Sign in to become a guardian.</p>
+                )}
+
+                {localIsGuardian && (
+                    <button 
+                        onClick={handleToggleDanger}
+                        disabled={isSaving}
+                        className={`w-full py-3 rounded-xl font-bold uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center justify-center space-x-2 ${localStatus === 'DANGER' ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-red-500 text-white hover:bg-red-600'}`}
+                    >
+                        {localStatus === 'DANGER' ? (
+                            <><span>RESOLVE DANGER</span></>
+                        ) : (
+                            <><Icons.Siren /><span>REPORT DANGER</span></>
+                        )}
+                    </button>
+                )}
+            </div>
+            <div className="mt-4 pt-4 border-t border-sky-200 text-xs text-sky-600 font-mono">
+                Guardians: {tree.guardians ? tree.guardians.length + (localIsGuardian && !tree.guardians.includes(currentUserId) ? 1 : 0) - (!localIsGuardian && tree.guardians.includes(currentUserId) ? 1 : 0) : (localIsGuardian ? 1 : 0)}
+            </div>
+        </div>
+   );
     
     return (
         <div className="min-h-screen animate-in fade-in zoom-in-95 duration-300">
+            {/* Danger Banner */}
+            {localStatus === 'DANGER' && (
+                <div className="bg-red-600 text-white text-center py-2 font-bold animate-pulse sticky top-0 z-40">
+                    <div className="flex items-center justify-center space-x-2">
+                        <Icons.Siren />
+                        <span>ALERT: THIS TREE IS IN DANGER</span>
+                        <Icons.Siren />
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
-            <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 py-4 flex items-center justify-between">
+            <div className={`sticky ${localStatus === 'DANGER' ? 'top-10' : 'top-0'} z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 py-4 flex items-center justify-between`}>
                 <button onClick={onClose} className="flex items-center space-x-2 text-slate-600 hover:text-slate-900 font-medium">
                     <Icons.ArrowLeft />
                     <span>{t('back_forest')}</span>
@@ -50,9 +130,9 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                     <h2 className="text-xl font-light tracking-wide truncate max-w-[200px]">{isEditing ? "Editing..." : tree.name}</h2>
                     {tree.shortTitle && !isEditing && <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">{tree.shortTitle}</span>}
                 </div>
-                {/* CHANGED: More prominent Edit button */}
                 <div className="min-w-[80px] flex justify-end">
-                    {isOwner && !isEditing && (
+                    {/* EDIT Button: Allowed for Owner OR Guardian */}
+                    {((isOwner && !isNature) || isGuardian) && !isEditing && (
                         <button onClick={() => setIsEditing(true)} className="bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 px-4 py-2 rounded-full font-bold text-sm shadow-sm transition-colors flex items-center gap-1 border border-slate-200">
                             <Icons.Sparkles /> 
                             <span>{t('edit')}</span>
@@ -72,7 +152,12 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-6 left-6 text-white w-full pr-12">
                         <div className="flex items-center space-x-3 mb-2">
-                            {tree.validated && (
+                            {isNature ? (
+                                <span className="bg-sky-500 text-white text-xs px-2 py-0.5 rounded-full font-bold flex items-center">
+                                    <Icons.Shield />
+                                    <span className="ml-1">NATURE</span>
+                                </span>
+                            ) : tree.validated && (
                                 <span className="bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full font-bold flex items-center">
                                     <Icons.ShieldCheck />
                                     <span className="ml-1">{t('validated')}</span>
@@ -135,7 +220,7 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                             
                             <div className="flex justify-between py-2 border-b border-slate-50">
                                 <span className="text-slate-500 text-sm">{t('steward')}</span>
-                                <span className="text-slate-800 font-mono text-sm">{tree.ownerId.substring(0, 10)}...</span>
+                                <span className="text-slate-800 font-mono text-sm">{isNature ? "Nature (System)" : tree.ownerId.substring(0, 10) + "..."}</span>
                             </div>
                             <div className="flex justify-between py-2 border-b border-slate-50">
                                 <span className="text-slate-500 text-sm">{t('location')}</span>
@@ -166,7 +251,7 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                             </div>
                              <div className="flex justify-between py-2">
                                 <span className="text-slate-500 text-sm">Validator</span>
-                                <span className="text-slate-800 font-mono text-sm">{tree.validatorId ? tree.validatorId.substring(0, 8) + '...' : t('unvalidated')}</span>
+                                <span className="text-slate-800 font-mono text-sm">{tree.validatorId ? (tree.validatorId === 'GENESIS' || tree.validatorId === 'SYSTEM' ? 'Nature' : tree.validatorId.substring(0, 8) + '...') : t('unvalidated')}</span>
                             </div>
 
                             {isEditing && (
@@ -182,35 +267,42 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
                         </div>
                     </div>
 
-                    {/* Right: Blockchain */}
+                    {/* Right: Blockchain & Guard Panel */}
                     <div className="space-y-6">
-                         <div className="bg-slate-900 text-slate-300 p-6 rounded-2xl shadow-inner font-mono text-xs overflow-hidden relative">
-                            <div className="absolute top-0 right-0 p-4 opacity-10">
-                                <Logo width={100} height={100} />
-                            </div>
-                            <h3 className="text-emerald-400 font-bold uppercase tracking-wider mb-6 flex items-center">
-                                <Icons.Hash />
-                                <span className="ml-2">Blockchain Ledger</span>
-                            </h3>
+                        {isNature ? (
+                            <GuardianshipPanel />
+                        ) : (
+                            <>
+                                 <div className="bg-slate-900 text-slate-300 p-6 rounded-2xl shadow-inner font-mono text-xs overflow-hidden relative">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                                        <Logo width={100} height={100} />
+                                    </div>
+                                    <h3 className="text-emerald-400 font-bold uppercase tracking-wider mb-6 flex items-center">
+                                        <Icons.Hash />
+                                        <span className="ml-2">Blockchain Ledger</span>
+                                    </h3>
 
-                            <div className="space-y-4 relative z-10">
-                                <div>
-                                    <p className="text-slate-500 mb-1 uppercase text-[10px]">Block Height</p>
-                                    <p className="text-2xl text-white">{tree.blockHeight}</p>
+                                    <div className="space-y-4 relative z-10">
+                                        <div>
+                                            <p className="text-slate-500 mb-1 uppercase text-[10px]">Block Height</p>
+                                            <p className="text-2xl text-white">{tree.blockHeight}</p>
+                                        </div>
+                                        <div className="break-all">
+                                            <p className="text-slate-500 mb-1 uppercase text-[10px]">{t('genesis')}</p>
+                                            <p className="text-emerald-500/80">{tree.genesisHash}</p>
+                                        </div>
+                                        <div className="break-all">
+                                            <p className="text-slate-500 mb-1 uppercase text-[10px]">{t('latest_hash')}</p>
+                                            <p className="text-emerald-300">{tree.latestHash}</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="break-all">
-                                    <p className="text-slate-500 mb-1 uppercase text-[10px]">{t('genesis')}</p>
-                                    <p className="text-emerald-500/80">{tree.genesisHash}</p>
-                                </div>
-                                <div className="break-all">
-                                    <p className="text-slate-500 mb-1 uppercase text-[10px]">{t('latest_hash')}</p>
-                                    <p className="text-emerald-300">{tree.latestHash}</p>
-                                </div>
-                            </div>
-                        </div>
+                                <GuardianshipPanel />
+                            </>
+                        )}
 
-                        {/* Actions */}
-                        {myActiveTree && myActiveTree.validated && !tree.validated && myActiveTree.id !== tree.id && (
+                        {/* Validation Action */}
+                        {myActiveTree && myActiveTree.validated && !tree.validated && myActiveTree.id !== tree.id && !isNature && (
                              <button onClick={() => onValidate(tree.id)} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-emerald-200 transition-all active:scale-95">
                                 {t('validate_action')}
                             </button>

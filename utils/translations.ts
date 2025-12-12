@@ -56,7 +56,8 @@ export const translations = {
     joined: "Joined",
     total_love: "Total Love",
     edit: "Edit",
-    be_mother_tree: "Be a Mother Tree"
+    be_mother_tree: "Be a Mother Tree",
+    guard_tree: "Guard Tree"
   },
   es: {
     forest: "Bosque",
@@ -111,7 +112,8 @@ export const translations = {
     joined: "Se unió",
     total_love: "Amor Total",
     edit: "Editar",
-    be_mother_tree: "Sé un Árbol Madre"
+    be_mother_tree: "Sé un Árbol Madre",
+    guard_tree: "Guardar Árbol"
   },
   hu: {
     forest: "Erdő",
@@ -166,7 +168,8 @@ export const translations = {
     joined: "Csatlakozott",
     total_love: "Összes Szeretet",
     edit: "Szerkesztés",
-    be_mother_tree: "Légy Anyafa"
+    be_mother_tree: "Légy Anyafa",
+    guard_tree: "Fa Védelme"
   },
   qu: { 
     forest: "Sach'a-sach'a",
@@ -221,7 +224,8 @@ export const translations = {
     joined: "Yaykurqa",
     total_love: "Tukuy Munakuynin",
     edit: "Allichay",
-    be_mother_tree: "Mama Sach'a Kay"
+    be_mother_tree: "Mama Sach'a Kay",
+    guard_tree: "Mallki Amachay"
   },
   sa: { 
     forest: "अरण्यम् (Araṇyam)",
@@ -276,7 +280,8 @@ export const translations = {
     joined: "सम्बद्धः",
     total_love: "सम्पूर्ण स्नेह",
     edit: "सम्पादयतु",
-    be_mother_tree: "मातृवृक्षः भव"
+    be_mother_tree: "मातृवृक्षः भव",
+    guard_tree: "वृक्ष रक्षणम्"
   },
   ja: {
     forest: "森",
@@ -331,7 +336,8 @@ export const translations = {
     joined: "参加日",
     total_love: "総ラブ数",
     edit: "編集",
-    be_mother_tree: "マザーツリーになる"
+    be_mother_tree: "マザーツリーになる",
+    guard_tree: "木を守る"
   },
   ar: {
     forest: "الغابة",
@@ -386,7 +392,8 @@ export const translations = {
     joined: "انضم",
     total_love: "مجموع الحب",
     edit: "تعديل",
-    be_mother_tree: "كن شجرة أم"
+    be_mother_tree: "كن شجرة أم",
+    guard_tree: "احرس الشجرة"
   },
   sw: {
     forest: "Msitu",
@@ -441,6 +448,7 @@ export const translations = {
     joined: "Amejiunga",
     total_love: "Upendo Jumla",
     edit: "Hariri",
-    be_mother_tree: "Kuwa Mti Mama"
+    be_mother_tree: "Kuwa Mti Mama",
+    guard_tree: "Linda Mti"
   }
 };

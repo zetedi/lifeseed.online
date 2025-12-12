@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { type Language } from '../utils/translations';
@@ -19,11 +20,14 @@ interface NavigationProps {
     onCheckKey: () => void;
     pendingMatchesCount: number;
     myTreesCount: number;
+    dangerTreesCount: number;
 }
 
-export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout, onProfile, onCreateVision, hasApiKey, onCheckKey, pendingMatchesCount, myTreesCount = 0 }: NavigationProps) => {
+export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout, onProfile, onCreateVision, hasApiKey, onCheckKey, pendingMatchesCount, myTreesCount = 0, dangerTreesCount = 0 }: NavigationProps) => {
     const { t, language, setLanguage } = useLanguage();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    
+    const hasNotification = pendingMatchesCount > 0 || dangerTreesCount > 0;
 
     const handleApiKeySelect = async () => {
         const aiStudio = (window as any).aistudio;
@@ -109,7 +113,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
 
                         {lightseed ? (
                             <>
-                                {myTreesCount === 0 ? (
+                                {activeTab === 'forest' || myTreesCount === 0 ? (
                                      <button onClick={onPlant} className={`hidden sm:flex ${colors.grass} hover:bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
                                         <Icons.Tree />
                                         <span className="ml-1">{t('plant_lifetree')}</span>
@@ -125,12 +129,19 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                                     </button>
                                 )}
                                 
-                                <img 
-                                    src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} 
-                                    className="w-9 h-9 rounded-full border-2 border-emerald-700 cursor-pointer hover:border-emerald-500 transition-colors" 
-                                    alt="Seed" 
-                                    onClick={onProfile}
-                                />
+                                <div className="relative cursor-pointer" onClick={onProfile}>
+                                    <img 
+                                        src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} 
+                                        className="w-9 h-9 rounded-full border-2 border-emerald-700 hover:border-emerald-500 transition-colors" 
+                                        alt="Seed" 
+                                    />
+                                    {hasNotification && (
+                                        <span className="absolute top-0 right-0 flex h-3 w-3">
+                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-emerald-900"></span>
+                                        </span>
+                                    )}
+                                </div>
                                 <button onClick={onLogout} className="text-emerald-100 hover:text-white text-sm font-medium shadow-sm">{t('sign_out')}</button>
                             </>
                         ) : (
@@ -163,7 +174,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                         </select>
                         <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white p-2 relative hover:bg-white/10 rounded">
                             {isMenuOpen ? <Icons.Close /> : <Icons.Menu />}
-                            {pendingMatchesCount > 0 && !isMenuOpen && <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></div>}
+                            {hasNotification && !isMenuOpen && <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-emerald-900"></div>}
                         </button>
                     </div>
                 </div>
@@ -173,8 +184,11 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                  <div className="md:hidden bg-emerald-800 border-t border-emerald-700 pb-4 px-4 shadow-xl">
                     <div className="flex flex-col space-y-2 mt-4">
                          {lightseed && (
-                             <button onClick={() => { onProfile(); setIsMenuOpen(false); }} className="flex items-center space-x-3 px-3 py-3 rounded-md bg-black/20">
-                                <img src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} className="w-8 h-8 rounded-full" />
+                             <button onClick={() => { onProfile(); setIsMenuOpen(false); }} className="flex items-center space-x-3 px-3 py-3 rounded-md bg-black/20 relative">
+                                <div className="relative">
+                                    <img src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} className="w-8 h-8 rounded-full" />
+                                    {hasNotification && <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-black"></div>}
+                                </div>
                                 <span className="text-white font-medium">{t('profile')}</span>
                              </button>
                          )}
@@ -192,10 +206,14 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                         ))}
                          {lightseed ? (
                             <>
-                                {myTreesCount === 0 ? (
+                                {activeTab === 'forest' || myTreesCount === 0 ? (
                                     <button onClick={() => { onPlant(); setIsMenuOpen(false); }} className={`${colors.grass} text-white px-3 py-3 rounded-md text-base font-medium mt-4 flex items-center`}>
                                         <Icons.Tree />
                                         <span className="ml-2">{t('plant_lifetree')}</span>
+                                    </button>
+                                ) : activeTab === 'visions' ? (
+                                    <button onClick={() => { onCreateVision(); setIsMenuOpen(false); }} className={`${colors.earth} text-white px-3 py-3 rounded-md text-base font-medium mt-4 flex items-center`}>
+                                        {t('create_vision')}
                                     </button>
                                 ) : (
                                     <button onClick={() => { onPulse(); setIsMenuOpen(false); }} className={`${colors.earth} text-white px-3 py-3 rounded-md text-base font-medium mt-4 flex items-center`}>

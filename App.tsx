@@ -44,7 +44,7 @@ import { AboutPage } from './components/AboutPage';
 
 const AppContent = () => {
     const { t } = useLanguage();
-    const { lightseed, myTrees, activeTree, loading: authLoading, refreshTrees } = useLifeseed();
+    const { lightseed, myTrees, guardedTrees, activeTree, loading: authLoading, refreshTrees } = useLifeseed();
     const [tab, setTab] = useState('forest');
     const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
     const [data, setData] = useState<any[]>([]);
@@ -67,6 +67,8 @@ const AppContent = () => {
     const [showGrowthPlayer, setShowGrowthPlayer] = useState<string | null>(null);
     const [matchCandidate, setMatchCandidate] = useState<Pulse | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showNatureTrees, setShowNatureTrees] = useState(true);
+    const [showUserTrees, setShowUserTrees] = useState(true);
 
     // Form State
     const [treeName, setTreeName] = useState('');
@@ -74,6 +76,7 @@ const AppContent = () => {
     const [treeSeed, setTreeSeed] = useState('');
     const [treeBio, setTreeBio] = useState('');
     const [treeImageUrl, setTreeImageUrl] = useState('');
+    const [plantAsNature, setPlantAsNature] = useState(false);
     
     const [pulseTitle, setPulseTitle] = useState('');
     const [pulseBody, setPulseBody] = useState('');
@@ -131,6 +134,17 @@ const AppContent = () => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, [loadingMore, hasMore, tab, lastDoc]);
+
+    // Handle defaults for "Guard Tree" mode
+    useEffect(() => {
+        if (showPlantModal && plantAsNature) {
+            setTreeName("Humanity's Tree!");
+            setTreeBio(""); 
+        } else if (showPlantModal && !plantAsNature) {
+            // Reset to empty or user defaults if switching back to normal plant mode
+            if (treeName === "Humanity's Tree!") setTreeName("");
+        }
+    }, [showPlantModal, plantAsNature]);
 
     const loadContent = async (reset = false) => {
         if (reset) {
@@ -235,7 +249,8 @@ const AppContent = () => {
                     body: treeBio, 
                     imageUrl: treeImageUrl, 
                     lat: pos.coords.latitude, 
-                    lng: pos.coords.longitude 
+                    lng: pos.coords.longitude, 
+                    isNature: plantAsNature 
                 });
                 await refreshTrees(); setShowPlantModal(false); loadContent(true);
             } catch(e: any) { alert(e.message); }
@@ -247,7 +262,8 @@ const AppContent = () => {
                  name: finalName, 
                  shortTitle: treeShortTitle,
                  body: treeBio, 
-                 imageUrl: treeImageUrl 
+                 imageUrl: treeImageUrl,
+                 isNature: plantAsNature
              })
                 .then(async () => { await refreshTrees(); setShowPlantModal(false); loadContent(true); })
                 .catch(e => alert(e.message))
@@ -354,12 +370,26 @@ const AppContent = () => {
 
     // Filter Logic for Forest View
     const filteredData = data.filter((item: any) => {
-        if (!searchTerm) return true;
-        const term = searchTerm.toLowerCase();
-        // Common props for searching
-        const text = (item.title || item.name || "") + " " + (item.body || "") + " " + (item.locationName || "");
-        return text.toLowerCase().includes(term);
+        let matches = true;
+        // Text Search
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            const text = (item.title || item.name || "") + " " + (item.body || "") + " " + (item.locationName || "");
+            matches = matches && text.toLowerCase().includes(term);
+        }
+        // Nature Tree Filter (Forest Tab Only)
+        if (tab === 'forest') {
+            if (!showNatureTrees && item.isNature) {
+                matches = false;
+            }
+            if (!showUserTrees && !item.isNature) {
+                matches = false;
+            }
+        }
+        return matches;
     });
+
+    const dangerTreesCount = guardedTrees.filter(t => t.status === 'DANGER').length;
 
     // Create unique suggestion list for datalist
     const searchSuggestions = Array.from(new Set(data.map((item: any) => item.title || item.name).filter(Boolean)));
@@ -393,7 +423,30 @@ const AppContent = () => {
         }
 
         return (
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 min-h-[80vh]">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-[80vh]">
+                {/* Mother Tree Banner - Reduced height and margin */}
+                {tab === 'forest' && (
+                    <div className="relative w-full h-32 mb-4 rounded-2xl overflow-hidden shadow-lg group">
+                        <img 
+                            src="/mother.jpg" 
+                            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
+                            alt="Mother Tree"
+                            onError={(e) => {
+                                // If image missing, show a nice gradient placeholder
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.parentElement!.classList.add('bg-gradient-to-r', 'from-emerald-800', 'to-emerald-900');
+                            }}
+                        />
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <h2 className="text-3xl font-light text-white tracking-[0.2em] uppercase drop-shadow-xl border-y border-white/20 py-2 px-6 backdrop-blur-sm bg-white/5">
+                                {t('be_mother_tree')}
+                            </h2>
+                        </div>
+                    </div>
+                )}
+
                 {/* Search Bar for all tabs except matches/profile/oracle/about */}
                 {tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && tab !== 'about' && (
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -414,29 +467,37 @@ const AppContent = () => {
                             </datalist>
                         </div>
 
-                        {/* View Switcher only for Forest */}
-                        {tab === 'forest' && (
-                            <div className="bg-[#B2713A]/80 backdrop-blur p-1 rounded-lg border border-emerald-700 flex shadow-sm shrink-0">
+                        <div className="flex items-center space-x-2 shrink-0">
+                            {/* Guard Tree Button - Aligned with View Switcher */}
+                            {tab === 'forest' && myTrees.length > 0 && (
                                 <button 
-                                    onClick={() => setViewMode('grid')}
-                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewMode === 'grid' ? 'bg-emerald-600 text-white shadow' : 'text-emerald-300 hover:text-white'}`}
+                                    onClick={() => { setPlantAsNature(true); setShowPlantModal(true); }}
+                                    className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center space-x-2 transition-colors h-10"
                                 >
-                                    <div className="flex items-center space-x-2">
+                                    <Icons.Shield />
+                                    <span className="hidden sm:inline">{t('guard_tree')}</span>
+                                    <span className="sm:hidden">Guard</span>
+                                </button>
+                            )}
+
+                            {/* View Switcher only for Forest */}
+                            {tab === 'forest' && (
+                                <div className="bg-[#B2713A]/80 backdrop-blur p-1 rounded-lg border border-emerald-700 flex shadow-sm h-10">
+                                    <button 
+                                        onClick={() => setViewMode('grid')}
+                                        className={`px-3 py-1 text-sm font-medium rounded-md transition-all flex items-center justify-center ${viewMode === 'grid' ? 'bg-emerald-600 text-white shadow' : 'text-emerald-300 hover:text-white'}`}
+                                    >
                                         <Icons.List />
-                                        <span>{t('list_view')}</span>
-                                    </div>
-                                </button>
-                                <button 
-                                    onClick={() => setViewMode('map')}
-                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewMode === 'map' ? 'bg-emerald-600 text-white shadow' : 'text-emerald-300 hover:text-white'}`}
-                                >
-                                    <div className="flex items-center space-x-2">
+                                    </button>
+                                    <button 
+                                        onClick={() => setViewMode('map')}
+                                        className={`px-3 py-1 text-sm font-medium rounded-md transition-all flex items-center justify-center ${viewMode === 'map' ? 'bg-emerald-600 text-white shadow' : 'text-emerald-300 hover:text-white'}`}
+                                    >
                                         <Icons.Map />
-                                        <span>{t('map_view')}</span>
-                                    </div>
-                                </button>
-                            </div>
-                        )}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -444,7 +505,15 @@ const AppContent = () => {
                 {tab === 'matches' && (
                     <div className="max-w-2xl mx-auto text-white">
                         <h2 className="text-2xl font-light mb-6">Pending Matches</h2>
-                        {matches.length === 0 ? <p className="text-slate-400">No pending requests.</p> : matches.map(m => (
+                        {matches.length === 0 ? (
+                            <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-12 text-center flex flex-col items-center">
+                                <div className="mb-6 p-4 bg-slate-50 rounded-full">
+                                    <Logo width={100} height={100} className="text-slate-800" />
+                                </div>
+                                <h3 className="text-xl font-light text-slate-800 mb-2">No Pending Resonance</h3>
+                                <p className="text-slate-500">The ether is quiet. Emit a pulse to find a match.</p>
+                            </div>
+                        ) : matches.map(m => (
                             <div key={m.id} className="bg-white/90 p-4 rounded shadow-sm border border-slate-200 mb-4 flex justify-between items-center text-slate-800">
                                 <div><p className="font-bold">Match Request</p><p className="text-sm text-slate-500">From another Tree</p></div>
                                 <button onClick={() => onAcceptMatch(m.id)} className="bg-sky-500 text-white px-4 py-2 rounded">Accept & Sync</button>
@@ -459,27 +528,7 @@ const AppContent = () => {
                 {/* Content Area */}
                 {tab === 'forest' ? (
                     <>
-                        {/* Mother Tree Banner */}
-                        <div className="relative w-full h-40 mb-8 rounded-2xl overflow-hidden shadow-lg group">
-                            <img 
-                                src="/mother.jpg" 
-                                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
-                                alt="Mother Tree"
-                                onError={(e) => {
-                                    // If image missing, show a nice gradient placeholder
-                                    const target = e.target as HTMLImageElement;
-                                    target.style.display = 'none';
-                                    target.parentElement!.classList.add('bg-gradient-to-r', 'from-emerald-800', 'to-emerald-900');
-                                }}
-                            />
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <h2 className="text-3xl font-light text-white tracking-[0.2em] uppercase drop-shadow-xl border-y border-white/20 py-2 px-6 backdrop-blur-sm bg-white/5">
-                                    {t('be_mother_tree')}
-                                </h2>
-                            </div>
-                        </div>
-
+                        {/* Banner Moved Above */}
                         {viewMode === 'map' ? (
                             <ForestMap trees={filteredData} />
                         ) : (
@@ -492,6 +541,7 @@ const AppContent = () => {
                                             key={item.id} 
                                             tree={item} 
                                             myActiveTree={activeTree} 
+                                            currentUserId={lightseed?.uid}
                                             onPlayGrowth={setShowGrowthPlayer} 
                                             onQuickSnap={handleQuickSnap}
                                             onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); loadContent(true); })}
@@ -501,6 +551,32 @@ const AppContent = () => {
                                 )}
                             </div>
                         )}
+                        
+                        {/* Filter Controls below map/grid */}
+                        <div className="flex justify-center mt-6 mb-2 space-x-3">
+                             <label className="flex items-center space-x-2 cursor-pointer bg-[#B2713A]/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 hover:bg-[#B2713A]/80 transition-colors shadow-sm">
+                                <input 
+                                    type="checkbox" 
+                                    checked={showNatureTrees} 
+                                    onChange={(e) => setShowNatureTrees(e.target.checked)} 
+                                    className="rounded text-sky-500 focus:ring-sky-500 bg-white/20 border-white/30"
+                                />
+                                <span className="text-xs text-white font-medium flex items-center">
+                                    <span className="mr-1"><Icons.Nature /></span> Nature
+                                </span>
+                            </label>
+                            <label className="flex items-center space-x-2 cursor-pointer bg-[#B2713A]/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 hover:bg-[#B2713A]/80 transition-colors shadow-sm">
+                                <input 
+                                    type="checkbox" 
+                                    checked={showUserTrees} 
+                                    onChange={(e) => setShowUserTrees(e.target.checked)} 
+                                    className="rounded text-emerald-400 focus:ring-emerald-400 bg-white/20 border-white/30"
+                                />
+                                <span className="text-xs text-white font-medium flex items-center">
+                                    <span className="mr-1"><Icons.Tree /></span> Lifetrees
+                                </span>
+                            </label>
+                        </div>
                     </>
                 ) : tab === 'visions' ? (
                     <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -543,7 +619,7 @@ const AppContent = () => {
                 setTab={setTab} 
                 onLogin={signInWithGoogle} 
                 onLogout={logout} 
-                onPlant={() => setShowPlantModal(true)} 
+                onPlant={() => { setPlantAsNature(false); setShowPlantModal(true); }} 
                 onPulse={() => setShowPulseModal(true)}
                 onCreateVision={() => setShowVisionModal(true)}
                 onProfile={() => setTab('profile')} 
@@ -551,6 +627,7 @@ const AppContent = () => {
                 onCheckKey={checkKey}
                 pendingMatchesCount={matches.length}
                 myTreesCount={myTrees.length}
+                dangerTreesCount={guardedTrees.filter(t => t.status === 'DANGER').length}
             />
             
             {renderMainContent()}
@@ -588,13 +665,40 @@ const AppContent = () => {
 
             {/* Plant Modal (Simplified) */}
             {showPlantModal && (
-                <Modal title={t('plant_lifetree')} onClose={() => setShowPlantModal(false)}>
+                <Modal title={plantAsNature ? t('guard_tree') : t('plant_lifetree')} onClose={() => setShowPlantModal(false)}>
                     <form onSubmit={handlePlant} className="space-y-4">
                         <ImagePicker onChange={(e: any) => handleImageUpload(e.target.files[0], `trees/${Date.now()}`).then(setTreeImageUrl)} previewUrl={treeImageUrl} loading={uploading} />
+                        <div className="flex items-center space-x-2 bg-sky-50 p-2 rounded-lg border border-sky-100">
+                            <input 
+                                type="checkbox" 
+                                id="natureTree" 
+                                checked={plantAsNature} 
+                                onChange={e => setPlantAsNature(e.target.checked)} 
+                                className="rounded text-sky-600 focus:ring-sky-500 w-4 h-4"
+                            />
+                            <label htmlFor="natureTree" className="text-sm font-medium text-sky-800 flex items-center">
+                                <Icons.Shield />
+                                <span className="ml-2">Plant as Nature (Wild) Tree</span>
+                            </label>
+                        </div>
                         <input className="block w-full border p-2 rounded" placeholder={`Tree Name (Default: ${lightseed?.displayName || 'Anonymous'})`} value={treeName} onChange={e=>setTreeName(e.target.value)} />
                         <input className="block w-full border p-2 rounded" placeholder={t('short_title')} value={treeShortTitle} onChange={e=>setTreeShortTitle(e.target.value)} />
-                        <div className="flex gap-2"><input className="flex-1 border p-2 rounded" placeholder="Seed keywords" value={treeSeed} onChange={e=>setTreeSeed(e.target.value)} /><button type="button" onClick={() => generateLifetreeBio(treeSeed).then(setTreeBio)} disabled={uploading} className="bg-emerald-600 text-white px-4 rounded disabled:opacity-50">AI</button></div>
-                        <textarea className="block w-full border p-2 rounded" placeholder="Vision" value={treeBio} onChange={e=>setTreeBio(e.target.value)} required />
+                        
+                        {!plantAsNature && (
+                            <div className="flex gap-2">
+                                <input className="flex-1 border p-2 rounded" placeholder="Seed keywords" value={treeSeed} onChange={e=>setTreeSeed(e.target.value)} />
+                                <button type="button" onClick={() => generateLifetreeBio(treeSeed).then(setTreeBio)} disabled={uploading} className="bg-emerald-600 text-white px-4 rounded disabled:opacity-50">AI</button>
+                            </div>
+                        )}
+                        
+                        <textarea 
+                            className="block w-full border p-2 rounded" 
+                            placeholder={plantAsNature ? "Description" : "Vision"} 
+                            value={treeBio} 
+                            onChange={e=>setTreeBio(e.target.value)} 
+                            required 
+                        />
+                        
                         <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-emerald-600 text-white py-2 rounded disabled:opacity-50">
                             {isSubmitting ? 'Planting...' : 'Plant'}
                         </button>

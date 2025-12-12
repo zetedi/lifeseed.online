@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { onAuthChange, getMyLifetrees } from '../services/firebase';
+import { onAuthChange, getMyLifetrees, getGuardedTrees } from '../services/firebase';
 import { type Lightseed, type Lifetree } from '../types';
 
 export const useLifeseed = () => {
     const [lightseed, setLightseed] = useState<Lightseed | null>(null);
     const [myTrees, setMyTrees] = useState<Lifetree[]>([]);
+    const [guardedTrees, setGuardedTrees] = useState<Lifetree[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -17,11 +18,20 @@ export const useLifeseed = () => {
                     displayName: user.displayName,
                     photoURL: user.photoURL 
                 });
-                const trees = await getMyLifetrees(user.uid);
-                setMyTrees(trees);
+                try {
+                    const [owned, guarded] = await Promise.all([
+                        getMyLifetrees(user.uid),
+                        getGuardedTrees(user.uid)
+                    ]);
+                    setMyTrees(owned);
+                    setGuardedTrees(guarded);
+                } catch (e) {
+                    console.error("Failed to fetch user trees", e);
+                }
             } else {
                 setLightseed(null);
                 setMyTrees([]);
+                setGuardedTrees([]);
             }
             setLoading(false);
         });
@@ -30,10 +40,14 @@ export const useLifeseed = () => {
 
     const refreshTrees = async () => {
         if (lightseed) {
-            const trees = await getMyLifetrees(lightseed.uid);
-            setMyTrees(trees);
+            const [owned, guarded] = await Promise.all([
+                getMyLifetrees(lightseed.uid),
+                getGuardedTrees(lightseed.uid)
+            ]);
+            setMyTrees(owned);
+            setGuardedTrees(guarded);
         }
     }
     const activeTree = myTrees.length > 0 ? myTrees[0] : null;
-    return { lightseed, myTrees, activeTree, loading, refreshTrees };
+    return { lightseed, myTrees, guardedTrees, activeTree, loading, refreshTrees };
 };

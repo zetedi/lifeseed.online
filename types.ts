@@ -23,6 +23,11 @@ export interface Lifetree {
   validated: boolean; 
   validatorId?: string;
 
+  // Nature & Guardian Logic
+  isNature?: boolean;
+  guardians?: string[]; // Array of User IDs
+  status?: 'HEALTHY' | 'DANGER';
+
   // Blockchain Props
   genesisHash: string;
   latestHash: string; 

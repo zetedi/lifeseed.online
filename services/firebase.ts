@@ -28,7 +28,9 @@ import {
   deleteDoc,
   limit,
   startAfter,
-  QueryDocumentSnapshot
+  QueryDocumentSnapshot,
+  arrayUnion,
+  arrayRemove
 } from 'firebase/firestore';
 import { 
   getStorage, 
@@ -186,7 +188,8 @@ export const ensureGenesis = () => {
                         latestHash: genesisHash,
                         blockHeight: 0,
                         validated: true,
-                        validatorId: 'SYSTEM'
+                        validatorId: 'SYSTEM',
+                        isNature: true
                     });
 
                     // Create Vision for Genesis (Fixed ID)
@@ -230,17 +233,22 @@ export const plantLifetree = async (data: {
   imageUrl?: string,
   lat?: number,
   lng?: number,
-  locName?: string
+  locName?: string,
+  isNature?: boolean
 }) => {
-  // Check if user already has an unvalidated tree
-  const q = query(lifetreesCollection, where('ownerId', '==', data.ownerId));
-  const snapshot = await getDocs(q);
-  
-  if (!snapshot.empty) {
-      const trees = snapshot.docs.map(d => d.data() as Lifetree);
-      const allValidated = trees.every(t => t.validated);
-      if (!allValidated) {
-          throw new Error("Your existing Lifetree is not validated yet. You cannot plant another.");
+  // Check if user already has an unvalidated tree, UNLESS they are planting a Nature tree (which doesn't count against personal limit)
+  if (!data.isNature) {
+      const q = query(lifetreesCollection, where('ownerId', '==', data.ownerId), where('isNature', '!=', true));
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+          const trees = snapshot.docs.map(d => d.data() as Lifetree);
+          // Filter in memory for isNature just in case compound query issues arise
+          const personalTrees = trees.filter(t => !t.isNature);
+          const allValidated = personalTrees.every(t => t.validated);
+          if (!allValidated && personalTrees.length > 0) {
+              throw new Error("Your existing Lifetree is not validated yet. You cannot plant another.");
+          }
       }
   }
 
@@ -252,7 +260,7 @@ export const plantLifetree = async (data: {
   // Zetedi Validation Override
   const isZetedi = auth.currentUser?.email === 'zetedi@gmail.com';
 
-  const isValid = isFirstTree || isZetedi || data.name.trim().toLowerCase() === "phoenix";
+  const isValid = isFirstTree || isZetedi || data.name.trim().toLowerCase() === "phoenix" || data.isNature;
   const genesisData = { message: "Genesis Pulse", owner: data.ownerId, timestamp: Date.now() };
   const genesisHash = await createBlock("0", genesisData, Date.now());
 
@@ -270,7 +278,10 @@ export const plantLifetree = async (data: {
     latestHash: genesisHash,
     blockHeight: 0,
     validated: isValid,
-    validatorId: isValid ? (isFirstTree ? "GENESIS" : "SYSTEM") : null
+    validatorId: isValid ? (isFirstTree ? "GENESIS" : "SYSTEM") : null,
+    isNature: data.isNature || false,
+    guardians: [],
+    status: 'HEALTHY'
   });
 
   // Automatically create the first Vision (Branch) for this tree
@@ -333,10 +344,31 @@ export const fetchLifetrees = async (lastDoc?: QueryDocumentSnapshot): Promise<{
 
 export const getMyLifetrees = async (userId: string): Promise<Lifetree[]> => {
     if (!userId) return [];
+    // Helper to get personal trees + guarded nature trees would be ideal here, 
+    // but simplified to just owner for now to match current UI expectations.
     const q = query(lifetreesCollection, where('ownerId', '==', userId));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Lifetree));
 };
+
+export const getGuardedTrees = async (userId: string): Promise<Lifetree[]> => {
+    if (!userId) return [];
+    const q = query(lifetreesCollection, where('guardians', 'array-contains', userId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) } as Lifetree));
+}
+
+export const toggleGuardianship = async (treeId: string, userId: string, join: boolean) => {
+    const treeRef = doc(db, 'lifetrees', treeId);
+    await updateDoc(treeRef, {
+        guardians: join ? arrayUnion(userId) : arrayRemove(userId)
+    });
+}
+
+export const setTreeStatus = async (treeId: string, status: 'HEALTHY' | 'DANGER') => {
+    const treeRef = doc(db, 'lifetrees', treeId);
+    await updateDoc(treeRef, { status });
+}
 
 // --- VISIONS ---
 // Updated fetch with Pagination
@@ -471,7 +503,7 @@ export const mintPulse = async (pulseData: {
     transaction.update(sourceTreeRef, {
       latestHash: newHash,
       blockHeight: (sourceTree.blockHeight || 0) + 1,
-      // If growth, maybe update tree image? Optional.
+      // If growth, update tree image if provided
       ...(pulseData.type === 'GROWTH' && pulseData.imageUrl ? { imageUrl: pulseData.imageUrl } : {})
     });
   });
