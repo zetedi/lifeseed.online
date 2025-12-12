@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { type Language } from '../utils/translations';
 import Logo from './Logo';
@@ -26,8 +26,20 @@ interface NavigationProps {
 export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout, onProfile, onCreateVision, hasApiKey, onCheckKey, pendingMatchesCount, myTreesCount = 0, dangerTreesCount = 0 }: NavigationProps) => {
     const { t, language, setLanguage } = useLanguage();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isMoreOpen, setIsMoreOpen] = useState(false);
+    const moreRef = useRef<HTMLDivElement>(null);
     
     const hasNotification = pendingMatchesCount > 0 || dangerTreesCount > 0;
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
+                setIsMoreOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleApiKeySelect = async () => {
         const aiStudio = (window as any).aistudio;
@@ -41,12 +53,12 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
         }
     }
     
-    // Helper to get active button style
     const getTabStyle = (key: string) => {
         if (activeTab === key) {
             if (key === 'visions') return `bg-amber-500 text-white shadow-lg shadow-amber-500/30`;
             if (key === 'forest') return `bg-emerald-600 text-white shadow-lg shadow-emerald-500/30`;
             if (key === 'pulses') return `bg-sky-600 text-white shadow-lg shadow-sky-500/30`;
+            if (key === 'matches') return `bg-rose-600 text-white shadow-lg shadow-rose-500/30`; // distinct color for matches
             if (key === 'oracle') return `bg-indigo-600 text-white shadow-lg shadow-indigo-500/30`;
             if (key === 'about') return `bg-purple-600 text-white shadow-lg shadow-purple-500/30`;
             return `bg-slate-700 text-white`;
@@ -54,46 +66,80 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
         return `text-emerald-100 hover:text-white hover:bg-white/10`;
     }
 
-    // Dark Green Header
+    const mainTabs = ['forest', 'visions', 'pulses', 'matches'];
+    const moreTabs = ['oracle', 'about'];
+
+    // Desktop Tab Renderer
+    const renderTab = (tabKey: string) => (
+        <button 
+            key={tabKey}
+            onClick={() => { setTab(tabKey); setIsMoreOpen(false); }}
+            className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap ${getTabStyle(tabKey)}`}
+        >
+            {t(tabKey as any)}
+            {tabKey === 'matches' && pendingMatchesCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+            )}
+        </button>
+    );
+
     return (
         <nav className={`sticky top-0 z-30 bg-emerald-900 border-b border-emerald-800 text-white shadow-md`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-20 items-center">
-                    <div className="flex items-center space-x-3 cursor-pointer rtl:space-x-reverse" onClick={() => setTab('forest')}>
+                    <div className="flex items-center space-x-3 cursor-pointer shrink-0 rtl:space-x-reverse" onClick={() => setTab('forest')}>
                         <div className="bg-white p-1 rounded-full shadow-inner animate-[pulse_3s_ease-in-out_infinite]">
                              <Logo width={40} height={40} />
                         </div>
-                        {/* CHANGED: Removed hidden sm:block to make visible on mobile */}
                         <span className="font-light text-2xl tracking-wide lowercase block text-white drop-shadow-sm">.seed</span>
                     </div>
 
-                    <div className="hidden md:flex space-x-3 rtl:space-x-reverse">
-                        {['forest', 'pulses', 'visions', 'oracle', 'matches', 'about'].map((tabKey) => (
+                    {/* Desktop Menu */}
+                    <div className="hidden md:flex flex-1 justify-center space-x-1 lg:space-x-3 rtl:space-x-reverse px-4 overflow-hidden">
+                        {/* Always visible on md+ */}
+                        {mainTabs.map(tabKey => renderTab(tabKey))}
+
+                        {/* Visible on Large Screens Only */}
+                        <div className="hidden lg:flex space-x-3 rtl:space-x-reverse">
+                            {moreTabs.map(tabKey => renderTab(tabKey))}
+                        </div>
+
+                        {/* Dropdown for Medium Screens (hides Oracle/About) */}
+                        <div className="lg:hidden relative" ref={moreRef}>
                             <button 
-                                key={tabKey}
-                                onClick={() => setTab(tabKey)}
-                                className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${getTabStyle(tabKey)}`}
+                                onClick={() => setIsMoreOpen(!isMoreOpen)}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center space-x-1 ${['oracle', 'about'].includes(activeTab) ? 'bg-white/20 text-white' : 'text-emerald-100 hover:text-white hover:bg-white/10'}`}
                             >
-                                {t(tabKey as any)}
-                                {tabKey === 'matches' && pendingMatchesCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                                    </span>
-                                )}
+                                <span>{t('more')}</span>
+                                <svg className={`w-4 h-4 transition-transform ${isMoreOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                             </button>
-                        ))}
+                            {isMoreOpen && (
+                                <div className="absolute top-full mt-2 right-0 w-40 bg-emerald-800 rounded-xl shadow-xl border border-emerald-700 overflow-hidden py-2 flex flex-col z-50">
+                                    {moreTabs.map(tabKey => (
+                                        <button
+                                            key={tabKey}
+                                            onClick={() => { setTab(tabKey); setIsMoreOpen(false); }}
+                                            className={`text-left px-4 py-3 text-sm font-medium hover:bg-white/10 ${activeTab === tabKey ? 'text-white bg-white/10' : 'text-emerald-100'}`}
+                                        >
+                                            {t(tabKey as any)}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">
-                         {/* Only show button if we are in AI Studio environment or if key is present to indicate status */}
+                    <div className="hidden md:flex items-center space-x-2 lg:space-x-4 shrink-0 rtl:space-x-reverse">
                          <button 
                              onClick={handleApiKeySelect}
                              className={`p-2 rounded-full transition-all flex items-center space-x-2 ${!hasApiKey ? 'bg-amber-500/20 text-amber-500 ring-1 ring-amber-500' : 'text-emerald-100 hover:text-white hover:bg-white/10'}`}
-                             title={hasApiKey ? "Gemini Connected" : "Connect Gemini API (AI Studio Only)"}
+                             title={t('connect_gemini_tooltip')}
                          >
                              <Icons.Key />
-                             {!hasApiKey && <span className="text-xs font-bold">Connect AI</span>}
+                             {!hasApiKey && <span className="text-xs font-bold hidden lg:inline">{t('connect_ai')}</span>}
                          </button>
 
                          <select 
@@ -114,16 +160,16 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                         {lightseed ? (
                             <>
                                 {activeTab === 'forest' || myTreesCount === 0 ? (
-                                     <button onClick={onPlant} className={`hidden sm:flex ${colors.grass} hover:bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
+                                     <button onClick={onPlant} className={`hidden lg:flex ${colors.grass} hover:bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
                                         <Icons.Tree />
                                         <span className="ml-1">{t('plant_lifetree')}</span>
                                     </button>
                                 ) : activeTab === 'visions' ? (
-                                     <button onClick={onCreateVision} className={`hidden sm:flex ${colors.earth} hover:bg-[#78350f] text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
+                                     <button onClick={onCreateVision} className={`hidden lg:flex ${colors.earth} hover:bg-[#78350f] text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
                                         {t('create_vision')}
                                     </button>
                                 ) : (
-                                    <button onClick={onPulse} className={`hidden sm:flex ${colors.earth} hover:bg-[#78350f] text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
+                                    <button onClick={onPulse} className={`hidden lg:flex ${colors.earth} hover:bg-[#78350f] text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
                                         <PulsatingDot />
                                         {t('emit_pulse')}
                                     </button>
@@ -151,6 +197,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                         )}
                     </div>
 
+                    {/* Mobile Menu Toggle */}
                     <div className="flex md:hidden items-center space-x-4 rtl:space-x-reverse">
                          <button 
                              onClick={handleApiKeySelect}
@@ -181,7 +228,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
             </div>
 
             {isMenuOpen && (
-                 <div className="md:hidden bg-emerald-800 border-t border-emerald-700 pb-4 px-4 shadow-xl">
+                 <div className="md:hidden bg-emerald-800 border-t border-emerald-700 pb-4 px-4 shadow-xl animate-in slide-in-from-top-2 duration-200">
                     <div className="flex flex-col space-y-2 mt-4">
                          {lightseed && (
                              <button onClick={() => { onProfile(); setIsMenuOpen(false); }} className="flex items-center space-x-3 px-3 py-3 rounded-md bg-black/20 relative">
@@ -192,7 +239,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                                 <span className="text-white font-medium">{t('profile')}</span>
                              </button>
                          )}
-                        {['forest', 'pulses', 'visions', 'oracle', 'matches', 'about'].map((tabKey) => (
+                        {[...mainTabs, ...moreTabs].map((tabKey) => (
                             <button 
                                 key={tabKey}
                                 onClick={() => { setTab(tabKey); setIsMenuOpen(false); }}

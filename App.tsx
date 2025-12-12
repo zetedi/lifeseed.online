@@ -602,7 +602,7 @@ const AppContent = () => {
                     </div>
                 )}
 
-                {loadingMore && <div className="text-center py-4 text-emerald-300 text-sm animate-pulse">Growing root network...</div>}
+                {loadingMore && <div className="text-center py-4 text-emerald-300 text-sm animate-pulse">{t('loading')}</div>}
             </main>
         );
     }
@@ -678,7 +678,7 @@ const AppContent = () => {
                             />
                             <label htmlFor="natureTree" className="text-sm font-medium text-sky-800 flex items-center">
                                 <Icons.Shield />
-                                <span className="ml-2">Plant as Nature (Wild) Tree</span>
+                                <span className="ml-2">{t('nature')} (Wild) Tree</span>
                             </label>
                         </div>
                         <input className="block w-full border p-2 rounded" placeholder={`Tree Name (Default: ${lightseed?.displayName || 'Anonymous'})`} value={treeName} onChange={e=>setTreeName(e.target.value)} />
@@ -700,7 +700,7 @@ const AppContent = () => {
                         />
                         
                         <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-emerald-600 text-white py-2 rounded disabled:opacity-50">
-                            {isSubmitting ? 'Planting...' : 'Plant'}
+                            {isSubmitting ? t('planting') : t('plant_lifetree')}
                         </button>
                     </form>
                 </Modal>
@@ -730,7 +730,7 @@ const AppContent = () => {
                         <input className="block w-full border p-2 rounded" placeholder={t('webpage')} value={visionLink} onChange={e=>setVisionLink(e.target.value)} />
                         
                         <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-amber-500 text-white py-2 rounded font-bold hover:bg-amber-600 transition-colors disabled:opacity-50">
-                             {isSubmitting ? 'Creating...' : t('create_vision')}
+                             {isSubmitting ? t('creating') : t('create_vision')}
                         </button>
                     </form>
                 </Modal>
@@ -738,26 +738,26 @@ const AppContent = () => {
 
             {/* Pulse / Match Modal */}
             {showPulseModal && (
-                <Modal title={matchCandidate ? "Propose Match" : t('emit_pulse')} onClose={() => { setShowPulseModal(false); setMatchCandidate(null); }}>
+                <Modal title={matchCandidate ? t('propose_match') : t('emit_pulse')} onClose={() => { setShowPulseModal(false); setMatchCandidate(null); }}>
                     <form onSubmit={matchCandidate ? initiateMatch : handleEmitPulse} className="space-y-4">
                         {matchCandidate ? (
                              <div className="bg-sky-50 p-4 rounded text-sky-800">
-                                Matching with <strong>{matchCandidate.title}</strong>. 
-                                <br/><span className="text-xs">This will send a request to the owner.</span>
+                                {t('matching_with')} <strong>{matchCandidate.title}</strong>. 
+                                <br/><span className="text-xs">{t('match_request_desc')}</span>
                              </div>
                         ) : (
                             <>
                                 <ImagePicker onChange={(e: any) => handleImageUpload(e.target.files[0], `pulses/${Date.now()}`).then(setPulseImageUrl)} previewUrl={pulseImageUrl} loading={uploading} />
                                 <div className="flex items-center space-x-2">
                                     <input type="checkbox" id="growth" checked={isGrowth} onChange={e => setIsGrowth(e.target.checked)} className="rounded text-emerald-600 focus:ring-emerald-500" />
-                                    <label htmlFor="growth" className="text-sm font-medium text-slate-700">This is a Growth Picture (Internal Pulse)</label>
+                                    <label htmlFor="growth" className="text-sm font-medium text-slate-700">{t('internal_pulse')}</label>
                                 </div>
-                                <input className="block w-full border p-2 rounded" placeholder="Title" value={pulseTitle} onChange={e=>setPulseTitle(e.target.value)} required />
-                                <textarea className="block w-full border p-2 rounded" placeholder="Body" value={pulseBody} onChange={e=>setPulseBody(e.target.value)} required />
+                                <input className="block w-full border p-2 rounded" placeholder={t('title')} value={pulseTitle} onChange={e=>setPulseTitle(e.target.value)} required />
+                                <textarea className="block w-full border p-2 rounded" placeholder={t('body')} value={pulseBody} onChange={e=>setPulseBody(e.target.value)} required />
                             </>
                         )}
                         <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-emerald-600 text-white py-2 rounded disabled:opacity-50">
-                            {isSubmitting ? 'Processing...' : (matchCandidate ? "Send Request" : t('mint'))}
+                            {isSubmitting ? t('minting') : (matchCandidate ? t('send_request') : t('mint'))}
                         </button>
                     </form>
                 </Modal>
