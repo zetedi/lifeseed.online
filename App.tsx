@@ -262,7 +262,7 @@ const AppContent = () => {
                  name: finalName, 
                  shortTitle: treeShortTitle,
                  body: treeBio, 
-                 imageUrl: treeImageUrl,
+                 imageUrl: treeImageUrl, 
                  isNature: plantAsNature
              })
                 .then(async () => { await refreshTrees(); setShowPlantModal(false); loadContent(true); })
@@ -458,7 +458,7 @@ const AppContent = () => {
                                 type="text"
                                 list="search-suggestions"
                                 className="block w-full pl-10 pr-3 py-2 border border-emerald-700 rounded-lg leading-5 bg-[#B2713A]/80 backdrop-blur placeholder-slate-400 text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm shadow-sm"
-                                placeholder="Search..."
+                                placeholder={t('search_placeholder')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -476,7 +476,7 @@ const AppContent = () => {
                                 >
                                     <Icons.Shield />
                                     <span className="hidden sm:inline">{t('guard_tree')}</span>
-                                    <span className="sm:hidden">Guard</span>
+                                    <span className="sm:hidden">{t('guard')}</span>
                                 </button>
                             )}
 
@@ -504,19 +504,19 @@ const AppContent = () => {
                 {/* Matches Inbox */}
                 {tab === 'matches' && (
                     <div className="max-w-2xl mx-auto text-white">
-                        <h2 className="text-2xl font-light mb-6">Pending Matches</h2>
+                        <h2 className="text-2xl font-light mb-6">{t('pending_matches')}</h2>
                         {matches.length === 0 ? (
                             <div className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-12 text-center flex flex-col items-center">
                                 <div className="mb-6 p-4 bg-slate-50 rounded-full">
                                     <Logo width={100} height={100} className="text-slate-800" />
                                 </div>
-                                <h3 className="text-xl font-light text-slate-800 mb-2">No Pending Resonance</h3>
-                                <p className="text-slate-500">The ether is quiet. Emit a pulse to find a match.</p>
+                                <h3 className="text-xl font-light text-slate-800 mb-2">{t('no_pending_resonance')}</h3>
+                                <p className="text-slate-500">{t('ether_quiet')}</p>
                             </div>
                         ) : matches.map(m => (
                             <div key={m.id} className="bg-white/90 p-4 rounded shadow-sm border border-slate-200 mb-4 flex justify-between items-center text-slate-800">
-                                <div><p className="font-bold">Match Request</p><p className="text-sm text-slate-500">From another Tree</p></div>
-                                <button onClick={() => onAcceptMatch(m.id)} className="bg-sky-500 text-white px-4 py-2 rounded">Accept & Sync</button>
+                                <div><p className="font-bold">{t('match_request')}</p><p className="text-sm text-slate-500">{t('from_another_tree')}</p></div>
+                                <button onClick={() => onAcceptMatch(m.id)} className="bg-sky-500 text-white px-4 py-2 rounded">{t('accept_sync')}</button>
                             </div>
                         ))}
                     </div>
@@ -534,7 +534,7 @@ const AppContent = () => {
                         ) : (
                             <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                                 {filteredData.length === 0 && !loadingMore ? (
-                                    <p className="col-span-full text-center text-slate-400 py-10">No trees found matching your search.</p>
+                                    <p className="col-span-full text-center text-slate-400 py-10">{t('no_trees_found')}</p>
                                 ) : (
                                     filteredData.map((item: any) => (
                                         <LifetreeCard 
@@ -562,7 +562,7 @@ const AppContent = () => {
                                     className="rounded text-sky-500 focus:ring-sky-500 bg-white/20 border-white/30"
                                 />
                                 <span className="text-xs text-white font-medium flex items-center">
-                                    <span className="mr-1"><Icons.Nature /></span> Nature
+                                    <span className="mr-1"><Icons.Nature /></span> {t('nature')}
                                 </span>
                             </label>
                             <label className="flex items-center space-x-2 cursor-pointer bg-[#B2713A]/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 hover:bg-[#B2713A]/80 transition-colors shadow-sm">
@@ -573,14 +573,14 @@ const AppContent = () => {
                                     className="rounded text-emerald-400 focus:ring-emerald-400 bg-white/20 border-white/30"
                                 />
                                 <span className="text-xs text-white font-medium flex items-center">
-                                    <span className="mr-1"><Icons.Tree /></span> Lifetrees
+                                    <span className="mr-1"><Icons.Tree /></span> {t('lifetrees')}
                                 </span>
                             </label>
                         </div>
                     </>
                 ) : tab === 'visions' ? (
                     <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                        {filteredData.length === 0 && !loadingMore ? <p className="col-span-full text-center text-slate-400 py-10">No visions found.</p> : 
+                        {filteredData.length === 0 && !loadingMore ? <p className="col-span-full text-center text-slate-400 py-10">{t('no_visions_found')}</p> : 
                             filteredData.map((item: any) => (
                                 <div key={item.id} onClick={() => setSelectedVision(item)} className="cursor-pointer">
                                     <VisionCard vision={item} />

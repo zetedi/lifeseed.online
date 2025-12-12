@@ -1,4 +1,3 @@
-
 // Ensure polyfill runs first to populate process.env
 import '../utils/polyfill';
 
@@ -137,7 +136,7 @@ export const ensureGenesis = () => {
     if (!genesisInitializationPromise) {
         genesisInitializationPromise = (async () => {
             // Check for CLEAN mode from build
-            if (import.meta.env.MODE === 'clean') {
+            if ((import.meta as any).env.MODE === 'clean') {
                 // Check session storage to ensure we don't wipe repeatedly on reload if not intended
                 if (!sessionStorage.getItem('db_cleaned')) {
                     try {
@@ -158,7 +157,7 @@ export const ensureGenesis = () => {
                 const genesisSnap = await getDoc(genesisRef);
 
                 // If it doesn't exist, OR if we are in 'clean' mode (and want to enforce reset)
-                const shouldCreate = !genesisSnap.exists() || (import.meta.env.MODE === 'clean' && !sessionStorage.getItem('genesis_reset'));
+                const shouldCreate = !genesisSnap.exists() || ((import.meta as any).env.MODE === 'clean' && !sessionStorage.getItem('genesis_reset'));
 
                 // New Mahameru Design: Interconnected Grid
                 // 800x800 Viewbox containing 7 Mahameru nodes connected
@@ -203,7 +202,7 @@ export const ensureGenesis = () => {
                         link: "https://lifeseed.online"
                     });
                     
-                    if (import.meta.env.MODE === 'clean') {
+                    if ((import.meta as any).env.MODE === 'clean') {
                         sessionStorage.setItem('genesis_reset', 'true');
                     }
                     console.log("Genesis Tree (Mahameru) Planted.");

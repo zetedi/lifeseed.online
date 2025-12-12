@@ -74,7 +74,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                                 onClick={() => setTab(tabKey)}
                                 className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${getTabStyle(tabKey)}`}
                             >
-                                {tabKey === 'matches' ? 'Matches' : t(tabKey as any)}
+                                {t(tabKey as any)}
                                 {tabKey === 'matches' && pendingMatchesCount > 0 && (
                                     <span className="absolute -top-1 -right-1 flex h-3 w-3">
                                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -198,7 +198,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                                 onClick={() => { setTab(tabKey); setIsMenuOpen(false); }}
                                 className={`flex justify-between items-center text-left px-3 py-3 rounded-md text-base font-medium ${activeTab === tabKey ? 'bg-emerald-700 text-white' : 'text-emerald-100 hover:bg-white/10'}`}
                             >
-                                <span>{tabKey === 'matches' ? 'Matches' : t(tabKey as any)}</span>
+                                <span>{t(tabKey as any)}</span>
                                 {tabKey === 'matches' && pendingMatchesCount > 0 && (
                                     <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{pendingMatchesCount}</span>
                                 )}
