@@ -488,12 +488,14 @@ const AppContent = () => {
                                         className={`px-3 py-1 text-sm font-medium rounded-md transition-all flex items-center justify-center ${viewMode === 'grid' ? 'bg-emerald-600 text-white shadow' : 'text-emerald-300 hover:text-white'}`}
                                     >
                                         <Icons.List />
+                                        <span className="hidden lg:inline ml-2">{t('list_view')}</span>
                                     </button>
                                     <button 
                                         onClick={() => setViewMode('map')}
                                         className={`px-3 py-1 text-sm font-medium rounded-md transition-all flex items-center justify-center ${viewMode === 'map' ? 'bg-emerald-600 text-white shadow' : 'text-emerald-300 hover:text-white'}`}
                                     >
                                         <Icons.Map />
+                                        <span className="hidden lg:inline ml-2">{t('map_view')}</span>
                                     </button>
                                 </div>
                             )}

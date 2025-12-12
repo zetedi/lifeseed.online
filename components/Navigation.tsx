@@ -23,6 +23,59 @@ interface NavigationProps {
     dangerTreesCount: number;
 }
 
+const LanguageSelector = ({ language, setLanguage }: { language: Language, setLanguage: (l: Language) => void }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (ref.current && !ref.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const options = [
+        { code: 'en', label: 'English' },
+        { code: 'es', label: 'Español' },
+        { code: 'qu', label: 'Runasimi' },
+        { code: 'ar', label: 'العربية' },
+        { code: 'ja', label: '日本語' },
+        { code: 'hu', label: 'Magyar' },
+        { code: 'sa', label: 'संस्कृत' },
+        { code: 'sw', label: 'Kiswahili' },
+    ];
+
+    return (
+        <div className="relative" ref={ref}>
+            <button 
+                onClick={() => setIsOpen(!isOpen)}
+                className="flex items-center space-x-1 px-2 py-1 rounded hover:bg-white/10 transition-colors group"
+                title="Change Language"
+            >
+                <span className="text-emerald-100 group-hover:text-white transition-colors"><Icons.Globe /></span>
+                <span className="font-bold text-emerald-100 group-hover:text-white uppercase text-sm transition-colors">{language}</span>
+            </button>
+            
+            {isOpen && (
+                <div className="absolute top-full mt-2 right-0 w-32 bg-emerald-800 border border-emerald-700 rounded-lg shadow-xl overflow-hidden z-50 flex flex-col py-1 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-black/20">
+                    {options.map((opt) => (
+                        <button
+                            key={opt.code}
+                            onClick={() => { setLanguage(opt.code as Language); setIsOpen(false); }}
+                            className={`text-left px-4 py-2 text-sm text-emerald-100 hover:bg-white/10 transition-colors font-medium ${language === opt.code ? 'bg-white/20 text-white font-bold' : ''}`}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout, onProfile, onCreateVision, hasApiKey, onCheckKey, pendingMatchesCount, myTreesCount = 0, dangerTreesCount = 0 }: NavigationProps) => {
     const { t, language, setLanguage } = useLanguage();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -151,20 +204,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                              {!hasApiKey && <span className="text-xs font-bold hidden lg:inline">{t('connect_ai')}</span>}
                          </button>
 
-                         <select 
-                            value={language} 
-                            onChange={(e) => setLanguage(e.target.value as Language)}
-                            className="bg-black/20 text-white text-xs rounded border-none py-1 pl-2 pr-6 cursor-pointer hover:bg-black/30"
-                        >
-                            <option className="text-slate-800" value="en">EN</option>
-                            <option className="text-slate-800" value="es">ES</option>
-                            <option className="text-slate-800" value="hu">HU</option>
-                            <option className="text-slate-800" value="qu">QU</option>
-                            <option className="text-slate-800" value="sa">SA</option>
-                            <option className="text-slate-800" value="ja">JA</option>
-                            <option className="text-slate-800" value="ar">AR</option>
-                            <option className="text-slate-800" value="sw">SW</option>
-                        </select>
+                         <LanguageSelector language={language} setLanguage={setLanguage} />
 
                         {lightseed ? (
                             <>
@@ -214,20 +254,9 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                          >
                              <Icons.Key />
                          </button>
-                        <select 
-                            value={language} 
-                            onChange={(e) => setLanguage(e.target.value as Language)}
-                            className="bg-black/20 text-white text-xs rounded border-none py-1 pl-1 pr-1 cursor-pointer w-12"
-                        >
-                            <option className="text-slate-800" value="en">EN</option>
-                            <option className="text-slate-800" value="es">ES</option>
-                            <option className="text-slate-800" value="hu">HU</option>
-                            <option className="text-slate-800" value="qu">QU</option>
-                            <option className="text-slate-800" value="sa">SA</option>
-                            <option className="text-slate-800" value="ja">JA</option>
-                            <option className="text-slate-800" value="ar">AR</option>
-                            <option className="text-slate-800" value="sw">SW</option>
-                        </select>
+                        
+                        <LanguageSelector language={language} setLanguage={setLanguage} />
+
                         <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white p-2 relative hover:bg-white/10 rounded">
                             {isMenuOpen ? <Icons.Close /> : <Icons.Menu />}
                             {hasNotification && !isMenuOpen && <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-emerald-900"></div>}
