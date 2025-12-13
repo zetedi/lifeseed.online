@@ -7,6 +7,46 @@
 
 A decentralized social sharing platform where every lifetree is a blockchain of presents.
 
+## 🌟 Core Concepts
+
+- **Lifetree**: A digital-physical entity representing a user's profile and blockchain history. It must be "planted" (created) and "validated" (by another validated tree) to interact fully with the network.
+- **Pulse**: A block in the Lifetree's chain. It can be a `STANDARD` post or a `GROWTH` update (visual evolution of the tree).
+- **Vision**: A future-oriented goal or dream associated with a Lifetree.
+- **Guardian**: A user who protects and monitors a "Nature" (Wild) tree or another user's tree.
+- **Match**: A handshake between two Pulses from different Lifetrees, creating a permanent link in the blockchain ledger.
+
+---
+
+## 📐 Project Standards & Rules
+
+### 1. UI/UX & Localization (RTL Support)
+Since the application supports Arabic (`ar`) and other RTL languages, specific rules apply to text rendering to prevent punctuation errors (e.g., periods appearing at the start of sentences).
+
+*   **User-Generated Content**: Any text input by the user (Titles, Bodies, Descriptions) **MUST** have `dir="auto"`.
+    ```tsx
+    // Correct
+    <p dir="auto">{pulse.body}</p>
+    ```
+*   **Technical Data**: Identifiers, Hashes, Emails, and Codes **MUST** have `dir="ltr"` to prevent layout scrambling in RTL mode.
+    ```tsx
+    // Correct
+    <span dir="ltr">{hash}</span>
+    ```
+*   **Logos & Brand**: The `.seed` logo text should be forced `dir="ltr"` to maintain the dot position.
+
+### 2. AI & Gemini Integration
+*   **Library**: Use `@google/genai` exclusively. Do not use the deprecated `GoogleGenerativeAI` class directly if possible, or legacy packages.
+*   **Models**:
+    *   Text/Reasoning: `gemini-2.5-flash`
+    *   Images: `gemini-2.5-flash-image`
+*   **API Key**: The key is injected via `process.env.API_KEY`. Never prompt the user for a key in the UI unless using the specific `window.aistudio` shim.
+
+### 3. Database & Genesis
+*   **Genesis Tree**: The app automatically checks for a "GENESIS_TREE" (Mahameru) on load.
+*   **Clean Mode**: Running `npm run dev:clean` or `npm run build:clean` will **WIPE** the Firestore database locally to reset the state for testing.
+
+---
+
 ## 🚀 Fresh Start Deployment Guide
 
 If you are setting this up from scratch or facing "configuration not found" errors, follow these steps exactly.
