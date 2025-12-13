@@ -57,7 +57,7 @@ const LanguageSelector = ({ language, setLanguage }: { language: Language, setLa
                 title="Change Language"
             >
                 <span className="text-emerald-100 group-hover:text-white transition-colors"><Icons.Globe /></span>
-                <span className="font-bold text-emerald-100 group-hover:text-white uppercase text-sm transition-colors">{language}</span>
+                <span className="font-bold text-emerald-100 group-hover:text-white uppercase text-sm transition-colors hidden md:inline">{language}</span>
             </button>
             
             {isOpen && (
@@ -79,12 +79,11 @@ const LanguageSelector = ({ language, setLanguage }: { language: Language, setLa
 
 export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onLogin, onLogout, onProfile, onCreateVision, hasApiKey, onCheckKey, pendingMatchesCount, myTreesCount = 0, dangerTreesCount = 0 }: NavigationProps) => {
     const { t, language, setLanguage } = useLanguage();
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isMoreOpen, setIsMoreOpen] = useState(false);
     const moreRef = useRef<HTMLDivElement>(null);
-    
     const hasNotification = pendingMatchesCount > 0 || dangerTreesCount > 0;
 
+    // Handle clicks outside "More" menu
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
@@ -107,219 +106,184 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
         }
     }
     
-    const getTabStyle = (key: string) => {
-        if (activeTab === key) {
-            if (key === 'visions') return `bg-amber-500 text-white shadow-lg shadow-amber-500/30`;
-            if (key === 'forest') return `bg-emerald-600 text-white shadow-lg shadow-emerald-500/30`;
-            if (key === 'pulses') return `bg-sky-600 text-white shadow-lg shadow-sky-500/30`;
-            if (key === 'matches') return `bg-rose-600 text-white shadow-lg shadow-rose-500/30`; // distinct color for matches
-            if (key === 'oracle') return `bg-indigo-600 text-white shadow-lg shadow-indigo-500/30`;
-            if (key === 'about') return `bg-purple-600 text-white shadow-lg shadow-purple-500/30`;
-            return `bg-slate-700 text-white`;
-        }
-        return `text-emerald-100 hover:text-white hover:bg-white/10`;
-    }
+    // Determine FAB Action based on active tab
+    const getFabAction = () => {
+        if (!lightseed) return onLogin;
+        if (activeTab === 'forest') return onPlant;
+        if (activeTab === 'visions') return onCreateVision;
+        return onPulse; // Default to pulse for other tabs
+    };
 
-    const mainTabs = ['forest', 'visions', 'pulses'];
-    const moreTabs = ['matches', 'oracle', 'about'];
+    const getFabIcon = () => {
+        if (!lightseed) return <Icons.Key />; // Login icon
+        if (activeTab === 'forest') return <Icons.Tree />;
+        if (activeTab === 'visions') return <Icons.Sparkles />;
+        return <PulsatingDot />;
+    };
 
-    // Desktop Tab Renderer
-    const renderTab = (tabKey: string) => (
-        <button 
-            key={tabKey}
-            onClick={() => { setTab(tabKey); setIsMoreOpen(false); }}
-            className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap ${getTabStyle(tabKey)}`}
-        >
-            {t(tabKey as any)}
-            {tabKey === 'matches' && pendingMatchesCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                </span>
-            )}
-        </button>
-    );
+    const getFabLabel = () => {
+        if (!lightseed) return t('sign_in');
+        if (activeTab === 'forest') return t('plant_lifetree');
+        if (activeTab === 'visions') return t('create_vision');
+        return t('emit_pulse');
+    };
 
-    return (
-        <nav className={`sticky top-0 z-30 bg-emerald-900 border-b border-emerald-800 text-white shadow-md`}>
+    // --- RENDERERS ---
+
+    // 1. Desktop Top Navigation (Classic Web Style)
+    const renderDesktopNav = () => (
+        <nav className="hidden md:block sticky top-0 z-30 bg-emerald-900 border-b border-emerald-800 text-white shadow-md">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-20 items-center">
+                    {/* Brand */}
                     <div className="flex items-center space-x-3 cursor-pointer shrink-0 rtl:space-x-reverse" onClick={() => setTab('forest')}>
                         <div className="bg-white p-1 rounded-full shadow-inner animate-[pulse_3s_ease-in-out_infinite]">
                              <Logo width={40} height={40} />
                         </div>
-                        {/* Force LTR to prevent dot from moving to the end in Arabic */}
                         <span dir="ltr" className="font-light text-2xl tracking-wide lowercase block text-white drop-shadow-sm">.seed</span>
                     </div>
 
-                    {/* Desktop Menu */}
-                    {/* Removed overflow-hidden to allow dropdown to show */}
-                    <div className="hidden md:flex flex-1 justify-center space-x-1 lg:space-x-3 rtl:space-x-reverse px-4">
-                        {/* Always visible on md+ */}
-                        {mainTabs.map(tabKey => renderTab(tabKey))}
-
-                        {/* Visible on Large Screens Only (xl+) */}
-                        <div className="hidden xl:flex space-x-3 rtl:space-x-reverse">
-                            {moreTabs.map(tabKey => renderTab(tabKey))}
-                        </div>
-
-                        {/* Dropdown for Medium/Large Screens (hides overflow items until XL) */}
-                        <div className="xl:hidden relative z-50" ref={moreRef}>
+                    {/* Tabs */}
+                    <div className="flex-1 flex justify-center space-x-2">
+                        {['forest', 'visions', 'pulses', 'matches', 'oracle', 'about'].map(tabKey => (
                             <button 
-                                onClick={() => setIsMoreOpen(!isMoreOpen)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center space-x-1 ${moreTabs.includes(activeTab) ? 'bg-white/20 text-white' : 'text-emerald-100 hover:text-white hover:bg-white/10'}`}
+                                key={tabKey}
+                                onClick={() => setTab(tabKey)}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeTab === tabKey ? 'bg-white/20 text-white shadow-sm' : 'text-emerald-200 hover:text-white hover:bg-white/10'}`}
                             >
-                                <span>{t('more')}</span>
-                                <svg className={`w-4 h-4 transition-transform ${isMoreOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                {pendingMatchesCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                                    </span>
-                                )}
+                                {t(tabKey as any)}
                             </button>
-                            {isMoreOpen && (
-                                <div className="absolute top-full mt-2 right-0 w-48 bg-emerald-800 rounded-xl shadow-xl border border-emerald-700 overflow-hidden py-2 flex flex-col z-50 animate-in fade-in zoom-in-95 duration-100">
-                                    {moreTabs.map(tabKey => (
-                                        <button
-                                            key={tabKey}
-                                            onClick={() => { setTab(tabKey); setIsMoreOpen(false); }}
-                                            className={`text-left px-4 py-3 text-sm font-medium hover:bg-white/10 flex justify-between items-center ${activeTab === tabKey ? 'text-white bg-white/10' : 'text-emerald-100'}`}
-                                        >
-                                            {t(tabKey as any)}
-                                            {tabKey === 'matches' && pendingMatchesCount > 0 && (
-                                                <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{pendingMatchesCount}</span>
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        ))}
                     </div>
 
-                    <div className="hidden md:flex items-center space-x-2 lg:space-x-4 shrink-0 rtl:space-x-reverse">
-                         <button 
-                             onClick={handleApiKeySelect}
-                             className={`p-2 rounded-full transition-all flex items-center space-x-2 ${!hasApiKey ? 'bg-amber-500/20 text-amber-500 ring-1 ring-amber-500' : 'text-emerald-100 hover:text-white hover:bg-white/10'}`}
-                             title={t('connect_gemini_tooltip')}
-                         >
-                             <Icons.Key />
-                             {!hasApiKey && <span className="text-xs font-bold hidden lg:inline">{t('connect_ai')}</span>}
-                         </button>
-
+                    {/* Actions */}
+                    <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                         <button onClick={handleApiKeySelect} className={`p-2 rounded-full ${!hasApiKey ? 'text-amber-400 animate-pulse' : 'text-emerald-200'}`}><Icons.Key /></button>
                          <LanguageSelector language={language} setLanguage={setLanguage} />
-
-                        {lightseed ? (
-                            <>
-                                {activeTab === 'forest' || myTreesCount === 0 ? (
-                                     <button onClick={onPlant} className={`hidden lg:flex ${colors.grass} hover:bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
-                                        <Icons.Tree />
-                                        <span className="ml-1">{t('plant_lifetree')}</span>
-                                    </button>
-                                ) : activeTab === 'visions' ? (
-                                     <button onClick={onCreateVision} className={`hidden lg:flex ${colors.earth} hover:bg-[#78350f] text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
-                                        {t('create_vision')}
-                                    </button>
-                                ) : (
-                                    <button onClick={onPulse} className={`hidden lg:flex ${colors.earth} hover:bg-[#78350f] text-white px-5 py-2 rounded-full text-sm font-medium shadow-md transition-transform active:scale-95 items-center`}>
-                                        <PulsatingDot />
-                                        {t('emit_pulse')}
-                                    </button>
-                                )}
-                                
-                                <div className="relative cursor-pointer" onClick={onProfile}>
-                                    <img 
-                                        src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} 
-                                        className="w-9 h-9 rounded-full border-2 border-emerald-700 hover:border-emerald-500 transition-colors" 
-                                        alt="Seed" 
-                                    />
-                                    {hasNotification && (
-                                        <span className="absolute top-0 right-0 flex h-3 w-3">
-                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-emerald-900"></span>
-                                        </span>
-                                    )}
+                         {lightseed ? (
+                            <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                                <button onClick={getFabAction()} className="bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2 rounded-full text-sm font-bold shadow transition-transform active:scale-95 flex items-center gap-2">
+                                    {getFabIcon()} <span>{getFabLabel()}</span>
+                                </button>
+                                <div onClick={onProfile} className="cursor-pointer relative">
+                                    <img src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} className="w-9 h-9 rounded-full border-2 border-emerald-500" />
                                 </div>
-                                <button onClick={onLogout} className="text-emerald-100 hover:text-white text-sm font-medium shadow-sm">{t('sign_out')}</button>
-                            </>
-                        ) : (
-                            <button onClick={onLogin} className={`flex items-center space-x-2 rtl:space-x-reverse bg-white text-slate-900 px-5 py-2 rounded-full text-sm font-bold shadow-md hover:bg-slate-100 transition-colors`}>
-                                <span>{t('sign_in')}</span>
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Mobile Menu Toggle */}
-                    <div className="flex md:hidden items-center space-x-4 rtl:space-x-reverse">
-                         <button 
-                             onClick={handleApiKeySelect}
-                             className={`p-1 ${!hasApiKey ? 'text-amber-500' : 'text-emerald-100'}`}
-                         >
-                             <Icons.Key />
-                         </button>
-                        
-                        <LanguageSelector language={language} setLanguage={setLanguage} />
-
-                        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white p-2 relative hover:bg-white/10 rounded">
-                            {isMenuOpen ? <Icons.Close /> : <Icons.Menu />}
-                            {hasNotification && !isMenuOpen && <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-emerald-900"></div>}
-                        </button>
+                            </div>
+                         ) : (
+                             <button onClick={onLogin} className="bg-white text-emerald-900 px-5 py-2 rounded-full text-sm font-bold shadow hover:bg-slate-100">{t('sign_in')}</button>
+                         )}
                     </div>
                 </div>
             </div>
+        </nav>
+    );
 
-            {isMenuOpen && (
-                 <div className="md:hidden bg-emerald-800 border-t border-emerald-700 pb-4 px-4 shadow-xl animate-in slide-in-from-top-2 duration-200">
-                    <div className="flex flex-col space-y-2 mt-4">
-                         {lightseed && (
-                             <button onClick={() => { onProfile(); setIsMenuOpen(false); }} className="flex items-center space-x-3 px-3 py-3 rounded-md bg-black/20 relative">
-                                <div className="relative">
-                                    <img src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} className="w-8 h-8 rounded-full" />
-                                    {hasNotification && <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-black"></div>}
+    // 2. Mobile App Bar (Top Scaffold)
+    const renderMobileAppBar = () => (
+        <div className="md:hidden sticky top-0 z-30 bg-emerald-900 text-white shadow-md px-4 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-2" onClick={() => setTab('forest')}>
+                 <Logo width={32} height={32} />
+                 <span dir="ltr" className="font-light text-xl lowercase">.seed</span>
+            </div>
+            <div className="flex items-center gap-2 rtl:space-x-reverse">
+                <button onClick={handleApiKeySelect} className={`${!hasApiKey ? 'text-amber-400' : 'text-emerald-200/50'}`}><Icons.Key /></button>
+                <LanguageSelector language={language} setLanguage={setLanguage} />
+                {lightseed ? (
+                    <img onClick={onProfile} src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} className="w-8 h-8 rounded-full border border-emerald-500" />
+                ) : (
+                    <button onClick={onLogin} className="text-sm font-bold bg-white text-emerald-900 px-3 py-1 rounded-full">{t('sign_in')}</button>
+                )}
+            </div>
+        </div>
+    );
+
+    // 3. Mobile Bottom Navigation (Bottom Scaffold + FAB)
+    const renderMobileBottomNav = () => (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40">
+            {/* FAB - Center Docked */}
+            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-50">
+                <button 
+                    onClick={getFabAction()}
+                    className="w-14 h-14 bg-emerald-500 rounded-full shadow-lg shadow-emerald-900/40 flex items-center justify-center text-white border-4 border-[#B2713A] active:scale-95 transition-transform"
+                >
+                    <div className="scale-125">{getFabIcon()}</div>
+                </button>
+            </div>
+
+            {/* Bottom Bar */}
+            <div className="bg-emerald-900 h-20 rounded-t-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex items-center justify-between px-2 text-xs font-medium text-emerald-200/70 relative">
+                
+                {/* Left Group */}
+                <div className="flex-1 flex justify-around pr-8">
+                    <button onClick={() => setTab('forest')} className={`flex flex-col items-center gap-1 ${activeTab === 'forest' ? 'text-white' : ''}`}>
+                        <Icons.Tree />
+                        <span>{t('forest')}</span>
+                    </button>
+                    <button onClick={() => setTab('visions')} className={`flex flex-col items-center gap-1 ${activeTab === 'visions' ? 'text-white' : ''}`}>
+                        <Icons.Sparkles />
+                        <span>{t('visions')}</span>
+                    </button>
+                </div>
+
+                {/* Right Group */}
+                <div className="flex-1 flex justify-around pl-8">
+                    <button onClick={() => setTab('pulses')} className={`flex flex-col items-center gap-1 ${activeTab === 'pulses' ? 'text-white' : ''}`}>
+                        <PulsatingDot />
+                        <span>{t('pulses')}</span>
+                    </button>
+                    <button onClick={() => setIsMoreOpen(true)} className={`flex flex-col items-center gap-1 ${['matches', 'oracle', 'about', 'profile'].includes(activeTab) ? 'text-white' : ''}`}>
+                        <div className="relative">
+                            <Icons.Menu />
+                            {hasNotification && <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-emerald-900"></div>}
+                        </div>
+                        <span>{t('more')}</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile Drawer (More Menu) */}
+            {isMoreOpen && (
+                <div className="fixed inset-0 z-50" onClick={() => setIsMoreOpen(false)}>
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-emerald-800 rounded-t-3xl p-6 animate-in slide-in-from-bottom-full duration-300">
+                        <div className="w-12 h-1 bg-emerald-600/50 rounded-full mx-auto mb-6"></div>
+                        <div className="grid grid-cols-4 gap-4 text-center text-emerald-100">
+                             <button onClick={() => setTab('matches')} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-white/5">
+                                <div className="bg-rose-500/20 p-3 rounded-full text-rose-300 relative">
+                                    <Icons.Link />
+                                    {pendingMatchesCount > 0 && <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">{pendingMatchesCount}</span>}
                                 </div>
-                                <span className="text-white font-medium">{t('profile')}</span>
+                                <span className="text-xs">{t('matches')}</span>
                              </button>
-                         )}
-                        {[...mainTabs, ...moreTabs].map((tabKey) => (
-                            <button 
-                                key={tabKey}
-                                onClick={() => { setTab(tabKey); setIsMenuOpen(false); }}
-                                className={`flex justify-between items-center text-left px-3 py-3 rounded-md text-base font-medium ${activeTab === tabKey ? 'bg-emerald-700 text-white' : 'text-emerald-100 hover:bg-white/10'}`}
-                            >
-                                <span>{t(tabKey as any)}</span>
-                                {tabKey === 'matches' && pendingMatchesCount > 0 && (
-                                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{pendingMatchesCount}</span>
-                                )}
-                            </button>
-                        ))}
-                         {lightseed ? (
-                            <>
-                                {activeTab === 'forest' || myTreesCount === 0 ? (
-                                    <button onClick={() => { onPlant(); setIsMenuOpen(false); }} className={`${colors.grass} text-white px-3 py-3 rounded-md text-base font-medium mt-4 flex items-center`}>
-                                        <Icons.Tree />
-                                        <span className="ml-2">{t('plant_lifetree')}</span>
-                                    </button>
-                                ) : activeTab === 'visions' ? (
-                                    <button onClick={() => { onCreateVision(); setIsMenuOpen(false); }} className={`${colors.earth} text-white px-3 py-3 rounded-md text-base font-medium mt-4 flex items-center`}>
-                                        {t('create_vision')}
-                                    </button>
-                                ) : (
-                                    <button onClick={() => { onPulse(); setIsMenuOpen(false); }} className={`${colors.earth} text-white px-3 py-3 rounded-md text-base font-medium mt-4 flex items-center`}>
-                                        <PulsatingDot />
-                                        {t('emit_pulse')}
-                                    </button>
-                                )}
-                                <button onClick={onLogout} className="text-left px-3 py-3 text-emerald-300 hover:text-white">
-                                    {t('sign_out')}
-                                </button>
-                            </>
-                        ) : (
-                             <button onClick={() => { onLogin(); setIsMenuOpen(false); }} className="bg-white text-slate-900 px-3 py-3 rounded-md text-base font-bold mt-4 shadow">
-                                {t('sign_in')}
+                             <button onClick={() => setTab('oracle')} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-white/5">
+                                <div className="bg-indigo-500/20 p-3 rounded-full text-indigo-300"><Icons.SparkleFill /></div>
+                                <span className="text-xs">{t('oracle')}</span>
+                             </button>
+                             <button onClick={onProfile} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-white/5">
+                                <div className="bg-emerald-500/20 p-3 rounded-full text-emerald-300"><Icons.FingerPrint /></div>
+                                <span className="text-xs">{t('profile')}</span>
+                             </button>
+                             <button onClick={() => setTab('about')} className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-white/5">
+                                <div className="bg-purple-500/20 p-3 rounded-full text-purple-300"><Icons.Shield /></div>
+                                <span className="text-xs">{t('about')}</span>
+                             </button>
+                        </div>
+                        {lightseed && (
+                            <button onClick={onLogout} className="w-full mt-6 py-3 bg-black/20 rounded-xl text-emerald-200 font-bold hover:bg-black/30">
+                                {t('sign_out')}
                             </button>
                         )}
                     </div>
-                 </div>
+                </div>
             )}
-        </nav>
+        </div>
+    );
+
+    return (
+        <>
+            {renderDesktopNav()}
+            {renderMobileAppBar()}
+            {renderMobileBottomNav()}
+        </>
     );
 };

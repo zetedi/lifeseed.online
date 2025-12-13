@@ -398,7 +398,7 @@ const AppContent = () => {
     
     // DETAIL VIEWS WRAPPER to preserve background
     const DetailWrapper = ({children}: {children: React.ReactNode}) => (
-        <div className="fixed inset-0 z-40 overflow-y-auto bg-slate-900/90 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/90 backdrop-blur-sm">
             {children}
         </div>
     );
@@ -423,7 +423,7 @@ const AppContent = () => {
         }
 
         return (
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-[80vh]">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-[80vh] pb-24 md:pb-6">
                 {/* Mother Tree Banner - Reduced height and margin */}
                 {tab === 'forest' && (
                     <div className="relative w-full h-32 mb-4 rounded-2xl overflow-hidden shadow-lg group">
