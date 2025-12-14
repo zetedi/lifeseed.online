@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { type Pulse, type Lifetree, type MatchProposal, type Vision, type VisionSynergy } from '../types';
-import { getMyPulses, getMyVisions, getMyMatchesHistory } from '../services/firebase';
+import { getMyPulses, getMyVisions, getMyMatchesHistory, deleteUserAccount, logout } from '../services/firebase';
 import { findVisionSynergies } from '../services/gemini';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Icons } from './ui/Icons';
 import { VisionCard } from './VisionCard';
+import { Modal } from './ui/Modal';
 
 export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree, onViewVision, onPlant }: any) => {
     const { t } = useLanguage();
@@ -14,15 +15,16 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
     const [visions, setVisions] = useState<Vision[]>([]);
     const [history, setHistory] = useState<MatchProposal[]>([]);
     const [loading, setLoading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     
     // AI Matchmaking State
     const [synergies, setSynergies] = useState<VisionSynergy[]>([]);
     const [analyzing, setAnalyzing] = useState(false);
 
-    // Check if any tree is validated to show source code
     const hasValidatedTree = myTrees.some((t: Lifetree) => t.validated);
-    // Check if all trees are validated to allow planting new ones
     const allValidated = myTrees.length > 0 && myTrees.every((t: Lifetree) => t.validated);
+    const inviteLink = `${window.location.origin}?invite=${lightseed.uid}`;
 
     useEffect(() => {
         if (!lightseed) return;
@@ -51,7 +53,6 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                  return;
              }
              setVisions(data);
-             // Proceed with fetched data
              performAnalysis(data);
         } else {
             performAnalysis(visions);
@@ -65,9 +66,39 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
             const results = await findVisionSynergies(vs);
             setSynergies(results);
         } catch (e: any) {
+            console.error("AI Analysis Error:", e);
             alert("Analysis failed: " + e.message);
         }
         setAnalyzing(false);
+    }
+
+    const copyInvite = () => {
+        navigator.clipboard.writeText(inviteLink);
+        alert("Invite link copied to clipboard!");
+    }
+
+    const handleDeleteAccount = async () => {
+        setIsDeleting(true);
+        try {
+            await deleteUserAccount();
+            await logout();
+            alert(t('delete_goodbye'));
+            window.location.reload();
+        } catch (e: any) {
+            console.error("Delete Account Error:", e);
+            
+            // Check for specific security error requiring re-login
+            if (e.message && (e.message.includes("log out") || e.message.includes("recent-login"))) {
+                alert("Security Check: Please sign in again to confirm deletion.");
+                await logout();
+                window.location.reload();
+                return;
+            }
+
+            alert(e.message);
+            setIsDeleting(false);
+            setShowDeleteConfirm(false);
+        }
     }
 
     if (!lightseed) return null;
@@ -79,7 +110,12 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                     <div className="relative">
                         <img 
                             src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} 
-                            className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-xl"
+                            className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-xl bg-white object-cover"
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.onerror = null;
+                                target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lightseed.displayName || 'User')}&background=random&color=fff`;
+                            }}
                         />
                         <div className="absolute bottom-1 right-1 bg-emerald-500 w-6 h-6 rounded-full border-4 border-slate-900"></div>
                     </div>
@@ -93,7 +129,6 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                                 <span className="text-xs text-slate-400 uppercase tracking-wider">{t('my_trees')}</span>
                             </div>
                             
-                            {/* Create Tree Button for Validated Users */}
                             {allValidated && (
                                 <button onClick={onPlant} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-transform active:scale-95 flex items-center space-x-2">
                                     <Icons.Tree />
@@ -104,7 +139,6 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                     </div>
                 </div>
 
-                {/* Validation Banner moved inside dark header for better visibility and contrast */}
                 {hasValidatedTree && (
                     <div className="max-w-4xl mx-auto mt-8 bg-slate-700/50 backdrop-blur border border-slate-600 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="flex items-center space-x-3">
@@ -130,6 +164,24 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
             </div>
 
             <div className="max-w-4xl mx-auto px-4 mt-8">
+                {/* Invitations Card */}
+                {myTrees.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div>
+                            <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
+                                <Icons.SparkleFill /> {t('invitations')}
+                            </h3>
+                            <p className="text-sm text-slate-500">{t('invites_remaining')}: <span className="font-bold text-emerald-600">7</span></p>
+                        </div>
+                        <div className="flex w-full md:w-auto gap-2">
+                            <input readOnly value={inviteLink} className="flex-1 border border-slate-200 rounded px-3 py-2 text-xs bg-slate-50 text-slate-500 w-full md:w-64" />
+                            <button onClick={copyInvite} className="bg-slate-800 text-white px-4 py-2 rounded font-bold text-xs hover:bg-black transition-colors whitespace-nowrap">
+                                {t('copy_invite')}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden min-h-[500px]">
                     <div className="flex border-b border-slate-100 overflow-x-auto">
                         <button 
@@ -167,7 +219,6 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                                              <Icons.Tree />
                                         </div>
                                         <span className="font-bold mt-2 text-sm">Plant New Tree</span>
-                                        <span className="text-[10px] text-slate-400">Expand your network</span>
                                     </div>
                                 )}
 
@@ -284,7 +335,30 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                         )}
                     </div>
                 </div>
+
+                <div className="mt-8 text-center">
+                    <button onClick={() => setShowDeleteConfirm(true)} className="text-red-500 hover:text-red-700 text-xs uppercase font-bold tracking-widest border border-red-200 px-6 py-3 rounded-full hover:bg-red-50 transition-colors">
+                        {t('delete_account')}
+                    </button>
+                </div>
             </div>
+
+            {showDeleteConfirm && (
+                <Modal title={t('delete_confirm_title')} onClose={() => setShowDeleteConfirm(false)}>
+                    <div className="space-y-6 text-center p-4">
+                        <div className="text-red-500 text-4xl mb-2"><Icons.Siren /></div>
+                        <p className="text-slate-600">{t('delete_confirm_desc')}</p>
+                        <div className="flex justify-center gap-4 mt-6">
+                            <button onClick={() => setShowDeleteConfirm(false)} disabled={isDeleting} className="px-6 py-2 rounded-lg bg-slate-200 text-slate-800 hover:bg-slate-300 font-bold">
+                                {t('cancel')}
+                            </button>
+                            <button onClick={handleDeleteAccount} disabled={isDeleting} className="px-6 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-bold">
+                                {isDeleting ? "Deleting..." : "Confirm Delete"}
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
         </div>
     );
 };

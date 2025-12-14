@@ -2,22 +2,20 @@
 import React, { useState } from 'react';
 import Logo from './Logo';
 import { Icons } from './ui/Icons';
+import { subscribeToNewsletter } from '../services/firebase';
+import { Modal } from './ui/Modal';
+import { useLanguage } from '../contexts/LanguageContext';
 
-// Helper Component for Images to replace missing ArticleImage
 const ArticleImage = ({ src, alt }: { src: string, alt: string }) => {
-    // Determine if placeholder is needed if src is local and missing
-    // In this context, we just render the img tag. If images are missing, alt text shows.
     return (
         <span className="float-left mr-4 mb-2 mt-1">
              <img src={src} alt={alt} className="max-w-[150px] md:max-w-[200px] rounded-lg shadow-md border border-slate-200" onError={(e) => {
-                 // Fallback if image fails
                  (e.target as HTMLImageElement).style.display = 'none'; 
              }}/>
         </span>
     );
 };
 
-// Helper for Buttons/Links
 const LinkButton = ({ href, children }: { href: string, children: React.ReactNode }) => (
     <a 
         href={href} 
@@ -30,7 +28,32 @@ const LinkButton = ({ href, children }: { href: string, children: React.ReactNod
 );
 
 export const AboutPage = () => {
+    const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState<'phoenix' | 'tss' | 'whitepaper' | 'yantra' | 'steps'>('phoenix');
+    const [showSubModal, setShowSubModal] = useState(false);
+    const [email, setEmail] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+
+    const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    const handleSubscribe = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!validateEmail(email)) {
+            alert(t('invalid_email'));
+            return;
+        }
+        setSubmitting(true);
+        try {
+            await subscribeToNewsletter(email);
+            alert(`${t('subscribed_success')} ${email}`);
+            setEmail("");
+            setShowSubModal(false);
+        } catch (e) {
+            console.error("Subscription error", e);
+            alert(t('subscription_failed'));
+        }
+        setSubmitting(false);
+    };
 
     const stepsContent = [
       {
@@ -54,21 +77,21 @@ export const AboutPage = () => {
 
             <div className="flex flex-col items-center justify-center pt-10 pb-8 border-t border-slate-100 text-center space-y-6 bg-gradient-to-b from-transparent to-emerald-50/50 rounded-b-2xl -mx-6 px-6 mt-8">
                 <div className="space-y-2">
-                    <h3 className="text-2xl font-light text-emerald-800">We stand for trees</h3>
+                    <h3 className="text-2xl font-light text-emerald-800">{t('stand_for_trees')}</h3>
                     <p className="text-lg text-slate-600 max-w-md mx-auto">
-                        Subscribe to a very rare newsletter with the button below:
+                        {t('subscribe')}
                     </p>
                 </div>
                 <div className="p-4 bg-white rounded-full text-emerald-600 shadow-sm border border-emerald-100">
                     <Icons.Tree />
                 </div>
-                <a 
-                href="mailto:contact@lightseed.online?subject=Subscribe to Lightseed Newsletter&body=Hi, I would like to subscribe to the newsletter."
-                className="group bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all active:scale-95 flex items-center space-x-3 transform hover:-translate-y-0.5"
+                <button 
+                    onClick={() => setShowSubModal(true)}
+                    className="group bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all active:scale-95 flex items-center space-x-3 transform hover:-translate-y-0.5"
                 >
-                <Icons.Send />
-                <span>Subscribe to Newsletter</span>
-                </a>
+                    <Icons.Send />
+                    <span>{t('subscribe_action')}</span>
+                </button>
             </div>
           </div>
         )
@@ -648,7 +671,6 @@ export const AboutPage = () => {
 
     return (
         <div className="min-h-screen pb-20">
-            {/* Header Area */}
             <div className="relative bg-gradient-to-b from-purple-900 to-slate-900 text-white py-16 px-4">
                 <div className="max-w-4xl mx-auto text-center">
                     <p className="text-purple-200 text-lg font-light tracking-wide">The Story, The Science, The Spirit</p>
@@ -657,7 +679,6 @@ export const AboutPage = () => {
 
             <div className="max-w-4xl mx-auto px-4 -mt-8 relative z-10">
                  <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden min-h-[500px]">
-                    {/* Tabs */}
                     <div className="flex border-b border-slate-100 overflow-x-auto">
                         {[
                             { id: 'phoenix', label: 'Phoenix' },
@@ -708,6 +729,29 @@ export const AboutPage = () => {
                     </div>
                 </div>
             </div>
+
+            {showSubModal && (
+                <Modal title={t('subscription_title')} onClose={() => setShowSubModal(false)}>
+                    <div className="space-y-4">
+                        <p className="text-sm text-slate-500">{t('subscription_desc')}</p>
+                        <form onSubmit={handleSubscribe} className="space-y-4">
+                            <input 
+                                type="email"
+                                placeholder="Email address"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full border border-slate-300 rounded px-4 py-2"
+                                required
+                            />
+                            <div className="flex justify-end">
+                                <button type="submit" disabled={submitting} className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-emerald-700 disabled:opacity-50">
+                                    {submitting ? "Subscribing..." : t('subscribe_action')}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </Modal>
+            )}
         </div>
     );
 };

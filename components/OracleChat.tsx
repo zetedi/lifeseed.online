@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { createOracleChat } from '../services/gemini';
+import { checkAndIncrementAiUsage } from '../services/firebase';
 import { Chat, GenerateContentResponse } from "@google/genai";
 import { Icons } from './ui/Icons';
 
@@ -15,7 +16,7 @@ export const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
 
     useEffect(() => {
         if (!hasApiKey) {
-            setMessages([{role: 'model', text: "The Oracle awaits your Key. Please connect above."}]);
+            setMessages([{role: 'model', text: t('oracle_waiting')}]);
             setChat(null);
             return;
         }
@@ -23,8 +24,7 @@ export const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
         try {
             const c = createOracleChat();
             setChat(c);
-            // Updated greeting as requested
-            setMessages([{role: 'model', text: "I am the Oracle. Can I assist you with the vision of your Lifetree, help you find its location, or shall we simply decide on the journey ahead?"}]);
+            setMessages([{role: 'model', text: t('oracle_greeting')}]);
         } catch(e) {
             setMessages([{role: 'model', text: "The connection to the spirits (API) is severed."}]);
         }
@@ -42,6 +42,20 @@ export const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
              setMessages(prev => [...prev, {role: 'user', text: input}, {role: 'model', text: "Please connect your Spirit Key to speak."}]);
              setInput('');
              return;
+        }
+
+        // Check daily limit before proceeding
+        try {
+            const allowed = await checkAndIncrementAiUsage('text');
+            if (!allowed) {
+                setMessages(prev => [...prev, {role: 'user', text: input}, {role: 'model', text: t('ai_login_required')}]);
+                setInput('');
+                return;
+            }
+        } catch (error: any) {
+            setMessages(prev => [...prev, {role: 'user', text: input}, {role: 'model', text: error.message || t('daily_limit_text')}]);
+            setInput('');
+            return;
         }
 
         const userMsg = input;
@@ -98,7 +112,7 @@ export const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
                 <input 
                     value={input}
                     onChange={e => setInput(e.target.value)}
-                    placeholder="Ask the Oracle..."
+                    placeholder={t('ask_oracle')}
                     className="flex-1 border border-slate-200 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 <button type="submit" disabled={isTyping || !input.trim()} className="bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700 disabled:opacity-50 transition-colors">

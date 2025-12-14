@@ -16,7 +16,8 @@ import {
   fetchVisions,
   createVision,
   deleteLifetree,
-  ensureGenesis
+  ensureGenesis,
+  checkAndIncrementAiUsage
 } from './services/firebase';
 import { generateLifetreeBio, generateVisionImage } from './services/gemini';
 import { type Pulse, type Lifetree, type MatchProposal, type Vision } from './types';
@@ -110,7 +111,6 @@ const AppContent = () => {
              const has = await aiStudio.hasSelectedApiKey();
              setHasApiKey(has);
          } else {
-             // Check global process only
              const key = (window as any).process?.env?.API_KEY;
              setHasApiKey(!!key);
          }
@@ -119,10 +119,9 @@ const AppContent = () => {
     useEffect(() => { 
         checkKey();
         loadContent(true); 
-        ensureGenesis(); // Ensure Genesis tree exists on app load
+        ensureGenesis(); 
     }, [tab, lightseed]);
     
-    // Infinite Scroll Listener
     useEffect(() => {
         const handleScroll = () => {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
@@ -135,13 +134,11 @@ const AppContent = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [loadingMore, hasMore, tab, lastDoc]);
 
-    // Handle defaults for "Guard Tree" mode
     useEffect(() => {
         if (showPlantModal && plantAsNature) {
             setTreeName("Humanity's Tree!");
             setTreeBio(""); 
         } else if (showPlantModal && !plantAsNature) {
-            // Reset to empty or user defaults if switching back to normal plant mode
             if (treeName === "Humanity's Tree!") setTreeName("");
         }
     }, [showPlantModal, plantAsNature]);
@@ -153,7 +150,6 @@ const AppContent = () => {
             setHasMore(true);
         }
 
-        // Avoid fetching if we're just matching/profile/oracle or no more data
         if (!reset && !hasMore) return;
         
         setLoadingMore(true);
@@ -179,12 +175,11 @@ const AppContent = () => {
                 setHasMore(!!res.lastDoc);
             }
             else if (tab === 'matches' && lightseed) {
-                 // Matches don't support cursor pagination in this simplified version yet
                  const res = await getPendingMatches(lightseed.uid);
                  setMatches(res);
             }
         } catch(e) {
-            console.error(e);
+            console.error("Load Content Error:", e);
         }
         setLoadingMore(false);
     };
@@ -200,6 +195,14 @@ const AppContent = () => {
         if (!visionBody) { alert("Please enter a vision description first."); return; }
         setUploading(true);
         try {
+            // Check Daily Limit before generation
+            const allowed = await checkAndIncrementAiUsage('image');
+            if (!allowed) {
+                alert(t('ai_login_required'));
+                setUploading(false);
+                return;
+            }
+
             const url = await generateVisionImage(visionBody);
             if (url) {
                 setVisionImageUrl(url);
@@ -207,7 +210,8 @@ const AppContent = () => {
                 throw new Error("No image data returned from AI service.");
             }
         } catch (e: any) {
-             alert(`Image generation failed: ${e.message}`);
+             console.error("Image Gen Error:", e);
+             alert(`Image generation failed: ${e.message || t('daily_limit_image')}`);
         }
         setUploading(false);
     }
@@ -228,6 +232,7 @@ const AppContent = () => {
             });
             loadContent(true); 
         } catch (e: any) {
+            console.error("Quick Snap Error:", e);
             alert("Error taking picture: " + e.message);
         }
     }
@@ -237,7 +242,6 @@ const AppContent = () => {
         if (!lightseed || isSubmitting) return;
         setIsSubmitting(true);
         
-        // Use provided name or default to user's display name
         const finalName = treeName.trim() || lightseed.displayName || "Anonymous Tree";
 
         navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -253,10 +257,12 @@ const AppContent = () => {
                     isNature: plantAsNature 
                 });
                 await refreshTrees(); setShowPlantModal(false); loadContent(true);
-            } catch(e: any) { alert(e.message); }
+            } catch(e: any) { 
+                console.error("Plant Tree Error:", e);
+                alert(e.message); 
+            }
             finally { setIsSubmitting(false); }
         }, (err) => {
-            // Handle geo error fallback
              plantLifetree({ 
                  ownerId: lightseed.uid, 
                  name: finalName, 
@@ -266,7 +272,10 @@ const AppContent = () => {
                  isNature: plantAsNature
              })
                 .then(async () => { await refreshTrees(); setShowPlantModal(false); loadContent(true); })
-                .catch(e => alert(e.message))
+                .catch(e => {
+                    console.error("Plant Tree Error:", e);
+                    alert(e.message);
+                })
                 .finally(() => setIsSubmitting(false));
         });
     };
@@ -278,6 +287,7 @@ const AppContent = () => {
             await refreshTrees();
             loadContent(true);
         } catch (e: any) {
+            console.error("Delete Tree Error:", e);
             alert("Error deleting tree: " + e.message);
         }
     }
@@ -310,7 +320,10 @@ const AppContent = () => {
                 authorPhoto: lightseed.photoURL || undefined,
             });
             setShowPulseModal(false); setPulseTitle(''); setPulseBody(''); setPulseImageUrl(''); setIsGrowth(false); loadContent(true);
-        } catch(e: any) { alert(e.message); }
+        } catch(e: any) { 
+            console.error("Emit Pulse Error:", e);
+            alert(e.message); 
+        }
         finally { setIsSubmitting(false); }
     };
     
@@ -340,7 +353,10 @@ const AppContent = () => {
                 imageUrl: finalImageUrl
             });
             setShowVisionModal(false); setVisionTitle(''); setVisionBody(''); setVisionLink(''); setVisionImageUrl(''); loadContent(true);
-        } catch(e:any) { alert(e.message); }
+        } catch(e:any) { 
+            console.error("Create Vision Error:", e);
+            alert(e.message); 
+        }
         finally { setIsSubmitting(false); }
     }
     
@@ -359,25 +375,28 @@ const AppContent = () => {
              });
              alert("Match Proposed! Waiting for acceptance.");
              setShowPulseModal(false); setMatchCandidate(null);
-        } catch(e:any) { alert(e.message); }
+        } catch(e:any) { 
+            console.error("Match Error:", e);
+            alert(e.message); 
+        }
         finally { setIsSubmitting(false); }
     }
 
     const onAcceptMatch = async (id: string) => {
         try { await acceptMatch(id); alert("Match Accepted! Blocks synced."); loadContent(true); } 
-        catch(e:any) { alert(e.message); }
+        catch(e:any) { 
+            console.error("Accept Match Error:", e);
+            alert(e.message); 
+        }
     }
 
-    // Filter Logic for Forest View
     const filteredData = data.filter((item: any) => {
         let matches = true;
-        // Text Search
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
             const text = (item.title || item.name || "") + " " + (item.body || "") + " " + (item.locationName || "");
             matches = matches && text.toLowerCase().includes(term);
         }
-        // Nature Tree Filter (Forest Tab Only)
         if (tab === 'forest') {
             if (!showNatureTrees && item.isNature) {
                 matches = false;
@@ -390,20 +409,16 @@ const AppContent = () => {
     });
 
     const dangerTreesCount = guardedTrees.filter(t => t.status === 'DANGER').length;
-
-    // Create unique suggestion list for datalist
     const searchSuggestions = Array.from(new Set(data.map((item: any) => item.title || item.name).filter(Boolean)));
 
     if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-[#B2713A]"><Logo className="animate-pulse text-white" /></div>;
     
-    // DETAIL VIEWS WRAPPER to preserve background
     const DetailWrapper = ({children}: {children: React.ReactNode}) => (
         <div className="fixed inset-0 z-40 overflow-y-auto bg-slate-900/90 backdrop-blur-sm">
             {children}
         </div>
     );
 
-    // Main Content Renderer based on active tab
     const renderMainContent = () => {
         if (tab === 'profile' && lightseed) {
             return (
@@ -424,7 +439,6 @@ const AppContent = () => {
 
         return (
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-[80vh]">
-                {/* Mother Tree Banner - Reduced height and margin */}
                 {tab === 'forest' && (
                     <div className="relative w-full h-32 mb-4 rounded-2xl overflow-hidden shadow-lg group">
                         <img 
@@ -432,7 +446,6 @@ const AppContent = () => {
                             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
                             alt="Mother Tree"
                             onError={(e) => {
-                                // If image missing, show a nice gradient placeholder
                                 const target = e.target as HTMLImageElement;
                                 target.style.display = 'none';
                                 target.parentElement!.classList.add('bg-gradient-to-r', 'from-emerald-800', 'to-emerald-900');
@@ -447,7 +460,6 @@ const AppContent = () => {
                     </div>
                 )}
 
-                {/* Search Bar for all tabs except matches/profile/oracle/about */}
                 {tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && tab !== 'about' && (
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                         <div className="relative w-full md:max-w-md">
@@ -468,7 +480,6 @@ const AppContent = () => {
                         </div>
 
                         <div className="flex items-center space-x-2 shrink-0">
-                            {/* Guard Tree Button - Aligned with View Switcher */}
                             {tab === 'forest' && myTrees.length > 0 && (
                                 <button 
                                     onClick={() => { setPlantAsNature(true); setShowPlantModal(true); }}
@@ -480,7 +491,6 @@ const AppContent = () => {
                                 </button>
                             )}
 
-                            {/* View Switcher only for Forest */}
                             {tab === 'forest' && (
                                 <div className="bg-[#B2713A]/80 backdrop-blur p-1 rounded-lg border border-emerald-700 flex shadow-sm h-10">
                                     <button 
@@ -503,7 +513,6 @@ const AppContent = () => {
                     </div>
                 )}
 
-                {/* Matches Inbox */}
                 {tab === 'matches' && (
                     <div className="max-w-2xl mx-auto text-white">
                         <h2 className="text-2xl font-light mb-6">{t('pending_matches')}</h2>
@@ -524,13 +533,10 @@ const AppContent = () => {
                     </div>
                 )}
 
-                {/* Oracle Chat */}
                 {tab === 'oracle' && <OracleChat hasApiKey={hasApiKey} />}
 
-                {/* Content Area */}
                 {tab === 'forest' ? (
                     <>
-                        {/* Banner Moved Above */}
                         {viewMode === 'map' ? (
                             <ForestMap trees={filteredData} />
                         ) : (
@@ -554,7 +560,6 @@ const AppContent = () => {
                             </div>
                         )}
                         
-                        {/* Filter Controls below map/grid */}
                         <div className="flex justify-center mt-6 mb-2 space-x-3">
                              <label className="flex items-center space-x-2 cursor-pointer bg-[#B2713A]/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 hover:bg-[#B2713A]/80 transition-colors shadow-sm">
                                 <input 
@@ -611,9 +616,7 @@ const AppContent = () => {
 
     return (
         <div className="min-h-screen relative font-sans text-slate-800">
-            {/* Fixed Background */}
             <div className="fixed inset-0 z-[-1]" style={backgroundStyle}></div>
-            {/* Overlay to increase opacity (whiten) the background - REMOVED PER REQUEST */}
             
             <Navigation 
                 lightseed={lightseed} 
@@ -634,7 +637,6 @@ const AppContent = () => {
             
             {renderMainContent()}
 
-            {/* Modals & Overlays - Rendered at top level to ensure they appear even in Profile view */}
             {selectedTree && (
                 <DetailWrapper>
                     <LifetreeDetail 
@@ -655,17 +657,14 @@ const AppContent = () => {
                 </DetailWrapper>
             )}
             
-            {/* NEW: Pulse Detail Overlay */}
             {selectedPulse && (
                 <DetailWrapper>
                     <PulseDetail pulse={selectedPulse} onClose={() => setSelectedPulse(null)} />
                 </DetailWrapper>
             )}
 
-            {/* Growth Player Modal (Standalone) */}
             {showGrowthPlayer && !selectedTree && <GrowthPlayerModal treeId={showGrowthPlayer} onClose={() => setShowGrowthPlayer(null)} />}
 
-            {/* Plant Modal (Simplified) */}
             {showPlantModal && (
                 <Modal title={plantAsNature ? t('guard_tree') : t('plant_lifetree')} onClose={() => setShowPlantModal(false)}>
                     <form onSubmit={handlePlant} className="space-y-4">
@@ -708,7 +707,6 @@ const AppContent = () => {
                 </Modal>
             )}
 
-            {/* Vision Creation Modal */}
             {showVisionModal && (
                 <Modal title={t('create_vision')} onClose={() => setShowVisionModal(false)}>
                     <form onSubmit={handleCreateVision} className="space-y-4">
@@ -738,7 +736,6 @@ const AppContent = () => {
                 </Modal>
             )}
 
-            {/* Pulse / Match Modal */}
             {showPulseModal && (
                 <Modal title={matchCandidate ? t('propose_match') : t('emit_pulse')} onClose={() => { setShowPulseModal(false); setMatchCandidate(null); }}>
                     <form onSubmit={matchCandidate ? initiateMatch : handleEmitPulse} className="space-y-4">

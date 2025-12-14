@@ -3,43 +3,50 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper function
-    function isSignedIn() {
-      return request.auth != null;
+    // Allow users to access their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // LIFETREES
+    // Allow creation of emails (system triggers) by anyone (including welcome emails before full auth sync)
+    match /mail/{mailId} {
+      allow create: if true;
+      allow read: if false;
+    }
+
+    // Allow newsletter subscriptions
+    match /subscriptions/{subId} {
+      allow create: if true;
+      allow read: if false;
+    }
+
+    // Lifetrees: Read public, Write auth
     match /lifetrees/{treeId} {
       allow read: if true;
-      // Allow general delete for dev cleaning/management, or strictly owned by user
-      allow create, update: if isSignedIn(); 
-      allow delete: if true; 
+      allow write: if request.auth != null;
     }
 
-    // VISIONS
+    // Visions: Read public, Write auth
     match /visions/{visionId} {
       allow read: if true;
-      allow create, update: if isSignedIn();
-      allow delete: if true;
+      allow write: if request.auth != null;
     }
 
-    // PULSES
+    // Pulses: Read public, Write auth
     match /pulses/{pulseId} {
       allow read: if true;
-      allow create, update: if isSignedIn();
-      allow delete: if true;
+      allow write: if request.auth != null;
 
-      // Subcollection for Loves/Likes
+      // Subcollection for Loves
       match /loves/{userId} {
-        allow read, write: if isSignedIn();
+        allow read, write: if request.auth != null;
       }
     }
     
-    // MATCHES
+    // Matches: Read public, Write auth
     match /matches/{matchId} {
-        allow read: if true;
-        allow create, update: if isSignedIn();
-        allow delete: if true;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
   }
 }

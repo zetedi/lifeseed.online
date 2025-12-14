@@ -153,17 +153,13 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                     </div>
 
                     {/* Desktop Menu */}
-                    {/* Removed overflow-hidden to allow dropdown to show */}
                     <div className="hidden md:flex flex-1 justify-center space-x-1 lg:space-x-3 rtl:space-x-reverse px-4">
-                        {/* Always visible on md+ */}
                         {mainTabs.map(tabKey => renderTab(tabKey))}
 
-                        {/* Visible on Large Screens Only (xl+) */}
                         <div className="hidden xl:flex space-x-3 rtl:space-x-reverse">
                             {moreTabs.map(tabKey => renderTab(tabKey))}
                         </div>
 
-                        {/* Dropdown for Medium/Large Screens (hides overflow items until XL) */}
                         <div className="xl:hidden relative z-50" ref={moreRef}>
                             <button 
                                 onClick={() => setIsMoreOpen(!isMoreOpen)}
@@ -229,8 +225,14 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                                 <div className="relative cursor-pointer" onClick={onProfile}>
                                     <img 
                                         src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} 
-                                        className="w-9 h-9 rounded-full border-2 border-emerald-700 hover:border-emerald-500 transition-colors" 
-                                        alt="Seed" 
+                                        className="w-9 h-9 rounded-full border-2 border-emerald-700 hover:border-emerald-500 transition-colors bg-white object-cover" 
+                                        alt="Seed"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            // Fallback to UI Avatars if Google image fails (403/404)
+                                            target.onerror = null; // Prevent infinite loop
+                                            target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lightseed.displayName || 'User')}&background=random&color=fff`;
+                                        }}
                                     />
                                     {hasNotification && (
                                         <span className="absolute top-0 right-0 flex h-3 w-3">
@@ -273,7 +275,15 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                          {lightseed && (
                              <button onClick={() => { onProfile(); setIsMenuOpen(false); }} className="flex items-center space-x-3 px-3 py-3 rounded-md bg-black/20 relative">
                                 <div className="relative">
-                                    <img src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} className="w-8 h-8 rounded-full" />
+                                    <img 
+                                        src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} 
+                                        className="w-8 h-8 rounded-full bg-white object-cover"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.onerror = null;
+                                            target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lightseed.displayName || 'User')}&background=random&color=fff`;
+                                        }}
+                                    />
                                     {hasNotification && <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-black"></div>}
                                 </div>
                                 <span className="text-white font-medium">{t('profile')}</span>
