@@ -239,7 +239,18 @@ export const triggerSystemEmail = async (to: string, subject: string, text: stri
             message: {
                 subject: subject,
                 text: text,
-                html: `<p>${text}</p>`
+                html: `
+                  <div style="font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+                    <h2 style="color: #059669; font-weight: 300; letter-spacing: 1px; margin-bottom: 20px;">.seed</h2>
+                    <div style="font-size: 16px; margin-bottom: 30px;">
+                        ${text.replace(/\n/g, '<br>')}
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+                    <p style="font-size: 12px; color: #9ca3af; text-align: center;">
+                        Sent from the <a href="https://lifeseed.online" style="color: #059669; text-decoration: none;">Lifetree Network</a>
+                    </p>
+                  </div>
+                `
             }
         });
     } catch (e) {

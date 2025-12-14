@@ -8,13 +8,14 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Allow creation of emails (system triggers) by anyone (including welcome emails before full auth sync)
+    // Email System: Only authenticated users can trigger system emails (Welcome/Goodbye)
+    // The Extension (running as admin) will read these to send the email.
     match /mail/{mailId} {
-      allow create: if true;
-      allow read: if false;
+      allow create: if request.auth != null;
+      allow read: if false; // Users shouldn't read email logs
     }
 
-    // Allow newsletter subscriptions
+    // Newsletter: Public write access for signups
     match /subscriptions/{subId} {
       allow create: if true;
       allow read: if false;
