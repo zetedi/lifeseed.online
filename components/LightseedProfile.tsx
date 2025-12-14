@@ -123,18 +123,27 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                         <h1 className="text-3xl font-light tracking-wide">{lightseed.displayName}</h1>
                         <p className="text-slate-400 text-sm font-mono mt-1">{lightseed.email}</p>
                         
-                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 mt-6">
-                            <div className="text-center">
+                        <div className="flex flex-col md:flex-row items-center md:items-start gap-4 mt-4">
+                            {/* Stats */}
+                            <div className="text-center md:text-left">
                                 <span className="block text-2xl font-bold">{myTrees.length}</span>
                                 <span className="text-xs text-slate-400 uppercase tracking-wider">{t('my_trees')}</span>
                             </div>
-                            
-                            {allValidated && (
-                                <button onClick={onPlant} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-transform active:scale-95 flex items-center space-x-2">
-                                    <Icons.Tree />
-                                    <span>Create Tree</span>
+
+                            {/* Action Buttons Container */}
+                            <div className="flex flex-wrap items-center justify-center gap-3">
+                                {allValidated && (
+                                    <button onClick={onPlant} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-transform active:scale-95 flex items-center space-x-2">
+                                        <Icons.Tree />
+                                        <span>Create Tree</span>
+                                    </button>
+                                )}
+                                
+                                <button onClick={() => setShowDeleteConfirm(true)} className="bg-slate-700 hover:bg-red-900/50 text-slate-300 hover:text-red-200 px-3 py-2 rounded-full text-xs font-bold transition-colors flex items-center space-x-1 border border-slate-600 hover:border-red-800">
+                                    <Icons.Trash />
+                                    <span>{t('delete_account')}</span>
                                 </button>
-                            )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -182,7 +191,7 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                     </div>
                 )}
 
-                <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden min-h-[500px]">
+                <div className="bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden min-h-[500px] mb-20">
                     <div className="flex border-b border-slate-100 overflow-x-auto">
                         <button 
                             onClick={() => setActiveTab('trees')} 
@@ -334,12 +343,6 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                              )
                         )}
                     </div>
-                </div>
-
-                <div className="mt-8 text-center">
-                    <button onClick={() => setShowDeleteConfirm(true)} className="text-red-500 hover:text-red-700 text-xs uppercase font-bold tracking-widest border border-red-200 px-6 py-3 rounded-full hover:bg-red-50 transition-colors">
-                        {t('delete_account')}
-                    </button>
                 </div>
             </div>
 

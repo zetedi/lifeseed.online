@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { translations, Language } from '../utils/translations';
 
 interface LanguageContextType {
@@ -11,7 +12,19 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>('en');
+
+  useEffect(() => {
+      const stored = localStorage.getItem('lifeseed_lang');
+      if (stored && translations[stored as Language]) {
+          setLanguageState(stored as Language);
+      }
+  }, []);
+
+  const setLanguage = (lang: Language) => {
+      setLanguageState(lang);
+      localStorage.setItem('lifeseed_lang', lang);
+  }
 
   const t = (key: keyof typeof translations['en']) => {
     return translations[language][key] || translations['en'][key];
