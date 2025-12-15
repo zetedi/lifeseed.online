@@ -459,7 +459,7 @@ const AppContent = () => {
 
     if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-[#B2713A]"><Logo className="animate-pulse text-white" /></div>;
     
-    const DetailWrapper = ({children}: {children: React.ReactNode}) => (
+    const DetailWrapper = ({children}: {children?: React.ReactNode}) => (
         <div className="fixed inset-0 z-40 overflow-y-auto bg-slate-900/90 backdrop-blur-sm">
             {children}
         </div>
@@ -591,16 +591,17 @@ const AppContent = () => {
                                     <p className="col-span-full text-center text-slate-400 py-10">{t('no_trees_found')}</p>
                                 ) : (
                                     filteredData.map((item: any) => (
-                                        <LifetreeCard 
-                                            key={item.id} 
-                                            tree={item} 
-                                            myActiveTree={activeTree} 
-                                            currentUserId={lightseed?.uid}
-                                            onPlayGrowth={setShowGrowthPlayer} 
-                                            onQuickSnap={handleQuickSnap}
-                                            onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); loadContent(true); })}
-                                            onView={setSelectedTree}
-                                        />
+                                        <React.Fragment key={item.id}>
+                                            <LifetreeCard 
+                                                tree={item} 
+                                                myActiveTree={activeTree} 
+                                                currentUserId={lightseed?.uid}
+                                                onPlayGrowth={setShowGrowthPlayer} 
+                                                onQuickSnap={handleQuickSnap}
+                                                onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); loadContent(true); })}
+                                                onView={setSelectedTree}
+                                            />
+                                        </React.Fragment>
                                     ))
                                 )}
                             </div>
@@ -644,13 +645,14 @@ const AppContent = () => {
                 ) : tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && tab !== 'about' && (
                     <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {data.map((item) => (
-                             <PulseCard 
-                                key={item.id} 
-                                pulse={item} 
-                                lightseed={lightseed} 
-                                onMatch={(p: Pulse) => { setMatchCandidate(p); setShowPulseModal(true); }}
-                                onView={(p: Pulse) => setSelectedPulse(p)} 
-                            />
+                             <React.Fragment key={item.id}>
+                                 <PulseCard 
+                                    pulse={item} 
+                                    lightseed={lightseed} 
+                                    onMatch={(p: Pulse) => { setMatchCandidate(p); setShowPulseModal(true); }}
+                                    onView={(p: Pulse) => setSelectedPulse(p)} 
+                                />
+                            </React.Fragment>
                         ))}
                     </div>
                 )}

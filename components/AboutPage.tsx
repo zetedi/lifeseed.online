@@ -16,7 +16,7 @@ const ArticleImage = ({ src, alt }: { src: string, alt: string }) => {
     );
 };
 
-const LinkButton = ({ href, children }: { href: string, children: React.ReactNode }) => (
+const LinkButton = ({ href, children }: { href: string, children?: React.ReactNode }) => (
     <a 
         href={href} 
         target="_blank" 

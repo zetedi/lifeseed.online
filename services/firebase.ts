@@ -32,7 +32,8 @@ import {
   QueryDocumentSnapshot,
   arrayUnion,
   arrayRemove,
-  writeBatch
+  writeBatch,
+  onSnapshot
 } from 'firebase/firestore';
 import { 
   getStorage, 
@@ -47,6 +48,9 @@ import { createBlock } from '../utils/crypto';
 // ------------------------------------------------------------------
 // CONFIGURATION
 // ------------------------------------------------------------------
+
+// Configure your Sender Alias here
+const SYSTEM_EMAIL_FROM = "LifeSeed <hello@lifeseed.online>";
 
 const firebaseConfig = {
   apiKey: process.env.VITE_FIREBASE_API_KEY || "AIzaSyCDcg27BljgJsVGuzNgS0NQWOgFIuDMlYI",
@@ -107,7 +111,8 @@ export const signInWithGoogle = async () => {
           await triggerSystemEmail(
               user.email || "", 
               "Welcome to LifeSeed", 
-              `Welcome to LifeSeed, ${user.displayName}. You have planted your intention. Now you may plant your tree.`
+              `Welcome to LifeSeed, ${user.displayName}. You have planted your intention. Now you may plant your tree.`,
+              user.uid
           );
       }
 
@@ -115,9 +120,20 @@ export const signInWithGoogle = async () => {
   } 
   catch (error: any) { 
       console.error("Login Failed:", error); 
+      
       if (error.code === 'auth/invalid-api-key') {
           alert(`Login Failed: Invalid API Key.\n\nPlease check your .env file.`);
+      } else if (error.code === 'auth/unauthorized-domain') {
+          alert(`Login Failed: Unauthorized Domain.\n\nPlease add "${window.location.hostname}" to the Authorized Domains list in the Firebase Console -> Authentication -> Settings.`);
+      } else if (error.code === 'auth/popup-closed-by-user') {
+          // User closed the popup, silent return
+          return null;
+      } else if (error.code === 'auth/popup-blocked') {
+          alert("Login Popup Blocked.\n\nPlease allow popups for this site in your browser settings.");
+      } else {
+          alert(`Login Error: ${error.message}`);
       }
+      
       throw error; 
   }
 };
@@ -162,7 +178,8 @@ export const deleteUserAccount = async () => {
             await triggerSystemEmail(
                 email, 
                 "Goodbye from LifeSeed", 
-                "It was wonderful to have you. See you!"
+                "It was wonderful to have you. See you!",
+                uid
             );
         }
 
@@ -232,11 +249,16 @@ export const checkAndIncrementAiUsage = async (type: 'text' | 'image'): Promise<
 // --- EMAIL & SUBSCRIPTION ---
 
 // Writes to 'mail' collection to trigger Firebase Extension (e.g., Trigger Email)
-export const triggerSystemEmail = async (to: string, subject: string, text: string) => {
+export const triggerSystemEmail = async (to: string, subject: string, text: string, userId?: string) => {
+    // Robustly get UID. If called during login, auth.currentUser might be shaky, so we prefer the passed userId
+    const effectiveUid = userId || auth.currentUser?.uid;
+    
     try {
-        await addDoc(mailCollection, {
+        const docRef = await addDoc(mailCollection, {
             to: [to],
+            uid: effectiveUid, // Crucial for security rules to allow reading status back 
             message: {
+                from: SYSTEM_EMAIL_FROM,
                 subject: subject,
                 text: text,
                 html: `
@@ -253,9 +275,20 @@ export const triggerSystemEmail = async (to: string, subject: string, text: stri
                 `
             }
         });
+        return docRef;
     } catch (e) {
         console.warn("Email trigger failed (Check database permissions):", e);
+        throw e;
     }
+}
+
+export const monitorMailStatus = (docId: string, onChange: (status: any) => void) => {
+    const mailRef = doc(db, 'mail', docId);
+    return onSnapshot(mailRef, (docSnap) => {
+        if (docSnap.exists()) {
+            onChange(docSnap.data().delivery);
+        }
+    });
 }
 
 export const subscribeToNewsletter = async (email: string) => {

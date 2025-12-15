@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { type Pulse, type Lifetree, type MatchProposal, type Vision, type VisionSynergy } from '../types';
-import { getMyPulses, getMyVisions, getMyMatchesHistory, deleteUserAccount, logout } from '../services/firebase';
+import { getMyPulses, getMyVisions, getMyMatchesHistory, deleteUserAccount, logout, triggerSystemEmail, monitorMailStatus } from '../services/firebase';
 import { findVisionSynergies } from '../services/gemini';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Icons } from './ui/Icons';
@@ -17,6 +17,9 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
     const [loading, setLoading] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [sendingTest, setSendingTest] = useState(false);
+    const [mailStatus, setMailStatus] = useState<string | null>(null);
+    const [testEmailAddress, setTestEmailAddress] = useState('');
     
     // AI Matchmaking State
     const [synergies, setSynergies] = useState<VisionSynergy[]>([]);
@@ -75,6 +78,59 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
     const copyInvite = () => {
         navigator.clipboard.writeText(inviteLink);
         alert("Invite link copied to clipboard!");
+    }
+
+    const handleTestEmail = async () => {
+        const targetEmail = prompt("Enter the email address to send test to:", lightseed.email);
+        if (!targetEmail) return;
+
+        setTestEmailAddress(targetEmail);
+        setSendingTest(true);
+        setMailStatus("SENDING...");
+        
+        try {
+            const docRef = await triggerSystemEmail(
+                targetEmail,
+                "Debug Test: LifeSeed Network",
+                `This is a test email sent at ${new Date().toLocaleTimeString()} to verify the SMTP pipeline. If you see this, the system is working.`,
+                lightseed.uid // Explicitly pass UID to ensure security rules pass even if auth state is flaky
+            );
+            
+            setMailStatus("QUEUED");
+            
+            // Timeout check for sleeping/broken extension
+            const timeoutCheck = setTimeout(() => {
+                setMailStatus((current) => {
+                    if (current === "QUEUED") {
+                        alert("The email was written to the database, but the Email Extension didn't pick it up after 15 seconds.\n\nLikely causes:\n1. Region Mismatch (Database is in 'nam5', Extension Function must be in 'us-central1').\n2. Extension is paused/errored.\n3. Extension is configured to listen to a different collection.");
+                        return "TIMEOUT: Extension unresponsive";
+                    }
+                    return current;
+                });
+            }, 15000);
+
+            // Start listening to status changes
+            const unsubscribe = monitorMailStatus(docRef.id, (deliveryStatus: any) => {
+                clearTimeout(timeoutCheck);
+                if (deliveryStatus) {
+                    if (deliveryStatus.state === 'SUCCESS') {
+                        setMailStatus(`SUCCESS! Sent to ${targetEmail}`);
+                        setTimeout(() => { setSendingTest(false); setMailStatus(null); unsubscribe(); }, 5000);
+                    } else if (deliveryStatus.state === 'ERROR') {
+                        setMailStatus(`ERROR: ${deliveryStatus.error}`);
+                        console.error("Mail Error Details:", deliveryStatus);
+                        // Don't auto-clear error so user can read it
+                    } else {
+                        setMailStatus(`STATUS: ${deliveryStatus.state}`);
+                    }
+                }
+            });
+
+        } catch (e: any) {
+            alert("Failed to write to database: " + e.message);
+            setSendingTest(false);
+            setMailStatus(null);
+        }
     }
 
     const handleDeleteAccount = async () => {
@@ -139,6 +195,15 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                                     </button>
                                 )}
                                 
+                                <button 
+                                    onClick={handleTestEmail} 
+                                    disabled={sendingTest && mailStatus?.includes("SUCCESS")}
+                                    className={`px-3 py-2 rounded-full text-xs font-bold transition-colors flex items-center space-x-1 border ${mailStatus?.includes('ERROR') || mailStatus?.includes('TIMEOUT') ? 'bg-red-900 border-red-700 text-red-200' : 'bg-sky-700 hover:bg-sky-600 border-sky-600 text-sky-100'}`}
+                                >
+                                    <Icons.Send />
+                                    <span>{mailStatus || "Test Email"}</span>
+                                </button>
+
                                 <button onClick={() => setShowDeleteConfirm(true)} className="bg-slate-700 hover:bg-red-900/50 text-slate-300 hover:text-red-200 px-3 py-2 rounded-full text-xs font-bold transition-colors flex items-center space-x-1 border border-slate-600 hover:border-red-800">
                                     <Icons.Trash />
                                     <span>{t('delete_account')}</span>

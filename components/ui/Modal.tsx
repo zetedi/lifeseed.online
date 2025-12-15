@@ -2,7 +2,7 @@
 import React, { ReactNode } from 'react';
 
 interface ModalProps {
-    children: ReactNode;
+    children?: ReactNode;
     onClose: () => void;
     title: string;
 }
