@@ -112,7 +112,7 @@ For the Oracle and Firebase connection to work on the deployed site, you **must*
 
 ### Step 2: Configure Email (Using Google Workspace Alias)
 
-The goal is to send emails that look like they come from your alias (e.g., `hello@lifeseed.online`), even though you log in with your main account (e.g., `zetedi@lifeseed.online`).
+The goal is to send emails that look like they come from your alias (e.g., `hello@lightseed.online`), even though you log in with your main account (e.g., `zetedi@lightseed.online`).
 
 **1. Get the Key (App Password)**
 *Do this with your **MAIN** Google Workspace account.*
@@ -125,14 +125,14 @@ The goal is to send emails that look like they come from your alias (e.g., `hell
 
 **2. Create the Connection String**
 Combine your **MAIN** email and the **CODE**:
-`smtps://MAIN_EMAIL@lifeseed.online:THE_16_LETTER_CODE@smtp.gmail.com:465`
+`smtps://MAIN_EMAIL@lightseed.online:THE_16_LETTER_CODE@smtp.gmail.com:465`
 
 **3. Configure Firebase Extension**
 1.  Go to **Firebase Console** -> **Extensions**.
 2.  Find the **Trigger Email** extension.
 3.  Click **Manage** -> **Reconfigure extension**.
 4.  **SMTP Connection URI**: Paste the string from Step 2.
-5.  **Default FROM address**: Type your **ALIAS** email here (e.g., `hello@lifeseed.online`).
+5.  **Default FROM address**: Type your **ALIAS** email here (e.g., `hello@lightseed.online`).
 6.  Click **Save**.
 
 ### Step 3: Configure Firebase CLI

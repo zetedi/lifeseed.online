@@ -50,7 +50,7 @@ import { createBlock } from '../utils/crypto';
 // ------------------------------------------------------------------
 
 // Configure your Sender Alias here
-const SYSTEM_EMAIL_FROM = "LifeSeed <hello@lifeseed.online>";
+const SYSTEM_EMAIL_FROM = "LifeSeed <admin@lightseed.online>";
 
 const firebaseConfig = {
   apiKey: process.env.VITE_FIREBASE_API_KEY || "AIzaSyCDcg27BljgJsVGuzNgS0NQWOgFIuDMlYI",
@@ -130,6 +130,8 @@ export const signInWithGoogle = async () => {
           return null;
       } else if (error.code === 'auth/popup-blocked') {
           alert("Login Popup Blocked.\n\nPlease allow popups for this site in your browser settings.");
+      } else if (error.code === 'auth/network-request-failed' || error.message?.includes('BLOCKED_BY_CLIENT')) {
+          alert("Network Error: Connection blocked.\n\nPlease disable AdBlockers or Privacy extensions (like Ghostery/uBlock) for this site, as they block Google Authentication.");
       } else {
           alert(`Login Error: ${error.message}`);
       }
@@ -269,7 +271,7 @@ export const triggerSystemEmail = async (to: string, subject: string, text: stri
                     </div>
                     <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
                     <p style="font-size: 12px; color: #9ca3af; text-align: center;">
-                        Sent from the <a href="https://lifeseed.online" style="color: #059669; text-decoration: none;">Lifetree Network</a>
+                        Sent from the <a href="https://lightseed.online" style="color: #059669; text-decoration: none;">Lifetree Network</a>
                     </p>
                   </div>
                 `
@@ -284,11 +286,21 @@ export const triggerSystemEmail = async (to: string, subject: string, text: stri
 
 export const monitorMailStatus = (docId: string, onChange: (status: any) => void) => {
     const mailRef = doc(db, 'mail', docId);
-    return onSnapshot(mailRef, (docSnap) => {
-        if (docSnap.exists()) {
-            onChange(docSnap.data().delivery);
+    return onSnapshot(mailRef, 
+        (docSnap) => {
+            if (docSnap.exists()) {
+                onChange(docSnap.data().delivery);
+            }
+        },
+        (error) => {
+            // Gracefully handle permission errors (e.g., if user logs out while listening)
+            console.warn("Mail status listener stopped:", error.code);
+            // Optionally notify that permission was lost, but usually we just want to suppress the crash
+            if (error.code === 'permission-denied') {
+                onChange({ state: 'ERROR', error: 'Permission denied (User logged out?)' });
+            }
         }
-    });
+    );
 }
 
 export const subscribeToNewsletter = async (email: string) => {
@@ -395,7 +407,7 @@ export const ensureGenesis = () => {
                         body: genesisBody,
                         imageUrl: genesisSymbol,
                         createdAt: serverTimestamp(),
-                        link: "https://lifeseed.online"
+                        link: "https://lightseed.online"
                     });
                     
                     if ((import.meta as any).env.MODE === 'clean') {

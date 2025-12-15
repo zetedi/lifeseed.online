@@ -286,7 +286,7 @@ export const AboutPage = () => {
             <p className="my-2">
               Planting a lifetree is a practical act, linking biological growth to a
               system powered by a proof-of-stake Ethereum fork and an online
-              platform, lifeseed.online. Drawing on quantum entanglement as a
+              platform, lightseed.online. Drawing on quantum entanglement as a
               metaphor for interconnectedness, inspired by photosynthesis’ quantum
               coherence, the network aligns human intent, agentic AI, and ecological
               cycles. Your lifetree is your identity and gateway to reciprocity,
@@ -310,7 +310,7 @@ export const AboutPage = () => {
             <p className="my-2">
               Pseudonymous identities ensure privacy while unlocking transparent,
               verified interactions, enabling the creation of "forests" as dynamic
-              communities visualized through <b>lifeseed.online</b>’s interactive
+              communities visualized through <b>lightseed.online</b>’s interactive
               graphs. To make this vision accessible and transformative for all —
               regardless of location, resources, or experience — the Lifetree
               Network introduces a <b>Gradual Guardianship Pathway</b>.
@@ -337,7 +337,7 @@ export const AboutPage = () => {
                 Users start by adopting guardianship of an existing tree — one that
                 resonates deeply and is reachable by foot. This could be a nearby
                 oak in a park, a street-side maple, or any tree that evokes a sense
-                of connection and calm. Through the mobile-optimized lifeseed.online
+                of connection and calm. Through the mobile-optimized lightseed.online
                 platform, participants register their guardianship, linking it to
                 their pseudonymous digital identity. The act is simple yet profound:
                 Guardians commit to regular visits for meditation, reflection, or
@@ -482,7 +482,7 @@ export const AboutPage = () => {
         ),
       },
       {
-        title: "lightseed.online vs. lifeseed.online",
+        title: "lightseed.online vs. lightseed.online",
         content: (
           <div className="text-justify leading-relaxed">
             <p className="indent-8 my-2">
@@ -495,10 +495,10 @@ export const AboutPage = () => {
               individual blockchains of the distributed nodes. <br />
             </p>
             <p className="indent-8 my-2">
-              <b>lifeseed.online</b> is a where individual lifetrees become a
+              <b>lightseed.online</b> is a where individual lifetrees become a
               forest. It is also a reference implementation of a lightseed node.
               Built to demonstrate key features like lifetree NFT minting and
-              AI-driven matchmaking, lifeseed.online offers a tangible, working
+              AI-driven matchmaking, lightseed.online offers a tangible, working
               model to inspire developers and communities.
             </p>
           </div>
@@ -552,7 +552,7 @@ export const AboutPage = () => {
         content: (
           <div className="text-justify leading-relaxed">
             <p className="indent-8 my-2">
-              The lifeseed.online platform delivers a mobile-optimized web
+              The lightseed.online platform delivers a mobile-optimized web
               interface. Integrated with Ethereum via 'ethers.js', it includes:
               </p>
               <ul className="list-disc pl-4 pt-2 m-1 space-y-2">

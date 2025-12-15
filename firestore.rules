@@ -9,10 +9,10 @@ service cloud.firestore {
     }
 
     // Email System: 
-    // Create: Auth users can trigger emails
-    // Read: Users can read their own email logs to check delivery status (SUCCESS/ERROR)
+    // Create: Auth users can trigger emails, BUT must include their uid so they can read it back.
+    // Read: Users can read their own email logs to check delivery status.
     match /mail/{mailId} {
-      allow create: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
       allow read: if request.auth != null && resource.data.uid == request.auth.uid;
     }
 
