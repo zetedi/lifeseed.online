@@ -11,9 +11,10 @@ service cloud.firestore {
     // Email System: 
     // Create: Auth users can trigger emails, BUT must include their uid so they can read it back.
     // Read: Users can read their own email logs to check delivery status.
+    // We allow reading if resource is null to handle the race condition where the client listens before the server commits the write.
     match /mail/{mailId} {
       allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
-      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow read: if request.auth != null && (resource == null || resource.data.uid == request.auth.uid);
     }
 
     // Newsletter: Public write access for signups

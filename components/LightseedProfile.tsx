@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { type Pulse, type Lifetree, type MatchProposal, type Vision, type VisionSynergy } from '../types';
-import { getMyPulses, getMyVisions, getMyMatchesHistory, deleteUserAccount, logout, triggerSystemEmail, monitorMailStatus } from '../services/firebase';
+import { getMyPulses, getMyVisions, getMyMatchesHistory, deleteUserAccount, logout, triggerSystemEmail, monitorMailStatus, sendInvite, listenToUserProfile } from '../services/firebase';
 import { findVisionSynergies } from '../services/gemini';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Icons } from './ui/Icons';
@@ -21,6 +21,13 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
     const [mailStatus, setMailStatus] = useState<string | null>(null);
     const [testEmailAddress, setTestEmailAddress] = useState('');
     
+    // Invite System
+    const [invitesRemaining, setInvitesRemaining] = useState(7);
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [inviteEmail, setInviteEmail] = useState('');
+    const [inviteMessage, setInviteMessage] = useState('');
+    const [sendingInvite, setSendingInvite] = useState(false);
+
     // AI Matchmaking State
     const [synergies, setSynergies] = useState<VisionSynergy[]>([]);
     const [analyzing, setAnalyzing] = useState(false);
@@ -31,6 +38,14 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
 
     useEffect(() => {
         if (!lightseed) return;
+        
+        // Listen to live user profile for invites
+        const unsub = listenToUserProfile(lightseed.uid, (data) => {
+            if (data && typeof data.invitesRemaining === 'number') {
+                setInvitesRemaining(data.invitesRemaining);
+            }
+        });
+
         setLoading(true);
         const fetchData = async () => {
             if (activeTab === 'pulses') {
@@ -46,6 +61,7 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
             setLoading(false);
         };
         fetchData();
+        return () => unsub();
     }, [activeTab, lightseed]);
 
     const handleMatchmaking = async () => {
@@ -80,6 +96,22 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
         alert("Invite link copied to clipboard!");
     }
 
+    const handleSendInvite = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!inviteEmail) return;
+        setSendingInvite(true);
+        try {
+            await sendInvite(inviteEmail, inviteMessage, lightseed.uid, inviteLink);
+            alert(t('invite_sent'));
+            setShowInviteModal(false);
+            setInviteEmail('');
+            setInviteMessage('');
+        } catch (e: any) {
+            alert(e.message || "Failed to send invite");
+        }
+        setSendingInvite(false);
+    }
+
     const handleTestEmail = async () => {
         const targetEmail = prompt("Enter the email address to send test to:", lightseed.email);
         if (!targetEmail) return;
@@ -102,12 +134,12 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
             const timeoutCheck = setTimeout(() => {
                 setMailStatus((current) => {
                     if (current === "QUEUED") {
-                        alert("The email was written to the database, but the Email Extension didn't pick it up after 15 seconds.\n\nLikely causes:\n1. Region Mismatch (Database is in 'nam5', Extension Function must be in 'us-central1').\n2. Extension is paused/errored.\n3. Extension is configured to listen to a different collection.");
-                        return "TIMEOUT: Extension unresponsive";
+                        alert("The email is in the DB, but the Extension didn't send it.\n\nCheck Firebase Console -> Extensions tab.\nIf you see 'Error saving configuration', you likely set the Database Name to 'nam5'. Change it to '(default)'.");
+                        return "TIMEOUT: Check Extension Config";
                     }
                     return current;
                 });
-            }, 15000);
+            }, 10000);
 
             // Start listening to status changes
             const unsubscribe = monitorMailStatus(docRef.id, (deliveryStatus: any) => {
@@ -245,12 +277,15 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                             <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
                                 <Icons.SparkleFill /> {t('invitations')}
                             </h3>
-                            <p className="text-sm text-slate-500">{t('invites_remaining')}: <span className="font-bold text-emerald-600">7</span></p>
+                            <p className="text-sm text-slate-500">{t('invites_remaining')}: <span className="font-bold text-emerald-600">{invitesRemaining}</span></p>
                         </div>
                         <div className="flex w-full md:w-auto gap-2">
                             <input readOnly value={inviteLink} className="flex-1 border border-slate-200 rounded px-3 py-2 text-xs bg-slate-50 text-slate-500 w-full md:w-64" />
-                            <button onClick={copyInvite} className="bg-slate-800 text-white px-4 py-2 rounded font-bold text-xs hover:bg-black transition-colors whitespace-nowrap">
+                            <button onClick={copyInvite} className="bg-slate-200 text-slate-700 px-4 py-2 rounded font-bold text-xs hover:bg-slate-300 transition-colors whitespace-nowrap">
                                 {t('copy_invite')}
+                            </button>
+                            <button onClick={() => setShowInviteModal(true)} disabled={invitesRemaining <= 0} className="bg-emerald-600 text-white px-4 py-2 rounded font-bold text-xs hover:bg-emerald-700 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
+                                {t('send_invite')}
                             </button>
                         </div>
                     </div>
@@ -410,6 +445,45 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                     </div>
                 </div>
             </div>
+
+            {/* Invite Modal */}
+            {showInviteModal && (
+                <Modal title={t('send_invite')} onClose={() => setShowInviteModal(false)}>
+                    <form onSubmit={handleSendInvite} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                            <input 
+                                type="email" 
+                                required
+                                value={inviteEmail}
+                                onChange={e => setInviteEmail(e.target.value)}
+                                placeholder={t('invite_email_placeholder')}
+                                className="w-full border border-slate-300 rounded px-3 py-2 text-sm"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Message (Optional)</label>
+                            <textarea 
+                                value={inviteMessage}
+                                onChange={e => setInviteMessage(e.target.value)}
+                                placeholder={t('invite_message_placeholder')}
+                                className="w-full border border-slate-300 rounded px-3 py-2 text-sm h-24 resize-none"
+                            />
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded text-xs text-slate-500">
+                            <strong>Preview:</strong><br/>
+                            {inviteMessage && <span className="italic block my-1">"{inviteMessage}"</span>}
+                            You have been invited to join the lightseed network.<br/>
+                            Join here: [Link]
+                        </div>
+                        <div className="flex justify-end">
+                            <button type="submit" disabled={sendingInvite} className="bg-emerald-600 text-white px-6 py-2 rounded font-bold text-sm hover:bg-emerald-700 transition-colors disabled:opacity-50">
+                                {sendingInvite ? "Sending..." : "Send Invite"}
+                            </button>
+                        </div>
+                    </form>
+                </Modal>
+            )}
 
             {showDeleteConfirm && (
                 <Modal title={t('delete_confirm_title')} onClose={() => setShowDeleteConfirm(false)}>

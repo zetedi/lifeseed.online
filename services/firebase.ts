@@ -50,7 +50,7 @@ import { createBlock } from '../utils/crypto';
 // ------------------------------------------------------------------
 
 // Configure your Sender Alias here
-const SYSTEM_EMAIL_FROM = "LifeSeed <admin@lightseed.online>";
+const SYSTEM_EMAIL_FROM = "lightseed <admin@lightseed.online>";
 
 const firebaseConfig = {
   apiKey: process.env.VITE_FIREBASE_API_KEY || "AIzaSyCDcg27BljgJsVGuzNgS0NQWOgFIuDMlYI",
@@ -87,6 +87,9 @@ export const onAuthChange = (callback: (user: FirebaseUser | null) => void) => {
 
 export const signInWithGoogle = async () => {
   try { 
+      // Add custom parameters if needed, e.g. prompt: 'select_account'
+      googleProvider.setCustomParameters({ prompt: 'select_account' });
+      
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       
@@ -108,10 +111,11 @@ export const signInWithGoogle = async () => {
           });
 
           // Trigger Welcome Email
+          // Pass user.uid explicitly to ensure the write permission check passes
           await triggerSystemEmail(
               user.email || "", 
-              "Welcome to LifeSeed", 
-              `Welcome to LifeSeed, ${user.displayName}. You have planted your intention. Now you may plant your tree.`,
+              "Welcome to lightseed", 
+              `Welcome to lightseed, ${user.displayName}. You have planted your intention. Now you may plant your tree.`,
               user.uid
           );
       }
@@ -141,6 +145,14 @@ export const signInWithGoogle = async () => {
 };
 
 export const logout = () => firebaseSignOut(auth);
+
+export const listenToUserProfile = (userId: string, callback: (data: any) => void) => {
+    return onSnapshot(doc(db, 'users', userId), (docSnap) => {
+        if (docSnap.exists()) {
+            callback(docSnap.data());
+        }
+    });
+}
 
 // Delete User and Data
 export const deleteUserAccount = async () => {
@@ -179,7 +191,7 @@ export const deleteUserAccount = async () => {
         if (email) {
             await triggerSystemEmail(
                 email, 
-                "Goodbye from LifeSeed", 
+                "Goodbye from lightseed", 
                 "It was wonderful to have you. See you!",
                 uid
             );
@@ -255,6 +267,11 @@ export const triggerSystemEmail = async (to: string, subject: string, text: stri
     // Robustly get UID. If called during login, auth.currentUser might be shaky, so we prefer the passed userId
     const effectiveUid = userId || auth.currentUser?.uid;
     
+    if (!effectiveUid) {
+        console.error("Cannot trigger email: User ID missing. This prevents Firestore write due to security rules.");
+        throw new Error("User ID required for email triggering.");
+    }
+
     try {
         const docRef = await addDoc(mailCollection, {
             to: [to],
@@ -284,6 +301,37 @@ export const triggerSystemEmail = async (to: string, subject: string, text: stri
     }
 }
 
+export const sendInvite = async (targetEmail: string, customMessage: string, userId: string, inviteLink: string) => {
+    const userRef = doc(db, 'users', userId);
+    
+    // 1. Decrement Invite Count Transaction
+    await runTransaction(db, async (t) => {
+        const userDoc = await t.get(userRef);
+        if (!userDoc.exists()) throw new Error("User profile not found");
+        
+        const data = userDoc.data();
+        const currentInvites = data.invitesRemaining || 0;
+        
+        if (currentInvites <= 0) {
+            throw new Error("No invites remaining.");
+        }
+        
+        t.update(userRef, { invitesRemaining: currentInvites - 1 });
+    });
+
+    // 2. Send Email
+    const subject = "You have been invited to lightseed";
+    const body = `
+${customMessage ? `"${customMessage}"\n\n` : ""}
+You have been invited to join the lightseed network.
+Plant your intention. Grow your tree.
+
+Join here: ${inviteLink}
+    `;
+    
+    await triggerSystemEmail(targetEmail, subject, body, userId);
+}
+
 export const monitorMailStatus = (docId: string, onChange: (status: any) => void) => {
     const mailRef = doc(db, 'mail', docId);
     return onSnapshot(mailRef, 
@@ -294,8 +342,9 @@ export const monitorMailStatus = (docId: string, onChange: (status: any) => void
         },
         (error) => {
             // Gracefully handle permission errors (e.g., if user logs out while listening)
-            console.warn("Mail status listener stopped:", error.code);
-            // Optionally notify that permission was lost, but usually we just want to suppress the crash
+            console.warn("Mail status listener stopped (likely permission/logout):", error.code);
+            // Suppress the "Uncaught Error in snapshot listener" by handling it here.
+            // We notify the UI so it can stop spinners or show a message.
             if (error.code === 'permission-denied') {
                 onChange({ state: 'ERROR', error: 'Permission denied (User logged out?)' });
             }

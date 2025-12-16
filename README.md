@@ -157,6 +157,18 @@ Since you created a new project, you must tell the Firebase CLI which project to
 
 ## Troubleshooting
 
+### Error: Database '(nam5)' does not exist
+This happens if you entered the location code `(nam5)` into the "Firestore Database" field during Extension configuration.
+
+**Fix:**
+1. Go to **Firebase Console** -> **Extensions** -> **Trigger Email**.
+2. Click **Reconfigure Extension**.
+3. Find the **Cloud Firestore database** field.
+4. Change it to `(default)`.
+   *   *Note: `nam5` is the location, not the name.*
+5. Ensure **Cloud Functions location** is set to `us-central1` (or whatever region your functions support).
+6. Click **Save**.
+
 ### Site Not Found (Works on Mobile but not Desktop)
 If you see "Site Not Found" on your computer but the site works on your phone:
 1. **It is a Cache Issue:** Your computer remembers the "broken" state of the domain from before the setup was finished.
