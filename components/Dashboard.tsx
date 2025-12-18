@@ -61,7 +61,7 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
     return (
         <div className="grid grid-cols-2 gap-3 sm:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Box 1: My Light HUD */}
-            <div onClick={() => lightseed ? onSetTab('profile') : onLogin()} className="relative h-48 md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
+            <div onClick={() => lightseed ? onSetTab('profile') : onLogin()} className="relative h-[40vh] md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-purple-600"></div>
                 {lightseed && firstTreeImage && <img src={firstTreeImage} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-[5s] opacity-50" />}
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div>
@@ -76,22 +76,22 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
                     </div>
 
                     {lightseed && (
-                        <div className="grid grid-cols-2 gap-2 mt-2">
-                            <div className="bg-black/20 rounded p-2 text-center">
-                                <span className="block text-xs text-white/60">Trees</span>
-                                <span className="font-bold">{stats.trees}</span>
+                        <div className="grid grid-cols-2 bg-white/10 backdrop-blur p-2 rounded-lg border border-white/10 mt-2">
+                            <div className="text-center border-r border-b border-white/10 pb-2">
+                                <span className="block text-[10px] uppercase text-emerald-200">Trees</span>
+                                <span className="font-bold text-sm">{stats.trees}</span>
                             </div>
-                            <div className="bg-black/20 rounded p-2 text-center">
-                                <span className="block text-xs text-white/60">Pulses</span>
-                                <span className="font-bold">{stats.pulses}</span>
+                            <div className="text-center border-b border-white/10 pb-2">
+                                <span className="block text-[10px] uppercase text-sky-200">Pulses</span>
+                                <span className="font-bold text-sm">{stats.pulses}</span>
                             </div>
-                            <div className="bg-black/20 rounded p-2 text-center">
-                                <span className="block text-xs text-white/60">Visions</span>
-                                <span className="font-bold">{stats.visions}</span>
+                            <div className="text-center border-r border-white/10 pt-2">
+                                <span className="block text-[10px] uppercase text-amber-200">Visions</span>
+                                <span className="font-bold text-sm">{stats.visions}</span>
                             </div>
-                            <div className="bg-black/20 rounded p-2 text-center">
-                                <span className="block text-xs text-white/60">Matches</span>
-                                <span className="font-bold">{stats.matches}</span>
+                            <div className="text-center pt-2">
+                                <span className="block text-[10px] uppercase text-rose-200">Matches</span>
+                                <span className="font-bold text-sm">{stats.matches}</span>
                             </div>
                         </div>
                     )}
@@ -105,7 +105,7 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
             </div>
 
             {/* Box 2: Plant a Lifetree */}
-            <div onClick={() => { if (!lightseed) onLogin(); else if (stats.trees === 0) onPlant(); else onSetTab('forest'); }} className="relative h-48 md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
+            <div onClick={() => { if (!lightseed) onLogin(); else if (stats.trees === 0) onPlant(); else onSetTab('forest'); }} className="relative h-[40vh] md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
                 <img src={lifetreeImage} className="absolute inset-0 w-full h-full object-cover" alt="Lifetree" />
                 <video 
                     ref={videoRef}
@@ -139,7 +139,7 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
             </div>
 
             {/* Box 3: Oracle (Dynamic Quote) */}
-            <div onClick={() => onSetTab('oracle')} className="relative h-48 md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
+            <div onClick={() => onSetTab('oracle')} className="relative h-[40vh] md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
                 <div className="absolute inset-0 bg-slate-900"></div>
                 <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=800" className="absolute inset-0 w-full h-full object-cover opacity-30" />
                 <div className="relative h-full p-4 flex flex-col justify-between text-white">
@@ -157,7 +157,7 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
             </div>
 
             {/* Box 4: Forest (Banner Style + Stats) */}
-            <div onClick={() => onSetTab('forest')} className="relative h-48 md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
+            <div onClick={() => onSetTab('forest')} className="relative h-[40vh] md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
                 <img src="/mother.jpg" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform" />
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors"></div>
                 <div className="relative h-full p-4 flex flex-col justify-between text-white">
@@ -166,16 +166,16 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
                         <div className="p-2 bg-white/10 backdrop-blur rounded-lg"><Icons.Map /></div>
                     </div>
                     
-                    <div className="grid grid-cols-3 gap-1 bg-white/10 backdrop-blur p-2 rounded-lg border border-white/10">
-                        <div className="text-center">
+                    <div className="grid grid-cols-2 md:grid-cols-3 bg-white/10 backdrop-blur p-2 rounded-lg border border-white/10">
+                        <div className="text-center border-r border-b md:border-b-0 border-white/10 pb-2 md:pb-0">
                             <span className="block text-[10px] uppercase text-emerald-200">Trees</span>
                             <span className="font-bold text-sm">{networkStats.trees}</span>
                         </div>
-                        <div className="text-center border-l border-white/10">
+                        <div className="text-center border-b md:border-b-0 md:border-r border-white/10 pb-2 md:pb-0">
                             <span className="block text-[10px] uppercase text-sky-200">Pulses</span>
                             <span className="font-bold text-sm">{networkStats.pulses}</span>
                         </div>
-                        <div className="text-center border-l border-white/10">
+                        <div className="text-center col-span-2 md:col-span-1 pt-2 md:pt-0">
                             <span className="block text-[10px] uppercase text-amber-200">Visions</span>
                             <span className="font-bold text-sm">{networkStats.visions}</span>
                         </div>

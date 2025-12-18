@@ -375,32 +375,41 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                             )}
                         </div>
                         
-                        <div className="relative flex flex-col items-center">
-                            {/* Central Line */}
-                            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -ml-px bg-gradient-to-b from-emerald-500 via-emerald-300 to-amber-900"></div>
+                        <div className="relative flex flex-col items-start md:items-center">
+                            {/* Central Line - Mobile: Left-4, Desktop: Left-1/2 */}
+                            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 -ml-px bg-gradient-to-b from-emerald-500 via-emerald-300 to-amber-900"></div>
 
-                            <div className="w-full space-y-24 pb-24">
+                            <div className="w-full space-y-12 md:space-y-24 pb-24">
                                 {growthBlocks.map((pulse, index) => {
                                     const isLeft = index % 2 === 0;
                                     
                                     return (
-                                        <div key={pulse.id} className={`flex w-full items-center ${isLeft ? 'justify-end' : 'justify-start'}`}>
-                                            {/* Container taking half width */}
-                                            <div className={`w-1/2 relative px-8 flex ${isLeft ? 'justify-end' : 'justify-start'}`}>
+                                        <div key={pulse.id} className={`flex w-full relative ${isLeft ? 'md:justify-end' : 'md:justify-start'} justify-start`}>
+                                            {/* Container: Mobile pl-12 (for left line), Desktop standard */}
+                                            <div className={`
+                                                w-full md:w-1/2 relative flex items-center
+                                                pl-12 md:pl-0 md:px-8
+                                                ${isLeft ? 'md:justify-end' : 'md:justify-start'}
+                                            `}>
                                                 
-                                                {/* Connector Stem */}
-                                                <div className={`absolute top-1/2 ${isLeft ? 'right-0' : 'left-0'} w-8 h-[2px] bg-emerald-300`}></div>
-                                                <div className={`absolute top-1/2 ${isLeft ? 'right-0 -mr-1' : 'left-0 -ml-1'} w-2 h-2 rounded-full bg-emerald-500 border-2 border-white z-10`}></div>
+                                                {/* Mobile Connector (Left Side) */}
+                                                <div className="md:hidden absolute top-1/2 left-4 w-8 h-[2px] bg-emerald-300"></div>
+                                                <div className="md:hidden absolute top-1/2 left-[14px] w-2 h-2 rounded-full bg-emerald-500 border-2 border-white z-10"></div>
+
+                                                {/* Desktop Connector */}
+                                                <div className={`hidden md:block absolute top-1/2 ${isLeft ? 'right-0' : 'left-0'} w-8 h-[2px] bg-emerald-300`}></div>
+                                                <div className={`hidden md:block absolute top-1/2 ${isLeft ? 'right-0 -mr-1' : 'left-0 -ml-1'} w-2 h-2 rounded-full bg-emerald-500 border-2 border-white z-10`}></div>
 
                                                 {/* Leaf Card */}
                                                 <div 
                                                     onClick={() => onViewPulse(pulse)}
                                                     className={`
                                                         relative bg-white border-2 border-emerald-100 shadow-sm hover:shadow-xl hover:border-emerald-300 
-                                                        transition-all cursor-pointer group w-full max-w-sm
+                                                        transition-all cursor-pointer group w-full md:max-w-sm rounded-xl
                                                         ${isLeft 
-                                                            ? 'rounded-tr-[3rem] rounded-bl-[3rem] rounded-tl-md rounded-br-md text-right' 
-                                                            : 'rounded-tl-[3rem] rounded-br-[3rem] rounded-tr-md rounded-bl-md text-left'}
+                                                            ? 'md:rounded-tr-[3rem] md:rounded-bl-[3rem] md:text-right' 
+                                                            : 'md:rounded-tl-[3rem] md:rounded-br-[3rem] md:text-left'}
+                                                        text-left
                                                     `}
                                                 >
                                                     {/* Decorative Vein SVG */}
@@ -408,8 +417,8 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                                                         <path d={isLeft ? "M0,100 Q50,50 100,0" : "M100,100 Q50,50 0,0"} stroke="currentColor" strokeWidth="1" fill="none" />
                                                     </svg>
 
-                                                    <div className="p-6 relative z-10">
-                                                        <div className={`flex items-center gap-2 mb-3 ${isLeft ? 'flex-row-reverse' : 'flex-row'}`}>
+                                                    <div className="p-4 md:p-6 relative z-10">
+                                                        <div className={`flex items-center gap-2 mb-3 ${isLeft ? 'md:flex-row-reverse' : ''} flex-row`}>
                                                             {pulse.type === 'GROWTH' ? (
                                                                 <span className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">GROWTH</span>
                                                             ) : (
@@ -418,17 +427,17 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                                                             <span className="text-xs text-slate-400 font-mono">{new Date(pulse.createdAt?.toMillis()).toLocaleDateString()}</span>
                                                         </div>
 
-                                                        <div className={`flex gap-4 ${isLeft ? 'flex-row-reverse' : 'flex-row'}`}>
+                                                        <div className={`flex gap-4 ${isLeft ? 'md:flex-row-reverse' : ''} flex-row items-start`}>
                                                             {pulse.imageUrl && (
                                                                 <img src={pulse.imageUrl} className="w-16 h-16 rounded-lg object-cover bg-slate-50 shrink-0 border border-slate-100" />
                                                             )}
                                                             <div>
-                                                                <h4 dir="auto" className="font-bold text-slate-800 text-lg leading-tight mb-2">{pulse.title}</h4>
+                                                                <h4 dir="auto" className="font-bold text-slate-800 text-base md:text-lg leading-tight mb-1 md:mb-2">{pulse.title}</h4>
                                                                 <p dir="auto" className="text-xs text-slate-500 line-clamp-3">{pulse.body}</p>
                                                             </div>
                                                         </div>
                                                         
-                                                        <div className={`mt-4 pt-2 border-t border-slate-50 text-[9px] font-mono text-slate-300 truncate ${isLeft ? 'text-right' : 'text-left'}`}>
+                                                        <div className={`mt-4 pt-2 border-t border-slate-50 text-[9px] font-mono text-slate-300 truncate ${isLeft ? 'md:text-right' : 'md:text-left'} text-left`}>
                                                             Hash: {pulse.hash.substring(0, 16)}...
                                                         </div>
                                                     </div>
@@ -440,10 +449,14 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
 
                                 {/* Genesis Block at the Bottom */}
                                 {genesisBlock && (
-                                    <div className="flex w-full justify-center pt-12 relative">
-                                         <div className="absolute top-0 left-1/2 -ml-3 -mt-1 w-6 h-6 rounded-full bg-amber-900 border-4 border-white shadow-md z-10 flex items-center justify-center"></div>
+                                    <div className="flex w-full justify-start md:justify-center pt-8 md:pt-12 relative pl-12 md:pl-0">
+                                         {/* Mobile Connector */}
+                                         <div className="md:hidden absolute top-0 left-4 w-0.5 h-full bg-gradient-to-b from-amber-900 to-transparent"></div>
                                          
-                                         <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl shadow-inner text-center max-w-sm relative z-10">
+                                         {/* Dot Position */}
+                                         <div className="absolute top-8 md:top-0 left-[13px] md:left-1/2 md:-ml-3 md:-mt-1 w-6 h-6 rounded-full bg-amber-900 border-4 border-white shadow-md z-10 flex items-center justify-center"></div>
+                                         
+                                         <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl shadow-inner text-center max-w-sm relative z-10 w-full md:w-auto">
                                              <div className="w-12 h-12 mx-auto bg-amber-100 rounded-full flex items-center justify-center mb-2 text-amber-700">
                                                  <Logo width={24} height={24} />
                                              </div>
