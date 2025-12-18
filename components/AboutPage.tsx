@@ -7,7 +7,7 @@ import { Modal } from './ui/Modal';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const SectionHeader = ({ children }: { children: React.ReactNode }) => (
-    <h2 className="text-2xl font-light text-purple-900 mb-6 mt-8 tracking-wide border-b border-purple-200 pb-2 flex items-center gap-3">
+    <h2 className="text-2xl font-light text-purple-900 mb-6 mt-12 tracking-wide flex items-center gap-3">
         {children}
     </h2>
 );
@@ -16,6 +16,89 @@ const Paragraph = ({ children, className = "" }: { children: React.ReactNode, cl
     <p className={`text-slate-700 leading-relaxed font-serif mb-6 text-justify text-lg ${className}`}>
         {children}
     </p>
+);
+
+// Helper to render specific geometric overlays for the Yantra section
+const SymbolOverlay = ({ type }: { type: string }) => {
+    const commonProps = {
+        viewBox: "0 0 262 262",
+        className: "absolute inset-0 w-full h-full",
+        fill: "none",
+        stroke: "#F59E0B", // Amber-500
+        strokeWidth: "3"
+    };
+
+    switch (type) {
+        case 'sun': // Circled Dot
+            return (
+                <svg {...commonProps}>
+                    <circle cx="131" cy="131" r="64" />
+                    <circle cx="131" cy="131" r="6" fill="#F59E0B" stroke="none" />
+                </svg>
+            );
+        case 'hexagram': // Star
+            return (
+                <svg {...commonProps}>
+                    <polygon points="131,35 214,179 48,179" />
+                    <polygon points="131,227 48,83 214,83" />
+                </svg>
+            );
+        case 'honeycomb': // Hexagon
+            return (
+                <svg {...commonProps}>
+                    <polygon points="131,35 214,83 214,179 131,227 48,179 48,83" />
+                </svg>
+            );
+        case 'infinity':
+            return (
+                <svg {...commonProps}>
+                     <path d="M75 131 a 32 32 0 1 0 64 0 a 32 32 0 1 0 -64 0 M187 131 a 32 32 0 1 0 64 0 a 32 32 0 1 0 -64 0" strokeWidth="4" />
+                </svg>
+            );
+        case 'lotus': // Petals
+            return (
+                <svg {...commonProps}>
+                     <path d="M131 131 Q 163 99 131 67 Q 99 99 131 131" fill="rgba(245, 158, 11, 0.2)" />
+                     <path d="M131 131 Q 163 163 131 195 Q 99 163 131 131" fill="rgba(245, 158, 11, 0.2)" />
+                     <path d="M131 131 Q 99 99 67 131 Q 99 163 131 131" fill="rgba(245, 158, 11, 0.2)" />
+                     <path d="M131 131 Q 163 99 195 131 Q 163 163 131 131" fill="rgba(245, 158, 11, 0.2)" />
+                </svg>
+            );
+        case 'kabbalah': // Tree structure approximation
+            return (
+                <svg {...commonProps}>
+                    <line x1="131" y1="35" x2="131" y2="227" />
+                    <line x1="48" y1="83" x2="48" y2="179" />
+                    <line x1="214" y1="83" x2="214" y2="179" />
+                    <circle cx="131" cy="35" r="4" fill="#F59E0B" />
+                    <circle cx="131" cy="131" r="4" fill="#F59E0B" />
+                    <circle cx="131" cy="227" r="4" fill="#F59E0B" />
+                    <circle cx="48" cy="83" r="4" fill="#F59E0B" />
+                    <circle cx="214" cy="83" r="4" fill="#F59E0B" />
+                </svg>
+            );
+        default: 
+            return null;
+    }
+}
+
+const SymbolCard = ({ title, description, type, link }: { title: string, description: string, type: string, link: string }) => (
+    <div className="flex flex-col md:flex-row gap-6 items-center bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+        <div className="relative w-32 h-32 shrink-0">
+             <div className="absolute inset-0 opacity-20">
+                 <Logo width={128} height={128} />
+             </div>
+             <SymbolOverlay type={type} />
+        </div>
+        <div>
+            <h3 className="text-amber-600 font-bold uppercase tracking-wider mb-2">{title}</h3>
+            <p className="text-slate-600 text-sm mb-3">{description}</p>
+            <a href={link} target="_blank" rel="noopener noreferrer" className="text-xs text-slate-400 hover:text-amber-500 flex items-center gap-1 transition-colors">
+                <Icons.Link />
+                <span>Read more</span>
+            </a>
+        </div>
+    </div>
 );
 
 export const AboutPage = () => {
@@ -243,31 +326,79 @@ export const AboutPage = () => {
                 {/* THE YANTRA */}
                 {activeTab === 'yantra' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="flex justify-center mb-10">
-                            <div className="p-8 bg-white rounded-full shadow-2xl border border-slate-100">
-                                <Logo width={150} height={150} />
+                        
+                        <div className="mb-10 text-center max-w-2xl mx-auto">
+                            <SectionHeader>The Lifeseed Yantra</SectionHeader>
+                            <Paragraph>
+                                A Yantra is a geometric diagram, mainly from the Tantric traditions of the Indian religions. It is used for the worship of deities in temples or at home; as an aid in meditation; used for the benefits given by their supposed occult powers based on Hindu astrology and tantric texts. They are also used for adornment of temple floors, due mainly to their aesthetic and symmetric qualities.
+                            </Paragraph>
+                            <p className="text-sm text-slate-500 italic">It is a true yantra I believe.</p>
+                        </div>
+
+                        {/* Large Main Yantra */}
+                        <div className="relative flex justify-center py-12 mb-16">
+                             <div className="relative p-2 rounded-full border-2 border-amber-300 shadow-[0_0_80px_rgba(251,191,36,0.3)] bg-white">
+                                <Logo width={300} height={300} />
                             </div>
                         </div>
 
-                        <SectionHeader>Symbolism & Geometry</SectionHeader>
-                        <Paragraph>
-                            The visual identity of .seed is rooted in the <b>Sri Yantra</b>, specifically the bindu—the center of the center. It represents the unity of masculine and feminine divine principles and the fractal nature of the universe.
-                        </Paragraph>
+                        <div className="space-y-4">
+                            <SymbolCard 
+                                title="Sun & Consciousness" 
+                                description="The circled dot represents the sun and consciousness. It is the center of the center, the bindu."
+                                type="sun"
+                                link="https://en.wikipedia.org/wiki/Circled_dot"
+                            />
+                            <SymbolCard 
+                                title="Seed of Life" 
+                                description="The seven circles imply that all life on Earth and the Universe is interconnected."
+                                type="seed"
+                                link="https://www.uniguide.com/seed-of-life-number-7-sacred-geometry/"
+                            />
+                            <SymbolCard 
+                                title="Hexagram" 
+                                description="It symbolizes God reaching down to man and man reaching up to God, the union of Heaven and earth."
+                                type="hexagram"
+                                link="https://en.wikipedia.org/wiki/Hexagram"
+                            />
+                            <SymbolCard 
+                                title="Shambhala" 
+                                description="The hidden inner and spiritual kingdom."
+                                type="hexagram" // Reusing hexagram shape as it often relates to the heart chakra/kingdom
+                                link="https://en.wikipedia.org/wiki/Shambhala"
+                            />
+                            <SymbolCard 
+                                title="Sacred Lotus" 
+                                description="It symbolizes the realization of inner potential."
+                                type="lotus"
+                                link="https://en.wikipedia.org/wiki/Sacred_lotus_in_religious_art"
+                            />
+                            <SymbolCard 
+                                title="Honeycomb" 
+                                description="The hexagonal structure symbolizing connection with nature and community."
+                                type="honeycomb"
+                                link="https://en.wikipedia.org/wiki/Honeycomb"
+                            />
+                             <SymbolCard 
+                                title="Overlapping Circles" 
+                                description="Connections to the DNA, the grid of life, and beyond."
+                                type="infinity"
+                                link="https://en.wikipedia.org/wiki/Overlapping_circles_grid"
+                            />
+                            <SymbolCard 
+                                title="Tree of Life (Kabbalah)" 
+                                description="The path of divine emanation and the map of the soul."
+                                type="kabbalah"
+                                link="https://en.wikipedia.org/wiki/Tree_of_life_(Kabbalah)"
+                            />
+                            <SymbolCard 
+                                title="Infinity" 
+                                description="The eternal flow of energy and the unified field."
+                                type="infinity"
+                                link="https://en.wikipedia.org/wiki/Infinity_symbol"
+                            />
+                        </div>
 
-                        <SectionHeader>37: The Principles of Awakening</SectionHeader>
-                        <Paragraph>
-                            The number 37 is woven into the architecture of our physical spaces (like The Secret Sun platform). It symbolizes the <b>37 Bodhipakṣadharmas</b>—the qualities conducive to enlightenment, including mindfulness, energy, and wisdom.
-                        </Paragraph>
-
-                        <SectionHeader>108: The Cosmic Rhythm</SectionHeader>
-                        <Paragraph>
-                            108 is a number of cosmic wholeness. In the physical structures of the network, beams are often 108cm long. This connects us to the celestial scale: the Sun is roughly 108 Sun-diameters from Earth, and the Moon is 108 Moon-diameters from Earth. It connects the micro to the macro.
-                        </Paragraph>
-
-                        <SectionHeader>Polarity & Unity</SectionHeader>
-                        <Paragraph>
-                            The Yin-Yang symbol and the polarities are represented in our designs. Handmade marks in opposing corners of our structures often represent this duality—one marked with a heart (love), the other empty (void). It teaches us that at the core, it is either love or nothing.
-                        </Paragraph>
                     </div>
                 )}
 
