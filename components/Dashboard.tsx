@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Icons } from './ui/Icons';
@@ -12,6 +11,17 @@ interface DashboardProps {
     onPlant: () => void;
     onLogin: () => void;
 }
+
+const GenesisSymbol = () => (
+    <div className="grid grid-cols-4 gap-1 opacity-25">
+        {[...Array(16)].map((_, i) => (
+            <div 
+                key={i} 
+                className={`w-2 h-2 rounded-full ${i % 3 === 0 ? 'bg-emerald-300' : i % 2 === 0 ? 'bg-emerald-500' : 'bg-emerald-700'}`}
+            ></div>
+        ))}
+    </div>
+);
 
 export const Dashboard = ({ lightseed, myTreesCount, firstTreeImage, onSetTab, onPlant, onLogin }: DashboardProps) => {
     const { t } = useLanguage();
@@ -55,7 +65,10 @@ export const Dashboard = ({ lightseed, myTreesCount, firstTreeImage, onSetTab, o
                 <div className="relative h-full p-2 sm:p-6 flex flex-col justify-between text-white">
                     <div className="flex justify-between items-start">
                         <h2 className="text-[10px] sm:text-sm md:text-2xl font-light uppercase tracking-widest truncate max-w-[70%]">{t('oracle')}</h2>
-                        <div className="p-1 sm:p-2 bg-white/10 backdrop-blur rounded-lg scale-75 sm:scale-100"><Icons.SparkleFill /></div>
+                        <div className="flex flex-col items-end">
+                             <div className="p-1 sm:p-2 bg-white/10 backdrop-blur rounded-lg scale-75 sm:scale-100 mb-2"><Icons.SparkleFill /></div>
+                             <GenesisSymbol />
+                        </div>
                     </div>
                     <p className="text-[7px] sm:text-xs italic truncate">"Seek clarity..."</p>
                 </div>

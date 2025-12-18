@@ -57,9 +57,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = initializeFirestore(app, {
-    ignoreUndefinedProperties: true
-});
+export const db = initializeFirestore(app, { ignoreUndefinedProperties: true });
 export const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 
@@ -71,9 +69,7 @@ const visionsCollection = collection(db, 'visions');
 const pulsesCollection = collection(db, 'pulses');
 const matchesCollection = collection(db, 'matches');
 
-export const onAuthChange = (callback: (user: FirebaseUser | null) => void) => {
-  return onAuthStateChanged(auth, callback);
-};
+export const onAuthChange = (callback: (user: FirebaseUser | null) => void) => onAuthStateChanged(auth, callback);
 
 export const signInWithGoogle = async () => {
   try { 
@@ -113,9 +109,7 @@ export const logout = () => firebaseSignOut(auth);
 
 export const listenToUserProfile = (userId: string, callback: (data: any) => void) => {
     return onSnapshot(doc(db, 'users', userId), (docSnap) => {
-        if (docSnap.exists()) {
-            callback(docSnap.data());
-        }
+        if (docSnap.exists()) callback(docSnap.data());
     });
 }
 
@@ -143,14 +137,10 @@ export const deleteUserAccount = async () => {
         batch.delete(userRef);
         await batch.commit();
 
-        if (email) {
-            await triggerSystemEmail(email, "Goodbye from lightseed", "It was wonderful to have you. See you!", uid);
-        }
+        if (email) await triggerSystemEmail(email, "Goodbye from lightseed", "It was wonderful to have you. See you!", uid);
         await firebaseDeleteUser(user);
     } catch (e: any) {
-        if (e.code === 'auth/requires-recent-login') {
-            throw new Error("Please log out and log in again to confirm deletion security.");
-        }
+        if (e.code === 'auth/requires-recent-login') throw new Error("Please log out and log in again to confirm deletion security.");
         throw e;
     }
 }
@@ -165,15 +155,11 @@ export const checkAndIncrementAiUsage = async (type: 'text' | 'image'): Promise<
             if (!docSnap.exists()) throw new Error("User profile missing");
             const data = docSnap.data();
             const now = Date.now();
-            const lastReset = data.lastAiReset || 0;
-            const lastDate = new Date(lastReset).getDate();
+            const lastDate = new Date(data.lastAiReset || 0).getDate();
             const currentDate = new Date(now).getDate();
             let textCount = data.dailyAiText || 0;
             let imageCount = data.dailyAiImage || 0;
-            if (lastDate !== currentDate) {
-                textCount = 0;
-                imageCount = 0;
-            }
+            if (lastDate !== currentDate) { textCount = 0; imageCount = 0; }
             if (type === 'text') {
                 if (textCount >= 7) throw new Error("Daily Oracle limit reached (7/7).");
                 textCount++;
@@ -224,9 +210,7 @@ export const monitorMailStatus = (docId: string, onChange: (status: any) => void
     });
 }
 
-export const subscribeToNewsletter = async (email: string) => {
-    return addDoc(subsCollection, { email, createdAt: serverTimestamp() });
-}
+export const subscribeToNewsletter = async (email: string) => addDoc(subsCollection, { email, createdAt: serverTimestamp() });
 
 export const uploadImage = async (file: File, path: string): Promise<string> => {
     const storageRef = ref(storage, path);
@@ -275,9 +259,7 @@ export const plantLifetree = async (data: any) => {
 
 export const updateLifetree = (id: string, data: any) => updateDoc(doc(db, 'lifetrees', id), data);
 export const deleteLifetree = (id: string) => deleteDoc(doc(db, 'lifetrees', id));
-export const validateLifetree = (targetId: string, validatorId: string) => {
-    return updateDoc(doc(db, 'lifetrees', targetId), { validated: true, validatorId });
-}
+export const validateLifetree = (targetId: string, validatorId: string) => updateDoc(doc(db, 'lifetrees', targetId), { validated: true, validatorId });
 
 export const fetchLifetrees = async (lastD?: QueryDocumentSnapshot) => {
     let q = query(lifetreesCollection, orderBy('createdAt', 'desc'), limit(12));
@@ -286,22 +268,9 @@ export const fetchLifetrees = async (lastD?: QueryDocumentSnapshot) => {
     return { items: snap.docs.map(d => ({ id: d.id, ...d.data() } as Lifetree)), lastDoc: snap.docs[snap.docs.length-1] || null };
 }
 
-export const getMyLifetrees = async (uid: string) => {
-    const q = query(lifetreesCollection, where('ownerId', '==', uid));
-    const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as Lifetree));
-}
-
-export const getGuardedTrees = async (uid: string) => {
-    const q = query(lifetreesCollection, where('guardians', 'array-contains', uid));
-    const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as Lifetree));
-}
-
-export const toggleGuardianship = (id: string, uid: string, join: boolean) => {
-    return updateDoc(doc(db, 'lifetrees', id), { guardians: join ? arrayUnion(uid) : arrayRemove(uid) });
-}
-
+export const getMyLifetrees = async (uid: string) => (await getDocs(query(lifetreesCollection, where('ownerId', '==', uid)))).docs.map(d => ({ id: d.id, ...d.data() } as Lifetree));
+export const getGuardedTrees = async (uid: string) => (await getDocs(query(lifetreesCollection, where('guardians', 'array-contains', uid)))).docs.map(d => ({ id: d.id, ...d.data() } as Lifetree));
+export const toggleGuardianship = (id: string, uid: string, join: boolean) => updateDoc(doc(db, 'lifetrees', id), { guardians: join ? arrayUnion(uid) : arrayRemove(uid) });
 export const setTreeStatus = (id: string, status: string) => updateDoc(doc(db, 'lifetrees', id), { status });
 
 export const fetchVisions = async (lastD?: QueryDocumentSnapshot) => {
@@ -311,12 +280,7 @@ export const fetchVisions = async (lastD?: QueryDocumentSnapshot) => {
     return { items: snap.docs.map(d => ({ id: d.id, ...d.data() } as Vision)), lastDoc: snap.docs[snap.docs.length-1] || null };
 }
 
-export const getMyVisions = async (uid: string) => {
-    const q = query(visionsCollection, where('authorId', '==', uid));
-    const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as Vision));
-}
-
+export const getMyVisions = async (uid: string) => (await getDocs(query(visionsCollection, where('authorId', '==', uid)))).docs.map(d => ({ id: d.id, ...d.data() } as Vision));
 export const createVision = (data: any) => addDoc(visionsCollection, { ...data, createdAt: serverTimestamp() });
 export const deleteVision = (id: string) => deleteDoc(doc(db, 'visions', id));
 
@@ -327,17 +291,8 @@ export const fetchPulses = async (lastD?: QueryDocumentSnapshot) => {
     return { items: snap.docs.map(d => ({ id: d.id, ...d.data() } as Pulse)), lastDoc: snap.docs[snap.docs.length-1] || null };
 }
 
-export const getMyPulses = async (uid: string) => {
-    const q = query(pulsesCollection, where('authorId', '==', uid));
-    const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as Pulse)).sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-}
-
-export const fetchGrowthPulses = async (treeId: string) => {
-    const q = query(pulsesCollection, where('lifetreeId', '==', treeId), where('type', '==', 'GROWTH'));
-    const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as Pulse)).sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-}
+export const getMyPulses = async (uid: string) => (await getDocs(query(pulsesCollection, where('authorId', '==', uid)))).docs.map(d => ({ id: d.id, ...d.data() } as Pulse)).sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+export const fetchGrowthPulses = async (treeId: string) => (await getDocs(query(pulsesCollection, where('lifetreeId', '==', treeId), where('type', '==', 'GROWTH')))).docs.map(d => ({ id: d.id, ...d.data() } as Pulse)).sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
 
 export const mintPulse = async (pulseData: any) => {
     return runTransaction(db, async (t) => {
@@ -353,17 +308,10 @@ export const mintPulse = async (pulseData: any) => {
 }
 
 export const proposeMatch = (data: any) => addDoc(matchesCollection, { ...data, status: 'PENDING', createdAt: serverTimestamp() });
-
-export const getPendingMatches = async (uid: string) => {
-    const q = query(matchesCollection, where('targetUid', '==', uid), where('status', '==', 'PENDING'));
-    const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as MatchProposal));
-}
+export const getPendingMatches = async (uid: string) => (await getDocs(query(matchesCollection, where('targetUid', '==', uid), where('status', '==', 'PENDING')))).docs.map(d => ({ id: d.id, ...d.data() } as MatchProposal));
 
 export const getMyMatchesHistory = async (uid: string) => {
-    const q1 = query(matchesCollection, where('targetUid', '==', uid), where('status', '==', 'ACCEPTED'));
-    const q2 = query(matchesCollection, where('initiatorUid', '==', uid), where('status', '==', 'ACCEPTED'));
-    const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+    const [s1, s2] = await Promise.all([getDocs(query(matchesCollection, where('targetUid', '==', uid), where('status', '==', 'ACCEPTED'))), getDocs(query(matchesCollection, where('initiatorUid', '==', uid), where('status', '==', 'ACCEPTED')))]);
     return [...s1.docs, ...s2.docs].map(d => ({ id: d.id, ...d.data() } as MatchProposal)).sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
 }
 
@@ -399,7 +347,6 @@ export const acceptMatch = async (proposalId: string) => {
 }
 
 export const isPulseLoved = async (id: string, uid: string) => (await getDoc(doc(db, 'pulses', id, 'loves', uid))).exists();
-
 export const lovePulse = async (id: string, uid: string) => {
     const pulseRef = doc(db, 'pulses', id);
     const loveRef = doc(pulseRef, 'loves', uid);
