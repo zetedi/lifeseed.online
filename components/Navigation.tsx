@@ -109,7 +109,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                                     <span className="hidden xl:inline">{t('plant_lifetree')}</span>
                                 </button>
                                 <button onClick={onPulse} className="bg-sky-600 hover:bg-sky-500 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-2 transition-colors border border-sky-500/30">
-                                    <Icons.Sparkles /> 
+                                    <Icons.HeartPulse /> 
                                     <span className="hidden xl:inline">{t('emit_pulse')}</span>
                                 </button>
                             </>
@@ -165,7 +165,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                                 <Icons.Tree /> <span>{t('plant_lifetree')}</span>
                             </button>
                             <button onClick={() => { onPulse(); setIsMenuOpen(false); }} className="bg-sky-600 p-4 rounded-xl flex flex-col items-center gap-2 font-bold text-xs shadow-lg border border-sky-500/50">
-                                <Icons.Sparkles /> <span>{t('emit_pulse')}</span>
+                                <Icons.HeartPulse /> <span>{t('emit_pulse')}</span>
                             </button>
                         </div>
                     )}

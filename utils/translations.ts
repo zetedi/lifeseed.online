@@ -27,7 +27,9 @@ const baseKeys = {
   internal_pulse: "Internal (Growth) Pulse", send_request: "Send Request", invite_sent: "Invite sent!",
   invite_email_placeholder: "Friend's email", invite_message_placeholder: "Message (optional)",
   cancel: "Cancel", back: "Back", subscription_failed: "Failed.", stand_for_trees: "Stand for the Trees",
-  subscribe: "Subscribe", subscription_desc: "Email every 7 weeks.", guard_tree_action: "Guard Tree"
+  subscribe: "Subscribe", subscription_desc: "Email every 7 weeks.", guard_tree_action: "Guard Tree",
+  create_new_world: "Create a New World",
+  type_lifetree: "Lifetree", type_guarded: "Guarded", type_kabbalistic: "Kabbalistic", type_family: "Family"
 };
 
 export const translations: Record<Language, typeof baseKeys> = {
@@ -37,48 +39,48 @@ export const translations: Record<Language, typeof baseKeys> = {
     sign_in: "Iniciar sesión", sign_out: "Cerrar sesión", plant_lifetree: "Plantar Árbol", emit_pulse: "Emitir Pulso", 
     be_mother_tree: "Planta un Árbol de Vida", loading: "Cargando...", my_trees: "Mis Árboles", profile: "Perfil",
     pending_matches: "Coincidencias Pendientes", quick_snap: "Foto Rápida", validated: "VALIDADO", 
-    validate_action: "Validar Árbol", create_vision: "Nueva Visión"
+    validate_action: "Validar Árbol", create_vision: "Nueva Visión", create_new_world: "Crea un Nuevo Mundo"
   },
   hu: { 
     ...baseKeys, forest: "Erdő", pulses: "Pulzusok", visions: "Víziók", oracle: "Orákulum", about: "Rólunk", explore: "Felfedezés", 
     sign_in: "Belépés", sign_out: "Kilépés", plant_lifetree: "Ültetés", emit_pulse: "Pulzus", 
     be_mother_tree: "Ültess Életfát", loading: "Töltés...", my_trees: "Fáim", profile: "Profil",
     pending_matches: "Függőben", quick_snap: "Gyors Fotó", validated: "HITELESÍTVE", 
-    validate_action: "Hitelesítés", create_vision: "Új Vízió"
+    validate_action: "Hitelesítés", create_vision: "Új Vízió", create_new_world: "Teremts Új Világot"
   },
   qu: { 
     ...baseKeys, forest: "Sach'a", pulses: "Sirkay", visions: "Musquy", oracle: "Willaq", about: "Kaymanta", explore: "Maskay", 
     sign_in: "Yaykuy", sign_out: "Lloqsiy", plant_lifetree: "Tarpuy", emit_pulse: "Sirkay", 
     be_mother_tree: "Mama Sach'a", loading: "Cargachkan...", my_trees: "Mallkikuna", profile: "Uyan",
     pending_matches: "Suyaq", quick_snap: "Utqaylla", validated: "CHASKISQA", 
-    validate_action: "Chaskiy", create_vision: "Musquy"
+    validate_action: "Chaskiy", create_vision: "Musquy", create_new_world: "Musuq Pachata Ruray"
   },
   sa: { 
     ...baseKeys, forest: "अरण्यम्", pulses: "स्पन्दनानि", visions: "दृष्टयः", oracle: "दैववाणी", about: "विषये", explore: "अन्वेषणम्", 
     sign_in: "प्रविशतु", sign_out: "निर्गच्छतु", plant_lifetree: "रोपयतु", emit_pulse: "स्पन्दनम्", 
     be_mother_tree: "जीवनवृक्षं रोपयतु", loading: "आरोचयति...", my_trees: "वृक्षाः", profile: "परिचयः",
     pending_matches: "लम्बित", quick_snap: "शीघ्रम्", validated: "प्रमाणित", 
-    validate_action: "प्रमाणयतु", create_vision: "दृष्टिः"
+    validate_action: "प्रमाणयतु", create_vision: "दृष्टिः", create_new_world: "नवं लोकं सृजतु"
   },
   ja: { 
     ...baseKeys, forest: "森", pulses: "パルス", visions: "ビジョン", oracle: "オラクル", about: "詳細", explore: "探索", 
     sign_in: "ログイン", sign_out: "ログアウト", plant_lifetree: "植樹", emit_pulse: "パルス", 
     be_mother_tree: "命の木を植える", loading: "読込中...", my_trees: "木", profile: "プロフ",
     pending_matches: "保留中", quick_snap: "スナップ", validated: "認証済", 
-    validate_action: "認証", create_vision: "ビジョン"
+    validate_action: "認証", create_vision: "ビジョン", create_new_world: "新しい世界を創造する"
   },
   ar: { 
     ...baseKeys, forest: "الغابة", pulses: "نبضات", visions: "رؤى", oracle: "عراف", about: "عن", explore: "استكشاف", 
     sign_in: "دخول", sign_out: "خروج", plant_lifetree: "زرع", emit_pulse: "نبضة", 
     be_mother_tree: "ازرع شجرة حياة", loading: "تحميل...", my_trees: "أشجاري", profile: "ملف",
     pending_matches: "معلقة", quick_snap: "لقطة", validated: "مصدق", 
-    validate_action: "صدق", create_vision: "رؤية"
+    validate_action: "صدق", create_vision: "رؤية", create_new_world: "اخلق عالما جديدا"
   },
   sw: { 
     ...baseKeys, forest: "Msitu", pulses: "Mapigo", visions: "Maono", oracle: "Mtabiri", about: "Kuhusu", explore: "Chunguza", 
     sign_in: "Ingia", sign_out: "Toka", plant_lifetree: "Panda", emit_pulse: "Pigo", 
     be_mother_tree: "Panda Mti wa Uhai", loading: "Inapakia...", my_trees: "Miti yangu", profile: "Wasifu",
     pending_matches: "Subiri", quick_snap: "Picha", validated: "IMETHIBITISHWA", 
-    validate_action: "Thibitisha", create_vision: "Ono"
+    validate_action: "Thibitisha", create_vision: "Ono", create_new_world: "Unda Ulimwengu Mpya"
   }
 };

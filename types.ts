@@ -26,6 +26,7 @@ export interface Lifetree {
 
   // Nature & Guardian Logic
   isNature?: boolean;
+  treeType?: 'LIFETREE' | 'GUARDED' | 'KABBALISTIC' | 'FAMILY';
   guardians?: string[]; // Array of User IDs
   status?: 'HEALTHY' | 'DANGER';
 

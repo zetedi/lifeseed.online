@@ -48,6 +48,8 @@ import { LightseedProfile } from './components/LightseedProfile';
 import { AboutPage } from './components/AboutPage';
 import { Dashboard } from './components/Dashboard';
 
+const lifetreeImage = '/mother.jpg';
+
 const GDPRBanner = () => {
     const [visible, setVisible] = useState(false);
     const [checked, setChecked] = useState(false);
@@ -130,7 +132,9 @@ const AppContent = () => {
     const [treeSeed, setTreeSeed] = useState('');
     const [treeBio, setTreeBio] = useState('');
     const [treeImageUrl, setTreeImageUrl] = useState('');
-    const [plantAsNature, setPlantAsNature] = useState(false);
+    
+    // Tree Type State
+    const [treeType, setTreeType] = useState<'LIFETREE' | 'GUARDED' | 'KABBALISTIC' | 'FAMILY'>('LIFETREE');
     
     const [pulseTitle, setPulseTitle] = useState('');
     const [pulseBody, setPulseBody] = useState('');
@@ -193,13 +197,13 @@ const AppContent = () => {
     }, [loadingMore, hasMore, tab, lastDoc]);
 
     useEffect(() => {
-        if (showPlantModal && plantAsNature) {
+        if (showPlantModal && treeType === 'GUARDED') {
             setTreeName("Humanity's Tree!");
             setTreeBio(""); 
-        } else if (showPlantModal && !plantAsNature) {
+        } else if (showPlantModal && treeType !== 'GUARDED') {
             if (treeName === "Humanity's Tree!") setTreeName("");
         }
-    }, [showPlantModal, plantAsNature]);
+    }, [showPlantModal, treeType]);
 
     const loadContent = async (reset = false) => {
         if (reset) {
@@ -300,6 +304,7 @@ const AppContent = () => {
         setIsSubmitting(true);
         
         const finalName = treeName.trim() || lightseed.displayName || "Anonymous Tree";
+        const isNature = treeType === 'GUARDED';
 
         navigator.geolocation.getCurrentPosition(async (pos) => {
             try {
@@ -311,7 +316,8 @@ const AppContent = () => {
                     imageUrl: treeImageUrl, 
                     lat: pos.coords.latitude, 
                     lng: pos.coords.longitude, 
-                    isNature: plantAsNature 
+                    isNature: isNature,
+                    treeType: treeType
                 });
                 await refreshTrees(); setShowPlantModal(false); loadContent(true);
             } catch(e: any) { 
@@ -326,7 +332,8 @@ const AppContent = () => {
                  shortTitle: treeShortTitle,
                  body: treeBio, 
                  imageUrl: treeImageUrl, 
-                 isNature: plantAsNature
+                 isNature: isNature,
+                 treeType: treeType
              })
                 .then(async () => { await refreshTrees(); setShowPlantModal(false); loadContent(true); })
                 .catch(e => {
@@ -501,7 +508,7 @@ const AppContent = () => {
                         }}
                         firstTreeImage={myTrees[0]?.imageUrl}
                         onSetTab={setTab} 
-                        onPlant={() => { setPlantAsNature(false); setShowPlantModal(true); }}
+                        onPlant={() => { setTreeType('LIFETREE'); setShowPlantModal(true); }}
                         onLogin={signInWithGoogle}
                     />
                 </div>
@@ -516,7 +523,7 @@ const AppContent = () => {
                     onViewTree={(tree: Lifetree) => setSelectedTree(tree)}
                     onDeleteTree={handleDeleteTree}
                     onViewVision={(v: Vision) => setSelectedVision(v)}
-                    onPlant={() => setShowPlantModal(true)}
+                    onPlant={() => { setTreeType('LIFETREE'); setShowPlantModal(true); }}
                 />
             );
         }
@@ -528,7 +535,10 @@ const AppContent = () => {
         return (
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-[80vh]">
                 {tab === 'forest' && (
-                    <div className="relative w-full h-32 mb-4 rounded-2xl overflow-hidden shadow-lg group">
+                    <div 
+                        onClick={() => { setTreeType('LIFETREE'); setShowPlantModal(true); }}
+                        className="relative w-full h-32 mb-4 rounded-2xl overflow-hidden shadow-lg group cursor-pointer"
+                    >
                         <img 
                             src="/mother.jpg" 
                             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
@@ -570,7 +580,7 @@ const AppContent = () => {
                         <div className="flex items-center space-x-2 shrink-0">
                             {tab === 'forest' && myTrees.length > 0 && (
                                 <button 
-                                    onClick={() => { setPlantAsNature(true); setShowPlantModal(true); }}
+                                    onClick={() => { setTreeType('GUARDED'); setShowPlantModal(true); }}
                                     className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center space-x-2 transition-colors h-10"
                                 >
                                     <Icons.Shield />
@@ -714,7 +724,7 @@ const AppContent = () => {
                 setTab={setTab} 
                 onLogin={signInWithGoogle} 
                 onLogout={logout} 
-                onPlant={() => { setPlantAsNature(false); setShowPlantModal(true); }} 
+                onPlant={() => { setTreeType('LIFETREE'); setShowPlantModal(true); }} 
                 onPulse={() => setShowPulseModal(true)}
                 onCreateVision={() => setShowVisionModal(true)}
                 onProfile={() => setTab('profile')} 
@@ -760,41 +770,64 @@ const AppContent = () => {
             {showGrowthPlayer && !selectedTree && <GrowthPlayerModal treeId={showGrowthPlayer} onClose={() => setShowGrowthPlayer(null)} />}
 
             {showPlantModal && (
-                <Modal title={plantAsNature ? t('guard_tree') : t('plant_lifetree')} onClose={() => setShowPlantModal(false)}>
-                    <form onSubmit={handlePlant} className="space-y-4">
-                        <ImagePicker onChange={(e: any) => handleImageUpload(e.target.files[0], `trees/${Date.now()}`).then(setTreeImageUrl)} previewUrl={treeImageUrl} loading={uploading} />
-                        <div className="flex items-center space-x-2 bg-sky-50 p-2 rounded-lg border border-sky-100">
-                            <input 
-                                type="checkbox" 
-                                id="natureTree" 
-                                checked={plantAsNature} 
-                                onChange={e => setPlantAsNature(e.target.checked)} 
-                                className="rounded text-sky-600 focus:ring-sky-500 w-4 h-4"
-                            />
-                            <label htmlFor="natureTree" className="text-sm font-medium text-sky-800 flex items-center">
-                                <Icons.Shield />
-                                <span className="ml-2">{t('nature')} (Wild) Tree</span>
-                            </label>
-                        </div>
-                        <input className="block w-full border p-2 rounded" placeholder={`Tree Name (Default: ${lightseed?.displayName || 'Anonymous'})`} value={treeName} onChange={e=>setTreeName(e.target.value)} />
-                        <input className="block w-full border p-2 rounded" placeholder={t('short_title')} value={treeShortTitle} onChange={e=>setTreeShortTitle(e.target.value)} />
+                <Modal 
+                    title={treeType === 'GUARDED' ? t('guard_tree') : t('plant_lifetree')} 
+                    onClose={() => setShowPlantModal(false)}
+                    backgroundImage={treeType !== 'GUARDED' ? lifetreeImage : undefined}
+                >
+                    <form onSubmit={handlePlant} className="space-y-4 pb-12">
+                        <ImagePicker 
+                            onChange={(e: any) => handleImageUpload(e.target.files[0], `trees/${Date.now()}`).then(setTreeImageUrl)} 
+                            previewUrl={treeImageUrl} 
+                            loading={uploading} 
+                            isDark={treeType !== 'GUARDED'}
+                        />
                         
-                        {!plantAsNature && (
+                        {/* Tree Type Selection */}
+                        <div className="grid grid-cols-2 gap-2">
+                            {[
+                                { id: 'LIFETREE', label: t('type_lifetree'), icon: <Icons.Tree /> },
+                                { id: 'GUARDED', label: t('type_guarded'), icon: <Icons.Shield /> },
+                                { id: 'KABBALISTIC', label: t('type_kabbalistic'), icon: <Icons.Sparkles /> },
+                                { id: 'FAMILY', label: t('type_family'), icon: <Icons.Heart filled={true} /> }
+                            ].map((type: any) => (
+                                <button
+                                    key={type.id}
+                                    type="button"
+                                    onClick={() => setTreeType(type.id)}
+                                    className={`flex items-center justify-center space-x-2 py-2 rounded-lg text-xs font-bold uppercase transition-all border ${
+                                        treeType === type.id 
+                                            ? 'bg-emerald-600 text-white border-emerald-500 shadow-md' 
+                                            : treeType !== 'GUARDED' 
+                                                ? 'bg-black/20 text-white border-white/20 hover:bg-black/40' 
+                                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                                    }`}
+                                >
+                                    <span>{type.icon}</span>
+                                    <span>{type.label}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        <input className="block w-full border p-2 rounded bg-white/90 focus:bg-white transition-colors" placeholder={`Tree Name (Default: ${lightseed?.displayName || 'Anonymous'})`} value={treeName} onChange={e=>setTreeName(e.target.value)} />
+                        <input className="block w-full border p-2 rounded bg-white/90 focus:bg-white transition-colors" placeholder={t('short_title')} value={treeShortTitle} onChange={e=>setTreeShortTitle(e.target.value)} />
+                        
+                        {treeType !== 'GUARDED' && (
                             <div className="flex gap-2">
-                                <input className="flex-1 border p-2 rounded" placeholder="Seed keywords" value={treeSeed} onChange={e=>setTreeSeed(e.target.value)} />
-                                <button type="button" onClick={() => generateLifetreeBio(treeSeed).then(setTreeBio)} disabled={uploading} className="bg-emerald-600 text-white px-4 rounded disabled:opacity-50">AI</button>
+                                <input className="flex-1 border p-2 rounded bg-white/90 focus:bg-white transition-colors" placeholder="Seed keywords" value={treeSeed} onChange={e=>setTreeSeed(e.target.value)} />
+                                <button type="button" onClick={() => generateLifetreeBio(treeSeed).then(setTreeBio)} disabled={uploading} className="bg-emerald-600 text-white px-4 rounded disabled:opacity-50 font-bold text-xs shadow-md">AI</button>
                             </div>
                         )}
                         
                         <textarea 
-                            className="block w-full border p-2 rounded" 
-                            placeholder={plantAsNature ? "Description" : "Vision"} 
+                            className="block w-full border p-2 rounded bg-white/90 focus:bg-white transition-colors min-h-[100px]" 
+                            placeholder={treeType === 'GUARDED' ? "Description" : "Vision"} 
                             value={treeBio} 
                             onChange={e=>setTreeBio(e.target.value)} 
                             required 
                         />
                         
-                        <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-emerald-600 text-white py-2 rounded disabled:opacity-50">
+                        <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold uppercase tracking-widest shadow-lg active:scale-95 transition-all mt-4 mb-4">
                             {isSubmitting ? t('planting') : t('plant_lifetree')}
                         </button>
                     </form>

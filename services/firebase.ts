@@ -267,7 +267,9 @@ export const getNetworkStats = async () => {
 export const plantLifetree = async (data: any) => {
     const genesisHash = await createBlock("0", { msg: "Birth" }, Date.now());
     const treeDoc = await addDoc(lifetreesCollection, {
-        ...data, createdAt: serverTimestamp(), genesisHash, latestHash: genesisHash, blockHeight: 0,
+        ...data, 
+        treeType: data.treeType || (data.isNature ? 'GUARDED' : 'LIFETREE'),
+        createdAt: serverTimestamp(), genesisHash, latestHash: genesisHash, blockHeight: 0,
         validated: true, validatorId: "SYSTEM", guardians: [], status: 'HEALTHY'
     });
     await addDoc(visionsCollection, {
