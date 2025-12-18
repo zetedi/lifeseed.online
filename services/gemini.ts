@@ -130,6 +130,8 @@ export const createOracleChat = (systemInstruction?: string) => {
 export const generateOracleQuote = async (): Promise<string> => {
     try {
         const ai = getAiClient();
+        if (!ai) return '"Nature is not a place to visit. It is home." - Gary Snyder';
+
         const prompt = `Based on the following vision: "${GENESIS_VISION}", select a short, profound quote from classic literature, philosophy, or poetry that resonates with these themes. Return ONLY the quote and the author in this format: "Quote" - Author.`;
         const response = await ai.models.generateContent({ 
             model: 'gemini-2.5-flash', 
