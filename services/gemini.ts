@@ -9,7 +9,8 @@ export const generatePostTitle = async (body: string): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const prompt = `Generate a short, engaging title (maximum 10 words) for the following post body:\n\n---\n${body}\n---`;
-    const response: GenerateContentResponse = await ai.models.generateContent({ model: 'gemini-3-flash-preview', contents: prompt });
+    // Upgraded to Pro for better nuance
+    const response: GenerateContentResponse = await ai.models.generateContent({ model: 'gemini-3-pro-preview', contents: prompt });
     return response.text ? response.text.trim().replace(/["']/g, '') : ""; 
   } catch (error) { return ""; }
 };
@@ -19,7 +20,8 @@ export const generateLifetreeBio = async (seed: string): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const prompt = `You are lightseed AI. Based on this seed: "${seed}", write a mystical nature-inspired bio (max 40 words).`;
-    const response: GenerateContentResponse = await ai.models.generateContent({ model: 'gemini-3-flash-preview', contents: prompt });
+    // Upgraded to Pro for deeper creativity
+    const response: GenerateContentResponse = await ai.models.generateContent({ model: 'gemini-3-pro-preview', contents: prompt });
     return response.text ? response.text.trim() : "";
   } catch (error) { return "The forest whispers quietly..."; }
 }
@@ -42,8 +44,9 @@ export const generateVisionImage = async (prompt: string): Promise<string | null
 
 export const createOracleChat = () => {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const instruction = `You are the Oracle of lightseed. Use the following Vision context: "${GENESIS_VISION}". Answer by weaving in themes of connection, nature, and joy.`;
-    return ai.chats.create({ model: 'gemini-3-flash-preview', config: { systemInstruction: instruction } });
+    // Pro model used for the Oracle to handle the complex spiritual/technical context
+    const instruction = `You are the Oracle of lightseed. Use the following Vision context: "${GENESIS_VISION}". Answer by weaving in themes of connection, nature, and joy. You operate with Pro-level complexity and mystical depth.`;
+    return ai.chats.create({ model: 'gemini-3-pro-preview', config: { systemInstruction: instruction } });
 }
 
 export const findVisionSynergies = async (visions: Vision[]): Promise<VisionSynergy[]> => {
@@ -51,9 +54,10 @@ export const findVisionSynergies = async (visions: Vision[]): Promise<VisionSyne
     if (visions.length < 2) return [];
     const visionsList = visions.map(v => `- Title: ${v.title}, Body: ${v.body}`).join('\n');
     try {
+        // Pro model is essential here for complex reasoning between disparate visions
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
-            contents: `Analyze these Visions and identify potential collaborations:\n${visionsList}`,
+            model: 'gemini-3-pro-preview',
+            contents: `Analyze these Visions and identify potential collaborations based on the lightseed ethos:\n${visionsList}`,
             config: {
                 responseMimeType: "application/json",
                 responseSchema: {

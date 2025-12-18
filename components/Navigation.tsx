@@ -55,9 +55,9 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                 dashboard: 'bg-indigo-600', visions: 'bg-amber-500', forest: 'bg-emerald-600', 
                 pulses: 'bg-sky-600', matches: 'bg-rose-600', oracle: 'bg-indigo-600', about: 'bg-purple-600'
             };
-            return `${themes[key] || 'bg-slate-700'} text-white shadow-lg shadow-black/20`;
+            return `${themes[key] || 'bg-slate-700'} text-white shadow-lg shadow-black/20 font-bold tracking-wide`;
         }
-        return `text-emerald-100 hover:text-white hover:bg-white/10`;
+        return `text-emerald-100 hover:text-white hover:bg-white/10 font-medium`;
     }
 
     const mainTabs = ['forest', 'visions', 'pulses'];
@@ -65,31 +65,31 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
 
     return (
         <nav className="sticky top-0 z-30 bg-emerald-900 border-b border-emerald-800 text-white shadow-md">
-            <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16 sm:h-20 items-center">
-                    <div className="flex items-center space-x-2 cursor-pointer group" onClick={() => setTab('dashboard')}>
-                        <div className="bg-white p-0.5 rounded-full group-hover:scale-110 transition-transform">
-                             <Logo width={28} height={28} />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between h-20 items-center">
+                    <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setTab('dashboard')}>
+                        <div className="bg-white p-1 rounded-full group-hover:scale-110 transition-transform">
+                             <Logo width={32} height={32} />
                         </div>
-                        <span dir="ltr" className="font-light text-lg sm:text-2xl lowercase">.seed</span>
+                        <span dir="ltr" className="font-light text-2xl lowercase tracking-wide">.seed</span>
                     </div>
 
                     {/* Desktop Navigation Tabs */}
-                    <div className="hidden lg:flex items-center space-x-1">
+                    <div className="hidden lg:flex items-center space-x-2">
                         {mainTabs.map(tab => (
-                            <button key={tab} onClick={() => setTab(tab)} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${getTabStyle(tab)}`}>
+                            <button key={tab} onClick={() => setTab(tab)} className={`px-5 py-2.5 rounded-full text-sm transition-all ${getTabStyle(tab)}`}>
                                 {t(tab as any)}
                             </button>
                         ))}
                         <div className="relative" ref={moreRef}>
-                            <button onClick={() => setIsMoreOpen(!isMoreOpen)} className="flex items-center px-4 py-2 rounded-full text-sm font-medium text-emerald-100 hover:bg-white/10">
+                            <button onClick={() => setIsMoreOpen(!isMoreOpen)} className="flex items-center px-5 py-2.5 rounded-full text-sm font-medium text-emerald-100 hover:bg-white/10">
                                 <span>{t('more')}</span>
                                 {hasNotification && <span className="ml-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>}
                             </button>
                             {isMoreOpen && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50 text-slate-700">
+                                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50 text-slate-700">
                                     {moreTabs.map(tab => (
-                                        <button key={tab} onClick={() => { setTab(tab); setIsMoreOpen(false); }} className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 flex justify-between">
+                                        <button key={tab} onClick={() => { setTab(tab); setIsMoreOpen(false); }} className="w-full text-left px-6 py-3 text-sm hover:bg-slate-50 flex justify-between font-medium">
                                             <span>{t(tab as any)}</span>
                                             {tab === 'matches' && pendingMatchesCount > 0 && <span className="bg-red-500 text-white text-[10px] px-2 rounded-full">{pendingMatchesCount}</span>}
                                         </button>
@@ -99,24 +99,27 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                         </div>
                     </div>
 
-                    {/* Desktop Actions Section */}
-                    <div className="hidden xl:flex items-center space-x-2 mr-4">
+                    {/* Action Buttons: Visible on MD+ (Mid size and up) */}
+                    <div className="hidden md:flex items-center space-x-3 mx-4">
                         {lightseed && (
                             <>
-                                <button onClick={onPlant} className="bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5 transition-colors border border-emerald-500/30">
-                                    <Icons.Tree /> <span>{t('plant_lifetree')}</span>
+                                <button onClick={onPlant} className="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-2 transition-colors border border-emerald-500/30">
+                                    <Icons.Tree /> 
+                                    {/* Text hidden on mid, visible on xl */}
+                                    <span className="hidden xl:inline">{t('plant_lifetree')}</span>
                                 </button>
-                                <button onClick={onPulse} className="bg-sky-600 hover:bg-sky-500 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5 transition-colors border border-sky-500/30">
-                                    <Icons.Sparkles /> <span>{t('emit_pulse')}</span>
+                                <button onClick={onPulse} className="bg-sky-600 hover:bg-sky-500 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-2 transition-colors border border-sky-500/30">
+                                    <Icons.Sparkles /> 
+                                    <span className="hidden xl:inline">{t('emit_pulse')}</span>
                                 </button>
                             </>
                         )}
                     </div>
 
-                    {/* Desktop Right Side UI Controls */}
-                    <div className="flex items-center space-x-2">
+                    {/* Right Side UI Controls */}
+                    <div className="flex items-center space-x-3">
                          <div className="relative" ref={langRef}>
-                            <button onClick={() => setIsLangOpen(!isLangOpen)} className="bg-emerald-800 text-[10px] sm:text-xs border border-emerald-700 rounded-full px-2 py-1 uppercase font-bold hover:bg-emerald-700 transition-colors">
+                            <button onClick={() => setIsLangOpen(!isLangOpen)} className="bg-emerald-800 text-xs border border-emerald-700 rounded-full px-3 py-1 uppercase font-bold hover:bg-emerald-700 transition-colors">
                                 {language}
                             </button>
                             {isLangOpen && (
@@ -131,22 +134,22 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                          </div>
 
                          {lightseed ? (
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-3">
                                 <button onClick={onProfile} className="relative group">
-                                    <img src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white/20 shadow-md group-hover:border-white transition-all" />
+                                    <img src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} className="w-10 h-10 rounded-full border-2 border-white/20 shadow-md group-hover:border-white transition-all" />
                                     {hasNotification && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 border-2 border-emerald-900 rounded-full"></span>}
                                 </button>
-                                <button onClick={onLogout} className="hidden md:block text-[10px] font-bold uppercase tracking-widest text-emerald-200 hover:text-white transition-colors ml-1">
+                                <button onClick={onLogout} className="hidden lg:block text-xs font-bold uppercase tracking-widest text-emerald-200 hover:text-white transition-colors">
                                     {t('sign_out')}
                                 </button>
                             </div>
                          ) : (
-                            <button onClick={onLogin} className="bg-white text-emerald-900 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold whitespace-nowrap shadow-lg hover:bg-emerald-50 transition-all active:scale-95">
+                            <button onClick={onLogin} className="bg-white text-emerald-900 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-lg hover:bg-emerald-50 transition-all active:scale-95">
                                 {t('sign_in')}
                             </button>
                          )}
 
-                         <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden p-1 text-white hover:text-emerald-200 transition-colors">
+                         <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden p-2 text-white hover:text-emerald-200 transition-colors">
                             {isMenuOpen ? <Icons.Close /> : <Icons.Menu />}
                          </button>
                     </div>
