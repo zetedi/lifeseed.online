@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { createOracleChat, generateImage } from '../services/gemini';
-import { checkAndIncrementAiUsage, mintPulse, uploadBase64Image } from '../services/firebase';
+import { checkAndIncrementAiUsage, mintPulse, uploadBase64Image, listenToUserProfile } from '../services/firebase';
 import { useLifeseed } from '../hooks/useLifeseed';
 import { Chat, GenerateContentResponse } from "@google/genai";
 import { Icons } from './ui/Icons';
@@ -15,6 +15,7 @@ export const OracleChat = () => {
     const [chat, setChat] = useState<Chat | null>(null);
     const [isTyping, setIsTyping] = useState(false);
     const [isMinting, setIsMinting] = useState(false);
+    const [usage, setUsage] = useState(0);
     const bottomRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -33,6 +34,15 @@ export const OracleChat = () => {
             setMessages([{role: 'model', text: errorText}]);
         }
     }, []);
+
+    useEffect(() => {
+        if (lightseed) {
+            const unsub = listenToUserProfile(lightseed.uid, (data) => {
+                setUsage(data?.dailyAiText || 0);
+            });
+            return () => unsub();
+        }
+    }, [lightseed]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -133,6 +143,10 @@ export const OracleChat = () => {
     return (
         <div className="max-w-2xl mx-auto h-[70vh] flex flex-col bg-white rounded-xl shadow-lg border border-indigo-100 overflow-hidden relative">
             {/* Header/Actions */}
+            <div className="absolute top-4 left-4 z-10 bg-indigo-50 text-indigo-800 px-3 py-1 rounded-full text-[10px] font-bold border border-indigo-100 shadow-sm backdrop-blur-sm">
+                Oracle Wisdom: {usage}/21
+            </div>
+
             {messages.length > 1 && lightseed && (
                 <div className="absolute top-4 right-4 z-10">
                     <button 
@@ -148,14 +162,14 @@ export const OracleChat = () => {
                         ) : (
                             <>
                                 <Icons.HeartPulse />
-                                <span>Mint Pulse</span>
+                                <span>Mint as Pulse</span>
                             </>
                         )}
                     </button>
                 </div>
             )}
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 pt-12">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 pt-16">
                 {messages.map((m, i) => (
                     <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         <div dir="auto" className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${

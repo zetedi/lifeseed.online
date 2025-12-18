@@ -315,6 +315,15 @@ export const fetchPulses = async (lastD?: QueryDocumentSnapshot) => {
 export const getMyPulses = async (uid: string) => (await getDocs(query(pulsesCollection, where('authorId', '==', uid)))).docs.map(d => ({ id: d.id, ...d.data() } as Pulse)).sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
 export const fetchGrowthPulses = async (treeId: string) => (await getDocs(query(pulsesCollection, where('lifetreeId', '==', treeId), where('type', '==', 'GROWTH')))).docs.map(d => ({ id: d.id, ...d.data() } as Pulse)).sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
 
+export const getPulsesByTreeId = async (treeId: string) => {
+    // We fetch by ID and sort client-side to be robust against missing composite indexes
+    const q = query(pulsesCollection, where('lifetreeId', '==', treeId));
+    const snap = await getDocs(q);
+    const pulses = snap.docs.map(d => ({ id: d.id, ...d.data() } as Pulse));
+    // Sort Descending (Newest -> Oldest/Genesis) so the timeline can be rendered top-down
+    return pulses.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+}
+
 export const mintPulse = async (pulseData: any) => {
     return runTransaction(db, async (t) => {
         const treeRef = doc(db, 'lifetrees', pulseData.lifetreeId);

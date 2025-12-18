@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Icons } from './ui/Icons';
 import Logo from './Logo';
-import { updateLifetree, toggleGuardianship, setTreeStatus } from '../services/firebase';
+import { updateLifetree, toggleGuardianship, setTreeStatus, getPulsesByTreeId } from '../services/firebase';
+import { Pulse } from '../types';
+import { PulseDetail } from './PulseDetail';
 
-export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpdate, myActiveTree, currentUserId }: any) => {
+export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpdate, onPulse, myActiveTree, currentUserId }: any) => {
    const { t } = useLanguage();
    const isOwner = currentUserId === tree.ownerId;
    const isNature = tree.isNature;
@@ -19,9 +21,38 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
    const [editLng, setEditLng] = useState(tree.longitude || 0);
    const [isSaving, setIsSaving] = useState(false);
    
+   // Blockchain Visualization State
+   const [chain, setChain] = useState<Pulse[]>([]);
+   const [genesisBlock, setGenesisBlock] = useState<Pulse | null>(null);
+   const [growthBlocks, setGrowthBlocks] = useState<Pulse[]>([]);
+   const [loadingChain, setLoadingChain] = useState(false);
+   const [selectedPulse, setSelectedPulse] = useState<Pulse | null>(null);
+   
    // Local state for immediate UI feedback on actions
    const [localIsGuardian, setLocalIsGuardian] = useState(isGuardian);
    const [localStatus, setLocalStatus] = useState(tree.status || 'HEALTHY');
+
+   useEffect(() => {
+        setLoadingChain(true);
+        // Note: getPulsesByTreeId now returns Descending order (Newest First)
+        getPulsesByTreeId(tree.id).then(pulses => {
+            if (pulses.length > 0) {
+                // The oldest one is usually the last in a descending list if created first.
+                // Assuming "Genesis" is clearly marked or is the oldest.
+                const last = pulses[pulses.length - 1];
+                if (last.previousHash === "0" || last.title === "Genesis Pulse") {
+                    setGenesisBlock(last);
+                    setGrowthBlocks(pulses.slice(0, pulses.length - 1));
+                } else {
+                    // Fallback if genesis isn't explicitly found
+                    setGrowthBlocks(pulses);
+                }
+            } else {
+                setGrowthBlocks([]);
+            }
+            setChain(pulses);
+        }).finally(() => setLoadingChain(false));
+   }, [tree.id]);
 
    const handleSave = async () => {
        setIsSaving(true);
@@ -324,7 +355,117 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                         )}
                     </div>
                 </div>
+
+                {/* Blockchain Visualization Section */}
+                {!loadingChain && chain.length > 0 && (
+                    <div className="mt-8 pt-8 border-t border-slate-200">
+                        <div className="flex flex-col items-center mb-12">
+                            <h3 className="text-xl font-light text-slate-800 mb-6 flex items-center gap-2">
+                                <span className="bg-emerald-100 p-2 rounded-full text-emerald-600"><Icons.Tree /></span>
+                                <span>Blockchain Growth Events</span>
+                            </h3>
+
+                            {/* Action Button at the Top */}
+                            {isOwner && (
+                                <button 
+                                    onClick={onPulse}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-full font-bold uppercase tracking-widest shadow-lg shadow-emerald-200 transition-transform active:scale-95 flex items-center gap-2 mb-8 animate-in fade-in zoom-in slide-in-from-top-4 duration-700"
+                                >
+                                    <Icons.HeartPulse />
+                                    <span>Grow your tree with a pulse</span>
+                                </button>
+                            )}
+                        </div>
+                        
+                        <div className="relative flex flex-col items-center">
+                            {/* Central Line */}
+                            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -ml-px bg-gradient-to-b from-emerald-500 via-emerald-300 to-amber-900"></div>
+
+                            <div className="w-full space-y-24 pb-24">
+                                {growthBlocks.map((pulse, index) => {
+                                    const isLeft = index % 2 === 0;
+                                    
+                                    return (
+                                        <div key={pulse.id} className={`flex w-full items-center ${isLeft ? 'justify-end' : 'justify-start'}`}>
+                                            {/* Container taking half width */}
+                                            <div className={`w-1/2 relative px-8 flex ${isLeft ? 'justify-end' : 'justify-start'}`}>
+                                                
+                                                {/* Connector Stem */}
+                                                <div className={`absolute top-1/2 ${isLeft ? 'right-0' : 'left-0'} w-8 h-[2px] bg-emerald-300`}></div>
+                                                <div className={`absolute top-1/2 ${isLeft ? 'right-0 -mr-1' : 'left-0 -ml-1'} w-2 h-2 rounded-full bg-emerald-500 border-2 border-white z-10`}></div>
+
+                                                {/* Leaf Card */}
+                                                <div 
+                                                    onClick={() => setSelectedPulse(pulse)}
+                                                    className={`
+                                                        relative bg-white border-2 border-emerald-100 shadow-sm hover:shadow-xl hover:border-emerald-300 
+                                                        transition-all cursor-pointer group w-full max-w-sm
+                                                        ${isLeft 
+                                                            ? 'rounded-tr-[3rem] rounded-bl-[3rem] rounded-tl-md rounded-br-md text-right' 
+                                                            : 'rounded-tl-[3rem] rounded-br-[3rem] rounded-tr-md rounded-bl-md text-left'}
+                                                    `}
+                                                >
+                                                    {/* Decorative Vein SVG */}
+                                                    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-5 text-emerald-500" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                                        <path d={isLeft ? "M0,100 Q50,50 100,0" : "M100,100 Q50,50 0,0"} stroke="currentColor" strokeWidth="1" fill="none" />
+                                                    </svg>
+
+                                                    <div className="p-6 relative z-10">
+                                                        <div className={`flex items-center gap-2 mb-3 ${isLeft ? 'flex-row-reverse' : 'flex-row'}`}>
+                                                            {pulse.type === 'GROWTH' ? (
+                                                                <span className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">GROWTH</span>
+                                                            ) : (
+                                                                <span className="bg-sky-100 text-sky-700 text-[10px] px-2 py-0.5 rounded-full font-bold">PULSE</span>
+                                                            )}
+                                                            <span className="text-xs text-slate-400 font-mono">{new Date(pulse.createdAt?.toMillis()).toLocaleDateString()}</span>
+                                                        </div>
+
+                                                        <div className={`flex gap-4 ${isLeft ? 'flex-row-reverse' : 'flex-row'}`}>
+                                                            {pulse.imageUrl && (
+                                                                <img src={pulse.imageUrl} className="w-16 h-16 rounded-lg object-cover bg-slate-50 shrink-0 border border-slate-100" />
+                                                            )}
+                                                            <div>
+                                                                <h4 dir="auto" className="font-bold text-slate-800 text-lg leading-tight mb-2">{pulse.title}</h4>
+                                                                <p dir="auto" className="text-xs text-slate-500 line-clamp-3">{pulse.body}</p>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className={`mt-4 pt-2 border-t border-slate-50 text-[9px] font-mono text-slate-300 truncate ${isLeft ? 'text-right' : 'text-left'}`}>
+                                                            Hash: {pulse.hash.substring(0, 16)}...
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+
+                                {/* Genesis Block at the Bottom */}
+                                {genesisBlock && (
+                                    <div className="flex w-full justify-center pt-12 relative">
+                                         <div className="absolute top-0 left-1/2 -ml-3 -mt-1 w-6 h-6 rounded-full bg-amber-900 border-4 border-white shadow-md z-10 flex items-center justify-center"></div>
+                                         
+                                         <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl shadow-inner text-center max-w-sm relative z-10">
+                                             <div className="w-12 h-12 mx-auto bg-amber-100 rounded-full flex items-center justify-center mb-2 text-amber-700">
+                                                 <Logo width={24} height={24} />
+                                             </div>
+                                             <h4 className="font-bold text-amber-900 uppercase tracking-widest text-xs mb-1">Genesis Block</h4>
+                                             <p className="text-[10px] text-amber-800/60 font-mono break-all px-4">{genesisBlock.hash}</p>
+                                             <p className="text-xs text-amber-700 mt-2 italic">"Rooted in the eternal now"</p>
+                                         </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {selectedPulse && (
+                <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/90 backdrop-blur-sm">
+                    <PulseDetail pulse={selectedPulse} onClose={() => setSelectedPulse(null)} />
+                </div>
+            )}
         </div>
     )
 };

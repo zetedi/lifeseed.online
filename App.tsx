@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, FormEvent, useRef } from 'react';
 import {
   signInWithGoogle,
@@ -763,6 +762,7 @@ const AppContent = () => {
                         onPlayGrowth={setShowGrowthPlayer}
                         onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); setSelectedTree(null); loadContent(true); })}
                         onUpdate={(updates: Partial<Lifetree>) => handleTreeUpdate(selectedTree.id, updates)}
+                        onPulse={() => { setShowPulseModal(true); }}
                         myActiveTree={activeTree}
                         currentUserId={lightseed?.uid}
                     />
