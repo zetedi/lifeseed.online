@@ -103,11 +103,19 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                     <div className="hidden md:flex items-center space-x-3 mx-4">
                         {lightseed && (
                             <>
-                                <button onClick={onPlant} className="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-2 transition-colors border border-emerald-500/30">
-                                    <Icons.Tree /> 
-                                    {/* Text hidden on mid, visible on xl */}
-                                    <span className="hidden xl:inline">{t('plant_lifetree')}</span>
-                                </button>
+                                {activeTab === 'visions' ? (
+                                    <button onClick={onCreateVision} className="bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-2 transition-colors border border-amber-500/30">
+                                        <Icons.Sparkles /> 
+                                        <span className="hidden xl:inline">{t('create_vision')}</span>
+                                    </button>
+                                ) : (
+                                    <button onClick={onPlant} className="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-2 transition-colors border border-emerald-500/30">
+                                        <Icons.Tree /> 
+                                        {/* Text hidden on mid, visible on xl */}
+                                        <span className="hidden xl:inline">{t('plant_lifetree')}</span>
+                                    </button>
+                                )}
+                                
                                 <button onClick={onPulse} className="bg-sky-600 hover:bg-sky-500 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-2 transition-colors border border-sky-500/30">
                                     <Icons.HeartPulse /> 
                                     <span className="hidden xl:inline">{t('emit_pulse')}</span>
@@ -161,9 +169,15 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                 <div className="lg:hidden bg-emerald-950 border-t border-emerald-800 py-6 px-4 space-y-3 animate-in slide-in-from-top-full">
                     {lightseed && (
                         <div className="grid grid-cols-2 gap-3 mb-6">
-                            <button onClick={() => { onPlant(); setIsMenuOpen(false); }} className="bg-emerald-600 p-4 rounded-xl flex flex-col items-center gap-2 font-bold text-xs shadow-lg border border-emerald-500/50">
-                                <Icons.Tree /> <span>{t('plant_lifetree')}</span>
-                            </button>
+                            {activeTab === 'visions' ? (
+                                <button onClick={() => { onCreateVision(); setIsMenuOpen(false); }} className="bg-amber-500 p-4 rounded-xl flex flex-col items-center gap-2 font-bold text-xs shadow-lg border border-amber-500/50 text-white">
+                                    <Icons.Sparkles /> <span>{t('create_vision')}</span>
+                                </button>
+                            ) : (
+                                <button onClick={() => { onPlant(); setIsMenuOpen(false); }} className="bg-emerald-600 p-4 rounded-xl flex flex-col items-center gap-2 font-bold text-xs shadow-lg border border-emerald-500/50">
+                                    <Icons.Tree /> <span>{t('plant_lifetree')}</span>
+                                </button>
+                            )}
                             <button onClick={() => { onPulse(); setIsMenuOpen(false); }} className="bg-sky-600 p-4 rounded-xl flex flex-col items-center gap-2 font-bold text-xs shadow-lg border border-sky-500/50">
                                 <Icons.HeartPulse /> <span>{t('emit_pulse')}</span>
                             </button>
