@@ -1,6 +1,8 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { generateOracleQuote } from '../services/gemini';
+import { getNetworkStats } from '../services/firebase';
 import { Icons } from './ui/Icons';
 import Logo from './Logo';
 
@@ -32,9 +34,18 @@ const GenesisSymbol = () => (
 
 export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant, onLogin }: DashboardProps) => {
     const { t } = useLanguage();
+    const [quote, setQuote] = useState<string>("Loading Oracle...");
+    const [networkStats, setNetworkStats] = useState({ trees: 0, pulses: 0, visions: 0 });
 
-    const mahameruSvg = `data:image/svg+xml,%3Csvg width='800' height='800' viewBox='0 0 800 800' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100%25' height='100%25' fill='%23064e3b'/%3E%3Cdefs%3E%3Csymbol id='mahameru' viewBox='0 0 262 262'%3E%3Ccircle cx='131' cy='131' r='131' fill='none' stroke='%23FFD700' stroke-width='7'/%3E%3C/symbol%3E%3C/defs%3E%3Cuse href='%23mahameru' x='269' y='269'/%3E%3C/svg%3E`;
-    const greenCirclesBg = `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23064e3b' /%3E%3Ccircle cx='25' cy='25' r='10' fill='%23065f46' opacity='0.5' /%3E%3C/svg%3E`;
+    useEffect(() => {
+        // Lazy load the quote
+        generateOracleQuote().then(setQuote);
+        // Fetch global stats
+        getNetworkStats().then(setNetworkStats);
+    }, []);
+
+    // A lush, joyful, green, special, personal, connecting lifetree visualization
+    const lifetreeImage = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3E%3Cdefs%3E%3CradialGradient id='g' cx='50%25' cy='50%25' r='60%25'%3E%3Cstop offset='0%25' stop-color='%23d1fae5'/%3E%3Cstop offset='100%25' stop-color='%23047857'/%3E%3C/radialGradient%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='8' result='coloredBlur'/%3E%3CfeMerge%3E%3CfeMergeNode in='coloredBlur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23g)'/%3E%3Cg opacity='0.3'%3E%3Ccircle cx='400' cy='400' r='350' fill='none' stroke='%23fff' stroke-width='1'/%3E%3Ccircle cx='400' cy='400' r='250' fill='none' stroke='%23fff' stroke-width='1'/%3E%3Cpath d='M400 50 L400 750 M50 400 L750 400' stroke='%23fff' stroke-width='1' stroke-dasharray='10 10'/%3E%3C/g%3E%3Cpath d='M400 800 C 350 700 300 650 400 550 C 500 650 450 700 400 800' fill='%235d4037' opacity='0.8'/%3E%3Cg transform='translate(0,-50)'%3E%3Ccircle cx='400' cy='400' r='160' fill='%2310b981'/%3E%3Ccircle cx='300' cy='350' r='100' fill='%2334d399' opacity='0.9'/%3E%3Ccircle cx='500' cy='350' r='100' fill='%2334d399' opacity='0.9'/%3E%3Ccircle cx='400' cy='250' r='120' fill='%23059669' opacity='0.9'/%3E%3Ccircle cx='250' cy='450' r='80' fill='%236ee7b7' opacity='0.8'/%3E%3Ccircle cx='550' cy='450' r='80' fill='%236ee7b7' opacity='0.8'/%3E%3C/g%3E%3Cg filter='url(%23glow)'%3E%3Ccircle cx='400' cy='350' r='15' fill='%23fcd34d'/%3E%3Ccircle cx='320' cy='300' r='12' fill='%23fcd34d' opacity='0.8'/%3E%3Ccircle cx='480' cy='300' r='12' fill='%23fcd34d' opacity='0.8'/%3E%3Ccircle cx='280' cy='420' r='10' fill='%23fbbf24' opacity='0.8'/%3E%3Ccircle cx='520' cy='420' r='10' fill='%23fbbf24' opacity='0.8'/%3E%3Ccircle cx='400' cy='220' r='18' fill='%23fff' opacity='0.9'/%3E%3C/g%3E%3Cpath d='M400 350 L 320 300 M 400 350 L 480 300 M 400 350 L 400 220' stroke='%23fff' stroke-width='2' opacity='0.4'/%3E%3C/svg%3E`;
 
     return (
         <div className="grid grid-cols-2 gap-3 sm:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -82,20 +93,20 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
                 </div>
             </div>
 
-            {/* Box 2: Mother Tree */}
+            {/* Box 2: Plant a Lifetree */}
             <div onClick={() => { if (!lightseed) onLogin(); else if (stats.trees === 0) onPlant(); else onSetTab('forest'); }} className="relative h-48 md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
-                <img src="/mother.jpg" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform" />
-                <div className="absolute inset-0 bg-black/40"></div>
+                <img src={lifetreeImage} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform opacity-90" />
+                <div className="absolute inset-0 bg-black/10"></div>
                 <div className="relative h-full p-4 flex flex-col justify-between text-white">
                     <div className="flex justify-between items-start">
-                        <h2 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-white/90">{t('be_mother_tree')}</h2>
+                        <h2 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-white/90 shadow-sm">{t('be_mother_tree')}</h2>
                         <div className="p-2 bg-white/10 backdrop-blur rounded-lg"><Icons.Tree /></div>
                     </div>
                     <div className="text-sm font-medium uppercase tracking-wide border-t border-white/30 pt-2">{t('plant_lifetree')}</div>
                 </div>
             </div>
 
-            {/* Box 3: Oracle */}
+            {/* Box 3: Oracle (Dynamic Quote) */}
             <div onClick={() => onSetTab('oracle')} className="relative h-48 md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
                 <div className="absolute inset-0 bg-slate-900"></div>
                 <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=800" className="absolute inset-0 w-full h-full object-cover opacity-30" />
@@ -107,19 +118,37 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
                              <GenesisSymbol />
                         </div>
                     </div>
-                    <p className="text-xs italic truncate opacity-70">"Seek clarity..."</p>
+                    <p className="text-xs italic leading-relaxed line-clamp-4 opacity-90 font-serif">
+                        {quote}
+                    </p>
                 </div>
             </div>
 
-            {/* Box 4: Forest */}
+            {/* Box 4: Forest (Banner Style + Stats) */}
             <div onClick={() => onSetTab('forest')} className="relative h-48 md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
-                <div className="absolute inset-0" style={{ backgroundImage: `url("${greenCirclesBg}")`, backgroundSize: '60px' }}></div>
-                <img src={mahameruSvg} className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-screen" />
+                <img src="/mother.jpg" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors"></div>
                 <div className="relative h-full p-4 flex flex-col justify-between text-white">
                     <div className="flex justify-between items-start">
                         <h2 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-white/90">{t('forest')}</h2>
                         <div className="p-2 bg-white/10 backdrop-blur rounded-lg"><Icons.Map /></div>
                     </div>
+                    
+                    <div className="grid grid-cols-3 gap-1 bg-white/10 backdrop-blur p-2 rounded-lg border border-white/10">
+                        <div className="text-center">
+                            <span className="block text-[10px] uppercase text-emerald-200">Trees</span>
+                            <span className="font-bold text-sm">{networkStats.trees}</span>
+                        </div>
+                        <div className="text-center border-l border-white/10">
+                            <span className="block text-[10px] uppercase text-sky-200">Pulses</span>
+                            <span className="font-bold text-sm">{networkStats.pulses}</span>
+                        </div>
+                        <div className="text-center border-l border-white/10">
+                            <span className="block text-[10px] uppercase text-amber-200">Visions</span>
+                            <span className="font-bold text-sm">{networkStats.visions}</span>
+                        </div>
+                    </div>
+
                     <div className="text-sm font-medium uppercase tracking-wide border-t border-white/30 pt-2">{t('explore')}</div>
                 </div>
             </div>

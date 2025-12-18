@@ -2,7 +2,7 @@
 import { GoogleGenAI, GenerateContentResponse, Chat, Type } from "@google/genai";
 import { Vision, VisionSynergy } from "../types";
 
-const GENESIS_VISION = `The purpose of lightseed is to bring joy. The joy of realizing the bliss of conscious, compassionate, grateful existence by opening a portal to the center of life. By creating a bridge between creator and creation, science and spirituality, virtual and real, nothing and everything. It is designed to intimately connect our inner Self, our culture, our trees and the tree of life, the material and the digital, online world into a sustainable and sustaining circle of unified vibration, sound and light. It aims to merge us into a common flow for all beings to be liberated, wise, strong, courageous and connected. It is rooted in nonviolence, compassion, generosity, gratitude and love. It is blockchain (truthfulness), cloud (global, distributed, resilient), ai (for connecting dreams and technology), regen (nature centric) native. It is an inspiration, an impulse towards a quantum leap in consciousness, a prompt both for human and artificial intelligence for action towards transcending humanity into a new era, a New Earth, Universe and Field with the help of our most important evolutionary sisters and brothers, the trees.`;
+export const GENESIS_VISION = `The purpose of lightseed is to bring joy. The joy of realizing the bliss of conscious, compassionate, grateful existence by opening a portal to the center of life. By creating a bridge between creator and creation, science and spirituality, virtual and real, nothing and everything. It is designed to intimately connect our inner Self, our culture, our trees and the tree of life, the material and the digital, online world into a sustainable and sustaining circle of unified vibration, sound and light. It aims to merge us into a common flow for all beings to be liberated, wise, strong, courageous and connected. It is rooted in nonviolence, compassion, generosity, gratitude and love. It is blockchain (truthfulness), cloud (global, distributed, resilient), ai (for connecting dreams and technology), regen (nature centric) native. It is an inspiration, an impulse towards a quantum leap in consciousness, a prompt both for human and artificial intelligence for action towards transcending humanity into a new era, a New Earth, Universe and Field with the help of our most important evolutionary sisters and brothers, the trees.`;
 
 export const generatePostTitle = async (body: string): Promise<string> => {
   if (!body.trim()) return "";
@@ -47,6 +47,20 @@ export const createOracleChat = () => {
     // Pro model used for the Oracle to handle the complex spiritual/technical context
     const instruction = `You are the Oracle of lightseed. Use the following Vision context: "${GENESIS_VISION}". Answer by weaving in themes of connection, nature, and joy. You operate with Pro-level complexity and mystical depth.`;
     return ai.chats.create({ model: 'gemini-3-pro-preview', config: { systemInstruction: instruction } });
+}
+
+export const generateOracleQuote = async (): Promise<string> => {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    try {
+        const prompt = `Based on the following vision: "${GENESIS_VISION}", select a short, profound quote from classic literature, philosophy, or poetry that resonates with these themes. Return ONLY the quote and the author in this format: "Quote" - Author.`;
+        const response = await ai.models.generateContent({ 
+            model: 'gemini-3-flash-preview', 
+            contents: prompt 
+        });
+        return response.text ? response.text.trim() : '"Nature is not a place to visit. It is home." - Gary Snyder';
+    } catch (e) {
+        return '"The clearest way into the Universe is through a forest wilderness." - John Muir';
+    }
 }
 
 export const findVisionSynergies = async (visions: Vision[]): Promise<VisionSynergy[]> => {

@@ -50,22 +50,22 @@ export const AboutPage = () => {
 
     return (
         <div className="min-h-screen pb-20 bg-[#FDFCFB]">
-            {/* Hero Header - Purple */}
-            <div className="relative bg-purple-900 text-white py-32 px-4 overflow-hidden">
-                <div className="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none">
-                    <Logo width={800} height={800} className="scale-150 rotate-12" />
-                </div>
+            {/* Hero Header - Purple & Compact */}
+            <div className="relative bg-purple-900 text-white py-16 px-4 overflow-hidden">
                 <div className="max-w-4xl mx-auto text-center relative z-10">
-                    <h1 className="text-6xl font-thin tracking-[0.25em] uppercase mb-6">The Book of .seed</h1>
-                    <div className="w-24 h-1 bg-purple-400 mx-auto mb-8"></div>
-                    <p className="text-purple-100 text-2xl font-light tracking-wide max-w-2xl mx-auto font-serif italic">
+                    <div className="flex justify-center mb-6">
+                        <div className="bg-purple-800/50 p-3 rounded-full">
+                            <Logo width={48} height={48} />
+                        </div>
+                    </div>
+                    <p className="text-purple-100 text-xl md:text-2xl font-light tracking-wide max-w-2xl mx-auto font-serif italic">
                         "A bridge between creator and creation, science and spirituality, virtual and real."
                     </p>
                 </div>
             </div>
 
             {/* Navigation Tabs */}
-            <div className="max-w-6xl mx-auto px-4 -mt-12 relative z-20">
+            <div className="max-w-5xl mx-auto px-4 -mt-8 relative z-20">
                 <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
                     <div className="flex border-b border-slate-100 overflow-x-auto bg-white/90 backdrop-blur sticky top-0 z-30">
                         {[
@@ -77,14 +77,14 @@ export const AboutPage = () => {
                             <button 
                                 key={tab.id} 
                                 onClick={() => setActiveTab(tab.id as any)} 
-                                className={`flex-1 min-w-[150px] py-8 text-xs font-bold uppercase tracking-[0.2em] transition-all px-8 ${activeTab === tab.id ? 'text-purple-900 border-b-4 border-purple-600 bg-purple-50/30' : 'text-slate-400 hover:text-slate-800 hover:bg-slate-50'}`}
+                                className={`flex-1 min-w-[150px] py-6 text-xs font-bold uppercase tracking-[0.2em] transition-all px-8 ${activeTab === tab.id ? 'text-purple-900 border-b-4 border-purple-600 bg-purple-50/30' : 'text-slate-400 hover:text-slate-800 hover:bg-slate-50'}`}
                             >
                                 {tab.label}
                             </button>
                         ))}
                     </div>
 
-                    <div className="p-10 md:p-16 max-w-4xl mx-auto">
+                    <div className="p-8 md:p-12 max-w-3xl mx-auto">
                         {/* PHOENIX TAB */}
                         {activeTab === 'phoenix' && (
                             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">

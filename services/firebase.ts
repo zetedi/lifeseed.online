@@ -31,7 +31,8 @@ import {
   arrayUnion,
   arrayRemove,
   writeBatch,
-  onSnapshot
+  onSnapshot,
+  getCountFromServer
 } from 'firebase/firestore';
 import { 
   getStorage, 
@@ -243,6 +244,24 @@ export const ensureGenesis = async () => {
             });
         }
     } catch (e) { console.warn("Genesis skip", e); }
+}
+
+export const getNetworkStats = async () => {
+    try {
+        const [trees, pulses, visions] = await Promise.all([
+            getCountFromServer(collection(db, 'lifetrees')),
+            getCountFromServer(collection(db, 'pulses')),
+            getCountFromServer(collection(db, 'visions'))
+        ]);
+        return {
+            trees: trees.data().count,
+            pulses: pulses.data().count,
+            visions: visions.data().count
+        };
+    } catch (e) {
+        console.error("Failed to fetch network stats:", e);
+        return { trees: 0, pulses: 0, visions: 0 };
+    }
 }
 
 export const plantLifetree = async (data: any) => {
