@@ -8,6 +8,10 @@ export const PulseDetail = ({ pulse, onClose }: { pulse: Pulse; onClose: () => v
     // Mock Exchange State
     const [swapAmount, setSwapAmount] = useState<string>("50");
     const [isBridging, setIsBridging] = useState(false);
+    
+    // Generate simple link ID
+    const pulseLink = `${window.location.origin}?pulse=${pulse.id}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(pulseLink)}`;
 
     return (
         <div className="min-h-screen animate-in fade-in zoom-in-95 duration-300 pb-20 bg-slate-50">
@@ -114,31 +118,40 @@ export const PulseDetail = ({ pulse, onClose }: { pulse: Pulse; onClose: () => v
                         </div>
                      </div>
 
-                     {/* Blockchain Ledger */}
-                     <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl">
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center">
-                            <Icons.FingerPrint />
-                            <span className="ml-2">Blockchain Ledger</span>
-                        </h3>
-                        <div className="space-y-3 font-mono text-[10px] text-slate-600 break-all">
-                            <div>
-                                <span className="block text-slate-400 uppercase text-[9px] mb-0.5">Pulse ID</span>
-                                <span className="bg-slate-100 px-1 py-0.5 rounded">{pulse.id}</span>
+                     {/* Blockchain Ledger & QR */}
+                     <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl flex flex-col md:flex-row gap-6">
+                        <div className="flex-1">
+                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center">
+                                <Icons.FingerPrint />
+                                <span className="ml-2">Blockchain Ledger</span>
+                            </h3>
+                            <div className="space-y-3 font-mono text-[10px] text-slate-600 break-all">
+                                <div>
+                                    <span className="block text-slate-400 uppercase text-[9px] mb-0.5">Pulse ID</span>
+                                    <span className="bg-slate-100 px-1 py-0.5 rounded">{pulse.id}</span>
+                                </div>
+                                <div>
+                                    <span className="block text-slate-400 uppercase text-[9px] mb-0.5">Parent Tree</span>
+                                    <span className="text-emerald-600 cursor-pointer hover:underline">{pulse.lifetreeId}</span>
+                                </div>
+                                <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
+                                    <span className="text-slate-400">PREV:</span>
+                                    <span>{pulse.previousHash}</span>
+                                    <span className="text-slate-400">HASH:</span>
+                                    <span className="text-indigo-600 font-bold">{pulse.hash}</span>
+                                </div>
+                                <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                                    <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">Verified Block</span>
+                                    <a href="#" className="text-indigo-500 hover:underline">View on Etherscan ↗</a>
+                                </div>
                             </div>
-                            <div>
-                                <span className="block text-slate-400 uppercase text-[9px] mb-0.5">Parent Tree</span>
-                                <span className="text-emerald-600 cursor-pointer hover:underline">{pulse.lifetreeId}</span>
-                            </div>
-                            <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
-                                <span className="text-slate-400">PREV:</span>
-                                <span>{pulse.previousHash}</span>
-                                <span className="text-slate-400">HASH:</span>
-                                <span className="text-indigo-600 font-bold">{pulse.hash}</span>
-                            </div>
-                            <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                                <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">Verified Block</span>
-                                <a href="#" className="text-indigo-500 hover:underline">View on Etherscan ↗</a>
-                            </div>
+                        </div>
+                        
+                        {/* QR Code Section */}
+                        <div className="flex flex-col items-center justify-center p-4 bg-white rounded-xl shadow-sm border border-slate-100">
+                            <div className="mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Link</div>
+                            <img src={qrUrl} alt="Pulse Link QR" className="w-24 h-24 rounded-lg mix-blend-multiply" />
+                            <div className="mt-2 text-[10px] text-slate-400 text-center max-w-[100px]">Scan to view on network</div>
                         </div>
                      </div>
 

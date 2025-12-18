@@ -162,7 +162,7 @@ export const checkAndIncrementAiUsage = async (type: 'text' | 'image'): Promise<
             let imageCount = data.dailyAiImage || 0;
             if (lastDate !== currentDate) { textCount = 0; imageCount = 0; }
             if (type === 'text') {
-                if (textCount >= 7) throw new Error("Daily Oracle limit reached (7/7).");
+                if (textCount >= 21) throw new Error("Daily Oracle limit reached (21/21).");
                 textCount++;
             } else {
                 if (imageCount >= 3) throw new Error("Daily Vision limit reached (3/3).");

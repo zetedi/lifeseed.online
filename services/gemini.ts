@@ -65,8 +65,8 @@ export const generateLifetreeBio = async (seed: string): Promise<string> => {
   }
 }
 
-// Generate Image for Visions (Nano Banana)
-export const generateVisionImage = async (prompt: string): Promise<string | null> => {
+// Base Image Generator
+export const generateImage = async (prompt: string): Promise<string | null> => {
     if (!prompt.trim()) return null;
     const ai = getAiClient();
     if (!ai) throw new Error("API Key Missing. Please click the Key icon in the top right to connect.");
@@ -74,10 +74,9 @@ export const generateVisionImage = async (prompt: string): Promise<string | null
     try {
         console.log("Generating image for:", prompt);
         
-        // Use simplified string content to minimize 403 errors from complex object parsing
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash-image', 
-            contents: `A mystical, nature-inspired, abstract painting representing: ${prompt}`,
+            contents: prompt,
             config: {
                 imageConfig: {
                     aspectRatio: "1:1"
@@ -106,6 +105,11 @@ export const generateVisionImage = async (prompt: string): Promise<string | null
         }
         throw new Error("AI Generation Failed. Please try again.");
     }
+}
+
+// Wrapper for Vision Style Images (Nano Banana)
+export const generateVisionImage = async (prompt: string): Promise<string | null> => {
+    return generateImage(`A mystical, nature-inspired, abstract painting representing: ${prompt}`);
 }
 
 // New Chat Interface

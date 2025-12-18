@@ -1,17 +1,20 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { createOracleChat } from '../services/gemini';
-import { checkAndIncrementAiUsage } from '../services/firebase';
+import { createOracleChat, generateImage } from '../services/gemini';
+import { checkAndIncrementAiUsage, mintPulse, uploadBase64Image } from '../services/firebase';
+import { useLifeseed } from '../hooks/useLifeseed';
 import { Chat, GenerateContentResponse } from "@google/genai";
 import { Icons } from './ui/Icons';
 
 export const OracleChat = () => {
     const { t } = useLanguage();
+    const { lightseed, activeTree } = useLifeseed();
     const [messages, setMessages] = useState<{role: 'user' | 'model', text: string}[]>([]);
     const [input, setInput] = useState('');
     const [chat, setChat] = useState<Chat | null>(null);
     const [isTyping, setIsTyping] = useState(false);
+    const [isMinting, setIsMinting] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -84,9 +87,75 @@ export const OracleChat = () => {
         setIsTyping(false);
     }
 
+    const handleMint = async () => {
+        if (!lightseed || !activeTree) {
+            alert("You need a planted Lifetree to mint this conversation.");
+            return;
+        }
+        if (messages.length <= 1) return; // Only greeting
+
+        setIsMinting(true);
+        try {
+            // Format conversation
+            const conversationText = messages.map(m => `${m.role === 'user' ? 'Seeker' : 'Oracle'}: ${m.text}`).join('\n\n');
+            const summaryPrompt = conversationText.substring(0, 1000); // Limit context for generation
+
+            // Check AI limit for image
+            await checkAndIncrementAiUsage('image');
+
+            // Generate Image
+            const prompt = `Create an image from the perspective of how this conversation can be an inspiration to others. The conversation context is: ${summaryPrompt}`;
+            const imageUrl = await generateImage(prompt);
+            let finalImageUrl = "";
+
+            if (imageUrl && imageUrl.startsWith('data:')) {
+                 finalImageUrl = await uploadBase64Image(imageUrl, `pulses/ai/${Date.now()}`);
+            }
+
+            await mintPulse({
+                lifetreeId: activeTree.id,
+                type: 'STANDARD',
+                title: 'Oracle Wisdom',
+                body: conversationText,
+                imageUrl: finalImageUrl,
+                authorId: lightseed.uid,
+                authorName: lightseed.displayName || "Soul",
+                authorPhoto: lightseed.photoURL,
+            });
+            alert("Conversation minted as a Pulse!");
+        } catch (e: any) {
+            console.error(e);
+            alert("Minting failed: " + e.message);
+        }
+        setIsMinting(false);
+    }
+
     return (
-        <div className="max-w-2xl mx-auto h-[70vh] flex flex-col bg-white rounded-xl shadow-lg border border-indigo-100 overflow-hidden">
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+        <div className="max-w-2xl mx-auto h-[70vh] flex flex-col bg-white rounded-xl shadow-lg border border-indigo-100 overflow-hidden relative">
+            {/* Header/Actions */}
+            {messages.length > 1 && lightseed && (
+                <div className="absolute top-4 right-4 z-10">
+                    <button 
+                        onClick={handleMint} 
+                        disabled={isMinting}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-full font-bold shadow-md transition-all active:scale-95 flex items-center gap-1 disabled:opacity-50"
+                    >
+                        {isMinting ? (
+                            <>
+                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                <span>Minting...</span>
+                            </>
+                        ) : (
+                            <>
+                                <Icons.HeartPulse />
+                                <span>Mint Pulse</span>
+                            </>
+                        )}
+                    </button>
+                </div>
+            )}
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 pt-12">
                 {messages.map((m, i) => (
                     <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         <div dir="auto" className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
