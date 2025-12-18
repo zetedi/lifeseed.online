@@ -19,8 +19,15 @@ export const OracleChat = () => {
             const c = createOracleChat();
             setChat(c);
             setMessages([{role: 'model', text: t('oracle_greeting')}]);
-        } catch(e) {
-            setMessages([{role: 'model', text: "The connection to the spirits (API) is severed."}]);
+        } catch(e: any) {
+            console.error("Oracle Init Error:", e);
+            let errorText = "The connection to the spirits (API) is severed.";
+            if (e.message && (e.message.includes("API Key") || e.message.includes("apiKey"))) {
+                errorText = "Connection severed: Spirit Key (API Key) is missing in deployment.";
+            } else if (e.message) {
+                errorText = `Connection severed: ${e.message}`;
+            }
+            setMessages([{role: 'model', text: errorText}]);
         }
     }, []);
 
@@ -33,7 +40,7 @@ export const OracleChat = () => {
         if (!input.trim()) return;
         
         if (!chat) {
-             setMessages(prev => [...prev, {role: 'user', text: input}, {role: 'model', text: "Please connect your Spirit Key to speak."}]);
+             setMessages(prev => [...prev, {role: 'user', text: input}, {role: 'model', text: "The Oracle is not connected."}]);
              setInput('');
              return;
         }
@@ -68,6 +75,8 @@ export const OracleChat = () => {
                 msg = "Forbidden (403): The Oracle cannot hear you. Please ensure your API Key is valid.";
             } else if (e.message?.includes("429")) {
                 msg = "The spirits are overwhelmed (Rate Limit). Please wait a moment.";
+            } else if (e.message) {
+                msg = `Error: ${e.message}`;
             }
             
             setMessages(prev => [...prev, {role: 'model', text: msg}]);

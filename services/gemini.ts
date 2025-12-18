@@ -6,14 +6,17 @@ import { Vision, VisionSynergy } from "../types";
 const GENESIS_VISION = `The purpose of lightseed is to bring joy. The joy of realizing the bliss of conscious, compassionate, grateful existence by opening a portal to the center of life. By creating a bridge between creator and creation, science and spirituality, virtual and real, nothing and everything. It is designed to intimately connect our inner Self, our culture, our trees and the tree of life, the material and the digital, online world into a sustainable and sustaining circle of unified vibration, sound and light. It aims to merge us into a common flow for all beings to be liberated, wise, strong, courageous and connected. It is rooted in nonviolence, compassion, generosity, gratitude and love. It is blockchain (truthfulness), cloud (global, distributed, resilient), ai (for connecting dreams and technology), regen (nature centric) native. It is an inspiration, an impulse towards a quantum leap in consciousness, a prompt both for human and artificial intelligence for action towards transcending humanity into a new era, a New Earth, Universe and Field with the help of our most important evolutionary sisters and brothers, the trees.`;
 
 const getAiClient = () => {
-    return new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+        throw new Error("API Key is missing. Please check your deployment settings (GitHub Secrets/Env Vars).");
+    }
+    return new GoogleGenAI({ apiKey });
 }
 
 export const generatePostTitle = async (body: string): Promise<string> => {
   if (!body.trim()) return "";
-  const ai = getAiClient();
-
   try {
+    const ai = getAiClient();
     const prompt = `Generate a short, engaging title (maximum 10 words) for the following post body. Do not use quotation marks in the title:\n\n---\n${body}\n---`;
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -28,9 +31,8 @@ export const generatePostTitle = async (body: string): Promise<string> => {
 
 export const generateLifetreeBio = async (seed: string): Promise<string> => {
   if (!seed.trim()) return "";
-  const ai = getAiClient();
-
   try {
+    const ai = getAiClient();
     const prompt = `
       You are lightseed AI, a poetic and nature-loving assistant.
       The user wants to grow a "lifetree" (a digital profile representation of their soul).
@@ -51,9 +53,8 @@ export const generateLifetreeBio = async (seed: string): Promise<string> => {
 // Generate Image for Visions (Nano Banana)
 export const generateVisionImage = async (prompt: string): Promise<string | null> => {
     if (!prompt.trim()) return null;
-    const ai = getAiClient();
-
     try {
+        const ai = getAiClient();
         console.log("Generating image for:", prompt);
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash-image', 
@@ -114,8 +115,8 @@ export const createOracleChat = (systemInstruction?: string) => {
 }
 
 export const generateOracleQuote = async (): Promise<string> => {
-    const ai = getAiClient();
     try {
+        const ai = getAiClient();
         const prompt = `Based on the following vision: "${GENESIS_VISION}", select a short, profound quote from classic literature, philosophy, or poetry that resonates with these themes. Return ONLY the quote and the author in this format: "Quote" - Author.`;
         const response = await ai.models.generateContent({ 
             model: 'gemini-2.5-flash', 
@@ -129,12 +130,11 @@ export const generateOracleQuote = async (): Promise<string> => {
 
 // Analyze Vision Synergy
 export const findVisionSynergies = async (visions: Vision[]): Promise<VisionSynergy[]> => {
-    const ai = getAiClient();
-    
     if (visions.length < 2) return [];
-    const visionsList = visions.map(v => `- Title: ${v.title}, Body: ${v.body}`).join('\n');
-
     try {
+        const ai = getAiClient();
+        const visionsList = visions.map(v => `- Title: ${v.title}, Body: ${v.body}`).join('\n');
+
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: `Analyze the following list of Visions and identify potential collaborations or thematic synergies between them. 
