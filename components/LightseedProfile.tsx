@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { type Pulse, type Lifetree, type MatchProposal, type Vision, type VisionSynergy } from '../types';
-import { getMyPulses, getMyVisions, getMyMatchesHistory, deleteUserAccount, logout, triggerSystemEmail, monitorMailStatus, sendInvite, listenToUserProfile } from '../services/firebase';
+import { getMyPulses, getMyVisions, getMyMatchesHistory, deleteUserAccount, logout, triggerSystemEmail, monitorMailStatus, sendInvite, listenToUserProfile, deleteVision } from '../services/firebase';
 import { findVisionSynergies } from '../services/gemini';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Icons } from './ui/Icons';
@@ -46,17 +46,21 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
             }
         });
 
-        setLoading(true);
         const fetchData = async () => {
-            if (activeTab === 'pulses') {
-                const data = await getMyPulses(lightseed.uid);
-                setPulses(data);
-            } else if (activeTab === 'visions') {
-                const data = await getMyVisions(lightseed.uid);
-                setVisions(data);
-            } else if (activeTab === 'history') {
-                const data = await getMyMatchesHistory(lightseed.uid);
-                setHistory(data);
+            setLoading(true);
+            try {
+                if (activeTab === 'pulses') {
+                    const data = await getMyPulses(lightseed.uid);
+                    setPulses(data);
+                } else if (activeTab === 'visions') {
+                    const data = await getMyVisions(lightseed.uid);
+                    setVisions(data);
+                } else if (activeTab === 'history') {
+                    const data = await getMyMatchesHistory(lightseed.uid);
+                    setHistory(data);
+                }
+            } catch (e) {
+                console.error("Fetch profile data error", e);
             }
             setLoading(false);
         };
@@ -112,6 +116,17 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
         setSendingInvite(false);
     }
 
+    const handleDeleteVision = async (e: React.MouseEvent, visionId: string) => {
+        e.stopPropagation();
+        if (!confirm("Are you sure you want to delete this vision?")) return;
+        try {
+            await deleteVision(visionId);
+            setVisions(prev => prev.filter(v => v.id !== visionId));
+        } catch (e: any) {
+            alert("Delete failed: " + e.message);
+        }
+    }
+
     const handleTestEmail = async () => {
         const targetEmail = prompt("Enter the email address to send test to:", lightseed.email);
         if (!targetEmail) return;
@@ -123,25 +138,23 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
         try {
             const docRef = await triggerSystemEmail(
                 targetEmail,
-                "Debug Test: LifeSeed Network",
+                "Debug Test: lightseed Network",
                 `This is a test email sent at ${new Date().toLocaleTimeString()} to verify the SMTP pipeline. If you see this, the system is working.`,
-                lightseed.uid // Explicitly pass UID to ensure security rules pass even if auth state is flaky
+                lightseed.uid 
             );
             
             setMailStatus("QUEUED");
             
-            // Timeout check for sleeping/broken extension
             const timeoutCheck = setTimeout(() => {
                 setMailStatus((current) => {
                     if (current === "QUEUED") {
-                        alert("The email is in the DB, but the Extension didn't send it.\n\nCheck Firebase Console -> Extensions tab.\nIf you see 'Error saving configuration', you likely set the Database Name to 'nam5'. Change it to '(default)'.");
+                        alert("The email is in the DB, but the Extension didn't send it.");
                         return "TIMEOUT: Check Extension Config";
                     }
                     return current;
                 });
             }, 10000);
 
-            // Start listening to status changes
             const unsubscribe = monitorMailStatus(docRef.id, (deliveryStatus: any) => {
                 clearTimeout(timeoutCheck);
                 if (deliveryStatus) {
@@ -150,8 +163,6 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                         setTimeout(() => { setSendingTest(false); setMailStatus(null); unsubscribe(); }, 5000);
                     } else if (deliveryStatus.state === 'ERROR') {
                         setMailStatus(`ERROR: ${deliveryStatus.error}`);
-                        console.error("Mail Error Details:", deliveryStatus);
-                        // Don't auto-clear error so user can read it
                     } else {
                         setMailStatus(`STATUS: ${deliveryStatus.state}`);
                     }
@@ -174,15 +185,12 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
             window.location.reload();
         } catch (e: any) {
             console.error("Delete Account Error:", e);
-            
-            // Check for specific security error requiring re-login
             if (e.message && (e.message.includes("log out") || e.message.includes("recent-login"))) {
                 alert("Security Check: Please sign in again to confirm deletion.");
                 await logout();
                 window.location.reload();
                 return;
             }
-
             alert(e.message);
             setIsDeleting(false);
             setShowDeleteConfirm(false);
@@ -212,13 +220,11 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                         <p className="text-slate-400 text-sm font-mono mt-1">{lightseed.email}</p>
                         
                         <div className="flex flex-col md:flex-row items-center md:items-start gap-4 mt-4">
-                            {/* Stats */}
                             <div className="text-center md:text-left">
                                 <span className="block text-2xl font-bold">{myTrees.length}</span>
                                 <span className="text-xs text-slate-400 uppercase tracking-wider">{t('my_trees')}</span>
                             </div>
 
-                            {/* Action Buttons Container */}
                             <div className="flex flex-wrap items-center justify-center gap-3">
                                 {allValidated && (
                                     <button onClick={onPlant} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-transform active:scale-95 flex items-center space-x-2">
@@ -270,7 +276,6 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
             </div>
 
             <div className="max-w-4xl mx-auto px-4 mt-8">
-                {/* Invitations Card */}
                 {myTrees.length > 0 && (
                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
                         <div>
@@ -419,8 +424,26 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
 
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                         {visions.length === 0 ? <p className="col-span-full text-slate-400 text-center py-10">No visions created yet.</p> : visions.map((vision) => (
-                                            <div key={vision.id} onClick={() => onViewVision(vision)} className="cursor-pointer">
-                                                <VisionCard vision={vision} />
+                                            <div key={vision.id} className="relative group">
+                                                <div onClick={() => onViewVision(vision)} className="cursor-pointer h-full">
+                                                    <VisionCard vision={vision} />
+                                                </div>
+                                                <div className="absolute top-2 left-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                                    {vision.title === "Root Vision" ? (
+                                                        <div className="bg-white/95 backdrop-blur-sm px-2 py-1.5 rounded-lg text-[9px] text-emerald-700 font-bold border border-emerald-200 shadow-sm flex flex-col">
+                                                            <span>ANCHOR (ROOT)</span>
+                                                            <span className="text-[8px] text-slate-400 font-normal leading-tight mt-0.5">This vision is the foundation of your tree and cannot be deleted.</span>
+                                                        </div>
+                                                    ) : (
+                                                        <button 
+                                                            onClick={(e) => handleDeleteVision(e, vision.id)}
+                                                            className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg border border-red-400 transition-all hover:scale-110 active:scale-95"
+                                                            title="Delete Vision"
+                                                        >
+                                                            <Icons.Trash />
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -450,52 +473,53 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
             {showInviteModal && (
                 <Modal title={t('send_invite')} onClose={() => setShowInviteModal(false)}>
                     <form onSubmit={handleSendInvite} className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                            <input 
-                                type="email" 
-                                required
-                                value={inviteEmail}
-                                onChange={e => setInviteEmail(e.target.value)}
-                                placeholder={t('invite_email_placeholder')}
-                                className="w-full border border-slate-300 rounded px-3 py-2 text-sm"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Message (Optional)</label>
-                            <textarea 
-                                value={inviteMessage}
-                                onChange={e => setInviteMessage(e.target.value)}
-                                placeholder={t('invite_message_placeholder')}
-                                className="w-full border border-slate-300 rounded px-3 py-2 text-sm h-24 resize-none"
-                            />
-                        </div>
-                        <div className="bg-slate-50 p-3 rounded text-xs text-slate-500">
-                            <strong>Preview:</strong><br/>
-                            {inviteMessage && <span className="italic block my-1">"{inviteMessage}"</span>}
-                            You have been invited to join the lightseed network.<br/>
-                            Join here: [Link]
-                        </div>
-                        <div className="flex justify-end">
-                            <button type="submit" disabled={sendingInvite} className="bg-emerald-600 text-white px-6 py-2 rounded font-bold text-sm hover:bg-emerald-700 transition-colors disabled:opacity-50">
-                                {sendingInvite ? "Sending..." : "Send Invite"}
-                            </button>
-                        </div>
+                        <p className="text-xs text-slate-500 mb-4">{t('invites_remaining')}: {invitesRemaining}</p>
+                        <input 
+                            required
+                            type="email"
+                            placeholder={t('invite_email_placeholder')}
+                            className="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                            value={inviteEmail}
+                            onChange={e => setInviteEmail(e.target.value)}
+                        />
+                        <textarea 
+                            placeholder={t('invite_message_placeholder')}
+                            className="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none h-24"
+                            value={inviteMessage}
+                            onChange={e => setInviteMessage(e.target.value)}
+                        />
+                        <button 
+                            disabled={sendingInvite}
+                            type="submit" 
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg transition-colors shadow-lg active:scale-95 disabled:opacity-50"
+                        >
+                            {sendingInvite ? t('loading') : t('send_invite')}
+                        </button>
                     </form>
                 </Modal>
             )}
 
+            {/* Delete Confirm Modal */}
             {showDeleteConfirm && (
                 <Modal title={t('delete_confirm_title')} onClose={() => setShowDeleteConfirm(false)}>
-                    <div className="space-y-6 text-center p-4">
-                        <div className="text-red-500 text-4xl mb-2"><Icons.Siren /></div>
-                        <p className="text-slate-600">{t('delete_confirm_desc')}</p>
-                        <div className="flex justify-center gap-4 mt-6">
-                            <button onClick={() => setShowDeleteConfirm(false)} disabled={isDeleting} className="px-6 py-2 rounded-lg bg-slate-200 text-slate-800 hover:bg-slate-300 font-bold">
+                    <div className="space-y-6">
+                        <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-red-800 text-sm">
+                            <p className="font-bold mb-1">{t('delete_confirm_desc')}</p>
+                        </div>
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 rounded-xl font-bold transition-colors"
+                            >
                                 {t('cancel')}
                             </button>
-                            <button onClick={handleDeleteAccount} disabled={isDeleting} className="px-6 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-bold">
-                                {isDeleting ? "Deleting..." : "Confirm Delete"}
+                            <button 
+                                onClick={handleDeleteAccount}
+                                disabled={isDeleting}
+                                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-red-200 transition-all active:scale-95 flex items-center justify-center space-x-2 disabled:opacity-50"
+                            >
+                                {isDeleting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <Icons.Trash />}
+                                <span>{t('delete_account')}</span>
                             </button>
                         </div>
                     </div>
@@ -503,4 +527,4 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
             )}
         </div>
     );
-};
+}

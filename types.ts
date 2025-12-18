@@ -1,6 +1,7 @@
 
-import { type User as FirebaseUser } from 'firebase/auth';
-import { type Timestamp } from 'firebase/firestore';
+// Fix: Use proper type imports to resolve "no exported member" errors in some TS environments.
+import type { User as FirebaseUser } from 'firebase/auth';
+import type { Timestamp } from 'firebase/firestore';
 
 export type Lightseed = Pick<FirebaseUser, 'uid' | 'email' | 'displayName' | 'photoURL'>;
 

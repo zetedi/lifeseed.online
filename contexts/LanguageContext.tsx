@@ -11,7 +11,9 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+// Fix: Marking children as optional to avoid TypeScript errors in some environments 
+// where children nested in JSX are not immediately recognized as the 'children' prop.
+export const LanguageProvider = ({ children }: { children?: ReactNode }) => {
   const [language, setLanguageState] = useState<Language>('en');
 
   useEffect(() => {

@@ -16,6 +16,7 @@ import {
   fetchVisions,
   createVision,
   deleteLifetree,
+  deleteVision,
   ensureGenesis,
   checkAndIncrementAiUsage
 } from './services/firebase';
@@ -42,6 +43,7 @@ import { GrowthPlayerModal } from './components/GrowthPlayerModal';
 import { OracleChat } from './components/OracleChat';
 import { LightseedProfile } from './components/LightseedProfile';
 import { AboutPage } from './components/AboutPage';
+import { Dashboard } from './components/Dashboard';
 
 const GDPRBanner = () => {
     const [visible, setVisible] = useState(false);
@@ -64,7 +66,7 @@ const GDPRBanner = () => {
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 animate-in slide-in-from-bottom-full duration-500">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
                 <p className="text-xs text-slate-600 text-center md:text-left max-w-2xl">
-                    We use cookies and local storage to ensure you get the best experience on LifeSeed. By continuing, you agree to our terms and privacy policy.
+                    We use cookies and local storage to ensure you get the best experience on lightseed. By continuing, you agree to our terms and privacy policy.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center gap-4">
                     <label className="flex items-center space-x-2 text-sm text-slate-800 cursor-pointer select-none">
@@ -92,7 +94,7 @@ const GDPRBanner = () => {
 const AppContent = () => {
     const { t } = useLanguage();
     const { lightseed, myTrees, guardedTrees, activeTree, loading: authLoading, refreshTrees } = useLifeseed();
-    const [tab, setTab] = useState('forest');
+    const [tab, setTab] = useState('dashboard');
     const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
     const [data, setData] = useState<any[]>([]);
     const [matches, setMatches] = useState<MatchProposal[]>([]);
@@ -100,7 +102,6 @@ const AppContent = () => {
     const [selectedVision, setSelectedVision] = useState<Vision | null>(null);
     const [selectedPulse, setSelectedPulse] = useState<Pulse | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [hasApiKey, setHasApiKey] = useState(false);
     
     // Pagination State
     const [lastDoc, setLastDoc] = useState<any>(null);
@@ -137,10 +138,7 @@ const AppContent = () => {
     const [visionLink, setVisionLink] = useState('');
     const [visionImageUrl, setVisionImageUrl] = useState('');
 
-    const mainContainerRef = useRef<HTMLDivElement>(null);
-
-    // Clay Background with Seed of Life Pattern
-    // Color: #B2713A (Clay)
+    // Original Brown Pattern
     const svgBackground = `data:image/svg+xml,%3Csvg width='332.5537705' height='320' xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E .outerCircle %7B fill: %23B2713A; stroke: %23fff; stroke-width: 7; stroke-opacity: .3; %7D .circle %7B fill: none; stroke: %23fff; stroke-width: .3; stroke-opacity: .3; %7D .innerCircle %7B fill: %23B2713A; stroke: %23fff; stroke-width: 1.7; stroke-opacity: .4; %7D %3C/style%3E%3Crect width='100%25' height='100%25' fill='%23B2713A'/%3E%3Cdefs%3E%3CclipPath id='clean'%3E%3Crect width='332.5537705' height='320' /%3E%3C/clipPath%3E%3C/defs%3E%3Cg%3E%3Ccircle cx='-38.2768775' cy='-32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='-38.2768775' cy='32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='-38.2768775' cy='96' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='-38.2768775' cy='160' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='-38.2768775' cy='224' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='-38.2768775' cy='288' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='-38.2768775' cy='352' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='17.1487483' cy='0' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='17.1487483' cy='64' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='17.1487483' cy='128' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='17.1487483' cy='192' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='17.1487483' cy='256' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='17.1487483' cy='320' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='-32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='96' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='160' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='224' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='288' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='352' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='0' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='64' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='128' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='192' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='256' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='320' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='-32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='96' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='160' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='224' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='288' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='352' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='238.8512516' cy='0' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='238.8512516' cy='64' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='238.8512516' cy='128' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='238.8512516' cy='192' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='238.8512516' cy='256' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='238.8512516' cy='320' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='-32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='32' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='96' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='160' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='224' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='288' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='352' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='349.7025033' cy='0' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='349.7025033' cy='64' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='349.7025033' cy='128' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='349.7025033' cy='192' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='349.7025033' cy='256' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='349.7025033' cy='320' r='64' class='circle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='96' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='72.5743741' cy='160' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='64' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='128' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='128' cy='192' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='96' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='183.4256258' cy='160' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3Ccircle cx='294.2768775' cy='288' r='16' class='innerCircle' clip-path='url(%23clean)' /%3E%3C/g%3E%3C/svg%3E`;
 
     const backgroundStyle = {
@@ -151,27 +149,17 @@ const AppContent = () => {
         backgroundAttachment: 'fixed',
     };
 
-    const checkKey = async () => {
-         const aiStudio = (window as any).aistudio;
-         if (aiStudio && aiStudio.hasSelectedApiKey) {
-             const has = await aiStudio.hasSelectedApiKey();
-             setHasApiKey(has);
-         } else {
-             const key = (window as any).process?.env?.API_KEY;
-             setHasApiKey(!!key);
-         }
-    }
-
     useEffect(() => { 
-        checkKey();
-        loadContent(true); 
+        if (tab !== 'dashboard') {
+            loadContent(true);
+        }
         ensureGenesis(); 
     }, [tab, lightseed]);
     
     useEffect(() => {
         const handleScroll = () => {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
-                if (!loadingMore && hasMore && tab !== 'matches' && tab !== 'oracle' && tab !== 'profile' && tab !== 'about') {
+                if (!loadingMore && hasMore && tab !== 'dashboard' && tab !== 'matches' && tab !== 'oracle' && tab !== 'profile' && tab !== 'about') {
                     loadContent(false);
                 }
             }
@@ -241,7 +229,6 @@ const AppContent = () => {
         if (!visionBody) { alert("Please enter a vision description first."); return; }
         setUploading(true);
         try {
-            // Check Daily Limit before generation
             const allowed = await checkAndIncrementAiUsage('image');
             if (!allowed) {
                 alert(t('ai_login_required'));
@@ -327,7 +314,7 @@ const AppContent = () => {
     };
 
     const handleDeleteTree = async (treeId: string) => {
-        if (!window.confirm("Are you sure you want to delete this Lifetree? This cannot be undone.")) return;
+        if (!window.confirm("Are you sure you want to delete this lifetree? This cannot be undone.")) return;
         try {
             await deleteLifetree(treeId);
             await refreshTrees();
@@ -335,6 +322,17 @@ const AppContent = () => {
         } catch (e: any) {
             console.error("Delete Tree Error:", e);
             alert("Error deleting tree: " + e.message);
+        }
+    }
+
+    const handleDeleteVisionInApp = async (visionId: string) => {
+        if (!confirm("Are you sure you want to delete this vision?")) return;
+        try {
+            await deleteVision(visionId);
+            setSelectedVision(null);
+            loadContent(true);
+        } catch (e: any) {
+            alert("Delete failed: " + e.message);
         }
     }
 
@@ -419,7 +417,7 @@ const AppContent = () => {
                  targetTreeId: matchCandidate.lifetreeId,
                  targetUid: matchCandidate.authorId
              });
-             alert("Match Proposed! Waiting for acceptance.");
+             alert("Match Proposed! Waiting for resonance.");
              setShowPulseModal(false); setMatchCandidate(null);
         } catch(e:any) { 
             console.error("Match Error:", e);
@@ -454,7 +452,6 @@ const AppContent = () => {
         return matches;
     });
 
-    const dangerTreesCount = guardedTrees.filter(t => t.status === 'DANGER').length;
     const searchSuggestions = Array.from(new Set(data.map((item: any) => item.title || item.name).filter(Boolean)));
 
     if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-[#B2713A]"><Logo className="animate-pulse text-white" /></div>;
@@ -466,6 +463,21 @@ const AppContent = () => {
     );
 
     const renderMainContent = () => {
+        if (tab === 'dashboard') {
+            return (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <Dashboard 
+                        lightseed={lightseed} 
+                        myTreesCount={myTrees.length} 
+                        firstTreeImage={myTrees[0]?.imageUrl}
+                        onSetTab={setTab} 
+                        onPlant={() => { setPlantAsNature(false); setShowPlantModal(true); }}
+                        onLogin={signInWithGoogle}
+                    />
+                </div>
+            );
+        }
+
         if (tab === 'profile' && lightseed) {
             return (
                 <LightseedProfile 
@@ -506,7 +518,7 @@ const AppContent = () => {
                     </div>
                 )}
 
-                {tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && tab !== 'about' && (
+                {tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && tab !== 'about' && tab !== 'dashboard' && (
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                         <div className="relative w-full md:max-w-md">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -579,35 +591,11 @@ const AppContent = () => {
                     </div>
                 )}
 
-                {tab === 'oracle' && <OracleChat hasApiKey={hasApiKey} />}
+                {tab === 'oracle' && <OracleChat />}
 
                 {tab === 'forest' ? (
                     <>
-                        {viewMode === 'map' ? (
-                            <ForestMap trees={filteredData} />
-                        ) : (
-                            <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                                {filteredData.length === 0 && !loadingMore ? (
-                                    <p className="col-span-full text-center text-slate-400 py-10">{t('no_trees_found')}</p>
-                                ) : (
-                                    filteredData.map((item: any) => (
-                                        <React.Fragment key={item.id}>
-                                            <LifetreeCard 
-                                                tree={item} 
-                                                myActiveTree={activeTree} 
-                                                currentUserId={lightseed?.uid}
-                                                onPlayGrowth={setShowGrowthPlayer} 
-                                                onQuickSnap={handleQuickSnap}
-                                                onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); loadContent(true); })}
-                                                onView={setSelectedTree}
-                                            />
-                                        </React.Fragment>
-                                    ))
-                                )}
-                            </div>
-                        )}
-                        
-                        <div className="flex justify-center mt-6 mb-2 space-x-3">
+                         <div className="flex justify-center mb-6 space-x-3">
                              <label className="flex items-center space-x-2 cursor-pointer bg-[#B2713A]/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 hover:bg-[#B2713A]/80 transition-colors shadow-sm">
                                 <input 
                                     type="checkbox" 
@@ -631,6 +619,30 @@ const AppContent = () => {
                                 </span>
                             </label>
                         </div>
+
+                        {viewMode === 'map' ? (
+                            <ForestMap trees={filteredData} />
+                        ) : (
+                            <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                                {filteredData.length === 0 && !loadingMore ? (
+                                    <p className="col-span-full text-center text-slate-400 py-10">{t('no_trees_found')}</p>
+                                ) : (
+                                    filteredData.map((item: any) => (
+                                        <React.Fragment key={item.id}>
+                                            <LifetreeCard 
+                                                tree={item} 
+                                                myActiveTree={activeTree} 
+                                                currentUserId={lightseed?.uid}
+                                                onPlayGrowth={setShowGrowthPlayer} 
+                                                onQuickSnap={handleQuickSnap}
+                                                onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); loadContent(true); })}
+                                                onView={setSelectedTree}
+                                            />
+                                        </React.Fragment>
+                                    ))
+                                )}
+                            </div>
+                        )}
                     </>
                 ) : tab === 'visions' ? (
                     <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -642,7 +654,7 @@ const AppContent = () => {
                             ))
                         }
                     </div>
-                ) : tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && tab !== 'about' && (
+                ) : tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && tab !== 'about' && tab !== 'dashboard' && (
                     <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {data.map((item) => (
                              <React.Fragment key={item.id}>
@@ -676,8 +688,6 @@ const AppContent = () => {
                 onPulse={() => setShowPulseModal(true)}
                 onCreateVision={() => setShowVisionModal(true)}
                 onProfile={() => setTab('profile')} 
-                hasApiKey={hasApiKey}
-                onCheckKey={checkKey}
                 pendingMatchesCount={matches.length}
                 myTreesCount={myTrees.length}
                 dangerTreesCount={guardedTrees.filter(t => t.status === 'DANGER').length}
@@ -702,7 +712,12 @@ const AppContent = () => {
 
             {selectedVision && (
                 <DetailWrapper>
-                    <VisionDetail vision={selectedVision} onClose={() => setSelectedVision(null)} />
+                    <VisionDetail 
+                        vision={selectedVision} 
+                        onClose={() => setSelectedVision(null)} 
+                        currentUserId={lightseed?.uid}
+                        onDelete={handleDeleteVisionInApp}
+                    />
                 </DetailWrapper>
             )}
             

@@ -6,7 +6,7 @@ import { checkAndIncrementAiUsage } from '../services/firebase';
 import { Chat, GenerateContentResponse } from "@google/genai";
 import { Icons } from './ui/Icons';
 
-export const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
+export const OracleChat = () => {
     const { t } = useLanguage();
     const [messages, setMessages] = useState<{role: 'user' | 'model', text: string}[]>([]);
     const [input, setInput] = useState('');
@@ -15,12 +15,6 @@ export const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
     const bottomRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (!hasApiKey) {
-            setMessages([{role: 'model', text: t('oracle_waiting')}]);
-            setChat(null);
-            return;
-        }
-
         try {
             const c = createOracleChat();
             setChat(c);
@@ -28,7 +22,7 @@ export const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
         } catch(e) {
             setMessages([{role: 'model', text: "The connection to the spirits (API) is severed."}]);
         }
-    }, [hasApiKey]);
+    }, []);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -71,7 +65,7 @@ export const OracleChat = ({ hasApiKey }: { hasApiKey: boolean }) => {
             let msg = "The wind is too strong (Error connecting to AI).";
             
             if (e.message?.includes("403")) {
-                msg = "Forbidden (403): The Oracle cannot hear you. Please ensure your API Key is valid and selected via the key icon.";
+                msg = "Forbidden (403): The Oracle cannot hear you. Please ensure your API Key is valid.";
             } else if (e.message?.includes("429")) {
                 msg = "The spirits are overwhelmed (Rate Limit). Please wait a moment.";
             }
