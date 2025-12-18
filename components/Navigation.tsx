@@ -67,7 +67,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
         <nav className="sticky top-0 z-30 bg-emerald-900 border-b border-emerald-800 text-white shadow-md">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-20 items-center">
-                    <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setTab('dashboard')}>
+                    <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setTab('dashboard')}>
                         <div className="bg-white p-1 rounded-full group-hover:scale-110 transition-transform">
                              <Logo width={32} height={32} />
                         </div>
@@ -75,7 +75,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                     </div>
 
                     {/* Desktop Navigation Tabs */}
-                    <div className="hidden lg:flex items-center space-x-2">
+                    <div className="hidden lg:flex items-center gap-2">
                         {mainTabs.map(tab => (
                             <button key={tab} onClick={() => setTab(tab)} className={`px-5 py-2.5 rounded-full text-sm transition-all ${getTabStyle(tab)}`}>
                                 {t(tab as any)}
@@ -100,7 +100,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                     </div>
 
                     {/* Action Buttons: Visible on MD+ (Mid size and up) */}
-                    <div className="hidden md:flex items-center space-x-3 mx-4">
+                    <div className="hidden md:flex items-center gap-3 mx-4">
                         {lightseed && (
                             <>
                                 {activeTab === 'visions' ? (
@@ -125,7 +125,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                     </div>
 
                     {/* Right Side UI Controls */}
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center gap-3">
                          <div className="relative" ref={langRef}>
                             <button onClick={() => setIsLangOpen(!isLangOpen)} className="bg-emerald-800 text-xs border border-emerald-700 rounded-full px-3 py-1 uppercase font-bold hover:bg-emerald-700 transition-colors">
                                 {language}
@@ -142,7 +142,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                          </div>
 
                          {lightseed ? (
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center gap-3">
                                 <button onClick={onProfile} className="relative group">
                                     <img src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${lightseed.displayName}`} className="w-10 h-10 rounded-full border-2 border-white/20 shadow-md group-hover:border-white transition-all" />
                                     {hasNotification && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 border-2 border-emerald-900 rounded-full"></span>}
@@ -166,7 +166,7 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
 
             {/* Mobile Sidebar/Menu */}
             {isMenuOpen && (
-                <div className="lg:hidden bg-emerald-950 border-t border-emerald-800 py-6 px-4 space-y-3 animate-in slide-in-from-top-full">
+                <div className="lg:hidden bg-emerald-950 border-t border-emerald-800 py-6 px-4 flex flex-col gap-3 animate-in slide-in-from-top-full">
                     {lightseed && (
                         <div className="grid grid-cols-2 gap-3 mb-6">
                             {activeTab === 'visions' ? (

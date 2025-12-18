@@ -7,6 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Icons } from './ui/Icons';
 import { VisionCard } from './VisionCard';
 import { Modal } from './ui/Modal';
+import { Loading } from './ui/Loading';
 
 export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree, onViewVision, onPlant }: any) => {
     const { t } = useLanguage();
@@ -366,7 +367,7 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                             </div>
                         )}
                         {activeTab === 'pulses' && (
-                            loading ? <p className="text-center py-10 text-slate-400">Loading...</p> : (
+                            loading ? <div className="flex justify-center py-10"><Loading /></div> : (
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                     {pulses.length === 0 ? <p className="col-span-full text-slate-400 text-center py-10">No pulses emitted yet.</p> : pulses.map((pulse) => (
                                         <div key={pulse.id} className="border border-slate-100 rounded-lg overflow-hidden group">
@@ -389,7 +390,7 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                             )
                         )}
                          {activeTab === 'visions' && (
-                             loading ? <p className="text-center py-10 text-slate-400">Loading...</p> : (
+                             loading ? <div className="flex justify-center py-10"><Loading /></div> : (
                                 <div>
                                     <div className="flex justify-between items-center mb-6">
                                          <h3 className="text-lg font-bold">My Visions</h3>
@@ -451,7 +452,7 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                              )
                         )}
                         {activeTab === 'history' && (
-                             loading ? <p className="text-center py-10 text-slate-400">Loading...</p> : (
+                             loading ? <div className="flex justify-center py-10"><Loading /></div> : (
                                 <div className="space-y-4">
                                     {history.length === 0 ? <p className="text-slate-400 text-center py-10">No history yet.</p> : history.map((h) => (
                                         <div key={h.id} className="border border-slate-200 p-4 rounded-lg bg-slate-50 flex justify-between items-center">

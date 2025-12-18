@@ -41,7 +41,7 @@ export const PulseCard = ({ pulse, lightseed, onMatch, onView }: PulseCardProps)
             className={`bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 group cursor-pointer ${pulse.type === 'GROWTH' ? 'ring-2 ring-emerald-500 ring-opacity-20' : ''}`}
         >
              <div className="relative h-36 bg-slate-100 overflow-hidden group">
-                 <div className="absolute top-2 right-2 z-20 flex space-x-1">
+                 <div className="absolute top-2 right-2 z-20 flex gap-1">
                     {pulse.type === 'GROWTH' && <span className="bg-emerald-100 text-emerald-600 text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm">GROWTH</span>}
                     {pulse.isMatch && <span className="bg-sky-100 text-sky-600 text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm">MATCH</span>}
                  </div>
@@ -65,13 +65,13 @@ export const PulseCard = ({ pulse, lightseed, onMatch, onView }: PulseCardProps)
                     {pulse.body}
                 </p>
                 <div className="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center">
-                    <button onClick={handleLove} disabled={!lightseed} className="flex items-center space-x-1 text-slate-500 hover:text-red-500 transition-colors">
+                    <button onClick={handleLove} disabled={!lightseed} className="flex items-center gap-1 text-slate-500 hover:text-red-500 transition-colors">
                         <Icons.Heart filled={loved} />
                         <span className="text-xs">{count}</span>
                     </button>
 
                     {lightseed && lightseed.uid !== pulse.authorId && !pulse.isMatch && (
-                        <button onClick={handleMatchClick} className="text-[10px] bg-slate-50 text-slate-500 hover:bg-sky-50 hover:text-sky-600 px-2 py-1 rounded transition-colors flex items-center space-x-1">
+                        <button onClick={handleMatchClick} className="text-[10px] bg-slate-50 text-slate-500 hover:bg-sky-50 hover:text-sky-600 px-2 py-1 rounded transition-colors flex items-center gap-1">
                             <Icons.Link /> <span>Match</span>
                         </button>
                     )}

@@ -47,6 +47,7 @@ import { OracleChat } from './components/OracleChat';
 import { LightseedProfile } from './components/LightseedProfile';
 import { AboutPage } from './components/AboutPage';
 import { Dashboard } from './components/Dashboard';
+import { Loading } from './components/ui/Loading';
 
 const lifetreeImage = '/mother.jpg';
 
@@ -74,7 +75,7 @@ const GDPRBanner = () => {
                     We use cookies and local storage to ensure you get the best experience on lightseed. By continuing, you agree to our terms and privacy policy.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center gap-4">
-                    <label className="flex items-center space-x-2 text-sm text-slate-800 cursor-pointer select-none">
+                    <label className="flex items-center gap-2 text-sm text-slate-800 cursor-pointer select-none">
                         <input 
                             type="checkbox" 
                             checked={checked} 
@@ -485,7 +486,12 @@ const AppContent = () => {
 
     const searchSuggestions = Array.from(new Set(data.map((item: any) => item.title || item.name).filter(Boolean)));
 
-    if (authLoading) return <div className="h-screen w-full flex items-center justify-center bg-[#B2713A]"><Logo className="animate-pulse text-white" /></div>;
+    if (authLoading) return (
+        <div className="h-screen w-full flex items-center justify-center relative overflow-hidden">
+            <div className="absolute inset-0 z-0" style={backgroundStyle}></div>
+            <div className="relative z-10"><Loading /></div>
+        </div>
+    );
     
     const DetailWrapper = ({children}: {children?: React.ReactNode}) => (
         <div className="fixed inset-0 z-40 overflow-y-auto bg-slate-900/90 backdrop-blur-sm">
@@ -565,9 +571,10 @@ const AppContent = () => {
                                 <Icons.Search />
                             </div>
                             <input 
+                                dir="auto"
                                 type="text"
                                 list="search-suggestions"
-                                className="block w-full pl-10 pr-3 py-2 border border-emerald-700 rounded-lg leading-5 bg-[#B2713A]/80 backdrop-blur placeholder-slate-400 text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm shadow-sm"
+                                className="block w-full pl-10 pr-3 py-2 border border-emerald-700 rounded-lg leading-5 bg-[#B2713A]/80 backdrop-blur placeholder-slate-200 text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm shadow-sm"
                                 placeholder={t('search_placeholder')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -577,11 +584,11 @@ const AppContent = () => {
                             </datalist>
                         </div>
 
-                        <div className="flex items-center space-x-2 shrink-0">
+                        <div className="flex items-center gap-2 shrink-0">
                             {tab === 'forest' && myTrees.length > 0 && (
                                 <button 
                                     onClick={() => { setTreeType('GUARDED'); setShowPlantModal(true); }}
-                                    className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center space-x-2 transition-colors h-10"
+                                    className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center gap-2 transition-colors h-10"
                                 >
                                     <Icons.Shield />
                                     <span className="hidden sm:inline">{t('guard_tree')}</span>
@@ -635,8 +642,8 @@ const AppContent = () => {
 
                 {tab === 'forest' ? (
                     <>
-                         <div className="flex justify-center mb-6 space-x-3">
-                             <label className="flex items-center space-x-2 cursor-pointer bg-[#B2713A]/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 hover:bg-[#B2713A]/80 transition-colors shadow-sm">
+                         <div className="flex justify-center mb-6 gap-3">
+                             <label className="flex items-center gap-2 cursor-pointer bg-[#B2713A]/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 hover:bg-[#B2713A]/80 transition-colors shadow-sm">
                                 <input 
                                     type="checkbox" 
                                     checked={showNatureTrees} 
@@ -647,7 +654,7 @@ const AppContent = () => {
                                     <span className="mr-1"><Icons.Nature /></span> {t('nature')}
                                 </span>
                             </label>
-                            <label className="flex items-center space-x-2 cursor-pointer bg-[#B2713A]/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 hover:bg-[#B2713A]/80 transition-colors shadow-sm">
+                            <label className="flex items-center gap-2 cursor-pointer bg-[#B2713A]/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 hover:bg-[#B2713A]/80 transition-colors shadow-sm">
                                 <input 
                                     type="checkbox" 
                                     checked={showUserTrees} 
@@ -709,32 +716,34 @@ const AppContent = () => {
                     </div>
                 )}
 
-                {loadingMore && <div className="text-center py-4 text-emerald-300 text-sm animate-pulse">{t('loading')}</div>}
+                {loadingMore && <div className="flex justify-center py-4"><Loading /></div>}
             </main>
         );
     }
 
     return (
         <div className="min-h-screen relative font-sans text-slate-800">
-            <div className="fixed inset-0 z-[-1]" style={backgroundStyle}></div>
+            <div className="fixed inset-0 z-0" style={backgroundStyle}></div>
             
-            <Navigation 
-                lightseed={lightseed} 
-                activeTab={tab} 
-                setTab={setTab} 
-                onLogin={signInWithGoogle} 
-                onLogout={logout} 
-                onPlant={() => { setTreeType('LIFETREE'); setShowPlantModal(true); }} 
-                onPulse={() => setShowPulseModal(true)}
-                onCreateVision={() => setShowVisionModal(true)}
-                onProfile={() => setTab('profile')} 
-                pendingMatchesCount={matches.length}
-                myTreesCount={myTrees.length}
-                dangerTreesCount={guardedTrees.filter(t => t.status === 'DANGER').length}
-            />
-            
-            {renderMainContent()}
-            <GDPRBanner />
+            <div className="relative z-10">
+                <Navigation 
+                    lightseed={lightseed} 
+                    activeTab={tab} 
+                    setTab={setTab} 
+                    onLogin={signInWithGoogle} 
+                    onLogout={logout} 
+                    onPlant={() => { setTreeType('LIFETREE'); setShowPlantModal(true); }} 
+                    onPulse={() => setShowPulseModal(true)}
+                    onCreateVision={() => setShowVisionModal(true)}
+                    onProfile={() => setTab('profile')} 
+                    pendingMatchesCount={matches.length}
+                    myTreesCount={myTrees.length}
+                    dangerTreesCount={guardedTrees.filter(t => t.status === 'DANGER').length}
+                />
+                
+                {renderMainContent()}
+                <GDPRBanner />
+            </div>
 
             {selectedTree && (
                 <DetailWrapper>
@@ -775,7 +784,7 @@ const AppContent = () => {
                     onClose={() => setShowPlantModal(false)}
                     backgroundImage={treeType !== 'GUARDED' ? lifetreeImage : undefined}
                 >
-                    <form onSubmit={handlePlant} className="space-y-4 pb-12">
+                    <form onSubmit={handlePlant} className="flex flex-col gap-4 pb-12">
                         <ImagePicker 
                             onChange={(e: any) => handleImageUpload(e.target.files[0], `trees/${Date.now()}`).then(setTreeImageUrl)} 
                             previewUrl={treeImageUrl} 
@@ -795,7 +804,7 @@ const AppContent = () => {
                                     key={type.id}
                                     type="button"
                                     onClick={() => setTreeType(type.id)}
-                                    className={`flex items-center justify-center space-x-2 py-2 rounded-lg text-xs font-bold uppercase transition-all border ${
+                                    className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold uppercase transition-all border ${
                                         treeType === type.id 
                                             ? 'bg-emerald-600 text-white border-emerald-500 shadow-md' 
                                             : treeType !== 'GUARDED' 
@@ -809,17 +818,18 @@ const AppContent = () => {
                             ))}
                         </div>
 
-                        <input className="block w-full border p-2 rounded bg-white/90 focus:bg-white transition-colors" placeholder={`Tree Name (Default: ${lightseed?.displayName || 'Anonymous'})`} value={treeName} onChange={e=>setTreeName(e.target.value)} />
-                        <input className="block w-full border p-2 rounded bg-white/90 focus:bg-white transition-colors" placeholder={t('short_title')} value={treeShortTitle} onChange={e=>setTreeShortTitle(e.target.value)} />
+                        <input dir="auto" className="block w-full border p-2 rounded bg-white/90 focus:bg-white transition-colors" placeholder={`Tree Name (Default: ${lightseed?.displayName || 'Anonymous'})`} value={treeName} onChange={e=>setTreeName(e.target.value)} />
+                        <input dir="auto" className="block w-full border p-2 rounded bg-white/90 focus:bg-white transition-colors" placeholder={t('short_title')} value={treeShortTitle} onChange={e=>setTreeShortTitle(e.target.value)} />
                         
                         {treeType !== 'GUARDED' && (
                             <div className="flex gap-2">
-                                <input className="flex-1 border p-2 rounded bg-white/90 focus:bg-white transition-colors" placeholder="Seed keywords" value={treeSeed} onChange={e=>setTreeSeed(e.target.value)} />
+                                <input dir="auto" className="flex-1 border p-2 rounded bg-white/90 focus:bg-white transition-colors" placeholder="Seed keywords" value={treeSeed} onChange={e=>setTreeSeed(e.target.value)} />
                                 <button type="button" onClick={() => generateLifetreeBio(treeSeed).then(setTreeBio)} disabled={uploading} className="bg-emerald-600 text-white px-4 rounded disabled:opacity-50 font-bold text-xs shadow-md">AI</button>
                             </div>
                         )}
                         
                         <textarea 
+                            dir="auto"
                             className="block w-full border p-2 rounded bg-white/90 focus:bg-white transition-colors min-h-[100px]" 
                             placeholder={treeType === 'GUARDED' ? "Description" : "Vision"} 
                             value={treeBio} 
@@ -836,8 +846,8 @@ const AppContent = () => {
 
             {showVisionModal && (
                 <Modal title={t('create_vision')} onClose={() => setShowVisionModal(false)}>
-                    <form onSubmit={handleCreateVision} className="space-y-4">
-                         <div className="border border-slate-200 p-4 rounded-xl text-center space-y-2">
+                    <form onSubmit={handleCreateVision} className="flex flex-col gap-4">
+                         <div className="border border-slate-200 p-4 rounded-xl text-center flex flex-col gap-2">
                              {visionImageUrl ? (
                                  <img src={visionImageUrl} className="w-full h-40 object-cover rounded-lg" />
                              ) : (
@@ -852,9 +862,9 @@ const AppContent = () => {
                              </div>
                          </div>
 
-                        <input className="block w-full border p-2 rounded" placeholder={t('title')} value={visionTitle} onChange={e=>setVisionTitle(e.target.value)} required />
-                        <textarea className="block w-full border p-2 rounded h-24" placeholder={t('body')} value={visionBody} onChange={e=>setVisionBody(e.target.value)} required />
-                        <input className="block w-full border p-2 rounded" placeholder={t('webpage')} value={visionLink} onChange={e=>setVisionLink(e.target.value)} />
+                        <input dir="auto" className="block w-full border p-2 rounded" placeholder={t('title')} value={visionTitle} onChange={e=>setVisionTitle(e.target.value)} required />
+                        <textarea dir="auto" className="block w-full border p-2 rounded h-24" placeholder={t('body')} value={visionBody} onChange={e=>setVisionBody(e.target.value)} required />
+                        <input dir="auto" className="block w-full border p-2 rounded" placeholder={t('webpage')} value={visionLink} onChange={e=>setVisionLink(e.target.value)} />
                         
                         <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-amber-500 text-white py-2 rounded font-bold hover:bg-amber-600 transition-colors disabled:opacity-50">
                              {isSubmitting ? t('creating') : t('create_vision')}
@@ -865,7 +875,7 @@ const AppContent = () => {
 
             {showPulseModal && (
                 <Modal title={matchCandidate ? t('propose_match') : t('emit_pulse')} onClose={() => { setShowPulseModal(false); setMatchCandidate(null); }}>
-                    <form onSubmit={matchCandidate ? initiateMatch : handleEmitPulse} className="space-y-4">
+                    <form onSubmit={matchCandidate ? initiateMatch : handleEmitPulse} className="flex flex-col gap-4">
                         {matchCandidate ? (
                              <div className="bg-sky-50 p-4 rounded text-sky-800">
                                 {t('matching_with')} <strong>{matchCandidate.title}</strong>. 
@@ -874,12 +884,12 @@ const AppContent = () => {
                         ) : (
                             <>
                                 <ImagePicker onChange={(e: any) => handleImageUpload(e.target.files[0], `pulses/${Date.now()}`).then(setPulseImageUrl)} previewUrl={pulseImageUrl} loading={uploading} />
-                                <div className="flex items-center space-x-2">
+                                <div className="flex items-center gap-2">
                                     <input type="checkbox" id="growth" checked={isGrowth} onChange={e => setIsGrowth(e.target.checked)} className="rounded text-emerald-600 focus:ring-emerald-500" />
                                     <label htmlFor="growth" className="text-sm font-medium text-slate-700">{t('internal_pulse')}</label>
                                 </div>
-                                <input className="block w-full border p-2 rounded" placeholder={t('title')} value={pulseTitle} onChange={e=>setPulseTitle(e.target.value)} required />
-                                <textarea className="block w-full border p-2 rounded" placeholder={t('body')} value={pulseBody} onChange={e=>setPulseBody(e.target.value)} required />
+                                <input dir="auto" className="block w-full border p-2 rounded" placeholder={t('title')} value={pulseTitle} onChange={e=>setPulseTitle(e.target.value)} required />
+                                <textarea dir="auto" className="block w-full border p-2 rounded" placeholder={t('body')} value={pulseBody} onChange={e=>setPulseBody(e.target.value)} required />
                             </>
                         )}
                         <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-emerald-600 text-white py-2 rounded disabled:opacity-50">

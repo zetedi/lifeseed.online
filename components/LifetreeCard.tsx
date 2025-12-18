@@ -42,7 +42,7 @@ export const LifetreeCard = ({ tree, myActiveTree, currentUserId, onValidate, on
             onClick={() => onView(tree)}
             className={`bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 group relative cursor-pointer ${tree.isNature ? 'ring-1 ring-sky-100' : (tree.validated ? 'ring-1 ring-emerald-100' : '')}`}
         >
-             <div className="absolute top-2 right-2 z-20 flex flex-col items-end space-y-1">
+             <div className="absolute top-2 right-2 z-20 flex flex-col items-end gap-1">
                 {tree.isNature ? (
                     <span className="bg-sky-100 text-sky-800 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center shadow-sm">
                         <Icons.Shield />
@@ -68,7 +68,7 @@ export const LifetreeCard = ({ tree, myActiveTree, currentUserId, onValidate, on
                      <button 
                         onClick={triggerUpload} 
                         disabled={uploading}
-                        className="flex items-center space-x-1.5 bg-white/95 text-slate-800 px-2.5 py-1 rounded-full shadow-md hover:bg-white hover:text-emerald-700 transition-all active:scale-95"
+                        className="flex items-center gap-1.5 bg-white/95 text-slate-800 px-2.5 py-1 rounded-full shadow-md hover:bg-white hover:text-emerald-700 transition-all active:scale-95"
                     >
                         {uploading ? <div className="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div> : <Icons.Camera />}
                         <span className="text-[10px] font-bold uppercase tracking-wider hidden sm:inline">{t('quick_snap')}</span>
@@ -98,7 +98,7 @@ export const LifetreeCard = ({ tree, myActiveTree, currentUserId, onValidate, on
                 <div className="absolute bottom-2 left-3 right-3 text-white pointer-events-none">
                     <h3 dir="auto" className="text-lg font-light tracking-wide truncate">{tree.name}</h3>
                     {tree.shortTitle && <p dir="auto" className="text-xs font-bold text-emerald-200 uppercase tracking-widest truncate">{tree.shortTitle}</p>}
-                    <div className="flex items-center text-xs text-slate-300 mt-0.5 space-x-2 rtl:space-x-reverse">
+                    <div className="flex items-center text-xs text-slate-300 mt-0.5 gap-2 rtl:space-x-reverse">
                          {!tree.isNature && <span className="px-1.5 py-0 border border-slate-500 rounded-full text-[9px] bg-slate-800/50 backdrop-blur">
                             {t('block')}: {tree.blockHeight || 0}
                         </span>}
@@ -113,12 +113,12 @@ export const LifetreeCard = ({ tree, myActiveTree, currentUserId, onValidate, on
                     "{tree.body}"
                 </p>
                 <div className="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center">
-                    <button onClick={(e) => { e.stopPropagation(); onPlayGrowth(tree.id); }} className="flex items-center space-x-1 text-[10px] bg-slate-50 hover:bg-slate-100 text-slate-500 px-2 py-1 rounded transition-colors uppercase tracking-wider font-semibold">
+                    <button onClick={(e) => { e.stopPropagation(); onPlayGrowth(tree.id); }} className="flex items-center gap-1 text-[10px] bg-slate-50 hover:bg-slate-100 text-slate-500 px-2 py-1 rounded transition-colors uppercase tracking-wider font-semibold">
                         <Icons.Play />
                         <span>Growth</span>
                     </button>
                     
-                    <div className="flex space-x-2">
+                    <div className="flex gap-2">
                         {myActiveTree && myActiveTree.validated && !tree.validated && myActiveTree.id !== tree.id && !tree.isNature && (
                             <button onClick={(e) => { e.stopPropagation(); onValidate(tree.id); }} className="text-[10px] bg-emerald-600 text-white px-3 py-1.5 rounded-full shadow hover:bg-emerald-700 transition-colors uppercase font-bold tracking-wider animate-pulse">
                                 {t('validate_action')}

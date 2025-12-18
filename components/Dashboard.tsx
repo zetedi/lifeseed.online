@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { generateOracleQuote } from '../services/gemini';
 import { getNetworkStats } from '../services/firebase';
@@ -32,10 +32,15 @@ const GenesisSymbol = () => (
     </div>
 );
 
+// Fallback SVG image
+const lifetreeImage = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3E%3Cdefs%3E%3CradialGradient id='g' cx='50%25' cy='50%25' r='60%25'%3E%3Cstop offset='0%25' stop-color='%23d1fae5'/%3E%3Cstop offset='100%25' stop-color='%23047857'/%3E%3C/radialGradient%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='8' result='coloredBlur'/%3E%3CfeMerge%3E%3CfeMergeNode in='coloredBlur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23g)'/%3E%3Cg opacity='0.3'%3E%3Ccircle cx='400' cy='400' r='350' fill='none' stroke='%23fff' stroke-width='1'/%3E%3Ccircle cx='400' cy='400' r='250' fill='none' stroke='%23fff' stroke-width='1'/%3E%3Cpath d='M400 50 L400 750 M50 400 L750 400' stroke='%23fff' stroke-width='1' stroke-dasharray='10 10'/%3E%3C/g%3E%3Cpath d='M400 800 C 350 700 300 650 400 550 C 500 650 450 700 400 800' fill='%235d4037' opacity='0.8'/%3E%3Cg transform='translate(0,-50)'%3E%3Ccircle cx='400' cy='400' r='160' fill='%2310b981'/%3E%3Ccircle cx='300' cy='350' r='100' fill='%2334d399' opacity='0.9'/%3E%3Ccircle cx='500' cy='350' r='100' fill='%2334d399' opacity='0.9'/%3E%3Ccircle cx='400' cy='250' r='120' fill='%23059669' opacity='0.9'/%3E%3Ccircle cx='250' cy='450' r='80' fill='%236ee7b7' opacity='0.8'/%3E%3Ccircle cx='550' cy='450' r='80' fill='%236ee7b7' opacity='0.8'/%3E%3C/g%3E%3Cg filter='url(%23glow)'%3E%3Ccircle cx='400' cy='350' r='15' fill='%23fcd34d'/%3E%3Ccircle cx='320' cy='300' r='12' fill='%23fcd34d' opacity='0.8'/%3E%3Ccircle cx='480' cy='300' r='12' fill='%23fcd34d' opacity='0.8'/%3E%3Ccircle cx='280' cy='420' r='10' fill='%23fbbf24' opacity='0.8'/%3E%3Ccircle cx='520' cy='420' r='10' fill='%23fbbf24' opacity='0.8'/%3E%3Ccircle cx='400' cy='220' r='18' fill='%23fff' opacity='0.9'/%3E%3C/g%3E%3Cpath d='M400 350 L 320 300 M 400 350 L 480 300 M 400 350 L 400 220' stroke='%23fff' stroke-width='2' opacity='0.4'/%3E%3C/svg%3E`;
+
 export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant, onLogin }: DashboardProps) => {
     const { t } = useLanguage();
     const [quote, setQuote] = useState<string>("Loading Oracle...");
     const [networkStats, setNetworkStats] = useState({ trees: 0, pulses: 0, visions: 0 });
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [videoEnded, setVideoEnded] = useState(false);
 
     useEffect(() => {
         // Lazy load the quote
@@ -43,6 +48,15 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
         // Fetch global stats
         getNetworkStats().then(setNetworkStats);
     }, []);
+
+    const handleReplay = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (videoRef.current) {
+            videoRef.current.currentTime = 0;
+            videoRef.current.play();
+            setVideoEnded(false);
+        }
+    };
 
     return (
         <div className="grid grid-cols-2 gap-3 sm:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -83,8 +97,8 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
                     )}
                     
                     {stats.danger > 0 && (
-                        <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-full animate-pulse shadow-lg flex items-center gap-1 whitespace-nowrap z-20 border-2 border-white/20">
-                            <Icons.Siren /> {stats.danger} TREE{stats.danger > 1 ? 'S' : ''} IN DANGER
+                        <div className="absolute bottom-2 right-2 bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-full animate-pulse shadow-lg flex items-center gap-1 whitespace-nowrap z-20 border-2 border-white/20">
+                            <Icons.Siren /> {stats.danger} {t('guard_tree')}!
                         </div>
                     )}
                 </div>
@@ -92,15 +106,29 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
 
             {/* Box 2: Plant a Lifetree */}
             <div onClick={() => { if (!lightseed) onLogin(); else if (stats.trees === 0) onPlant(); else onSetTab('forest'); }} className="relative h-48 md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
+                <img src={lifetreeImage} className="absolute inset-0 w-full h-full object-cover" alt="Lifetree" />
                 <video 
+                    ref={videoRef}
                     src="/planting.mp4" 
                     autoPlay 
-                    loop 
                     muted 
                     playsInline 
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform opacity-90" 
+                    onEnded={() => setVideoEnded(true)}
+                    className={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform opacity-90`}
                 />
-                <div className="absolute inset-0 bg-black/10"></div>
+                <div className={`absolute inset-0 bg-black/10 ${videoEnded ? 'bg-black/40' : ''} transition-colors`}></div>
+                
+                {videoEnded && (
+                    <div className="absolute top-2 right-2 z-20">
+                        <button 
+                            onClick={handleReplay}
+                            className="bg-white/20 hover:bg-white/40 text-white p-2 rounded-full backdrop-blur-md transition-all hover:scale-110 shadow-lg border border-white/30"
+                        >
+                            <Icons.Refresh />
+                        </button>
+                    </div>
+                )}
+
                 <div className="relative h-full p-4 flex flex-col justify-between text-white">
                     <div className="flex justify-between items-start">
                         <h2 className="text-sm sm:text-lg font-bold uppercase tracking-widest text-white drop-shadow-md">{t('be_mother_tree')}</h2>
@@ -122,7 +150,7 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
                              <GenesisSymbol />
                         </div>
                     </div>
-                    <p className="text-xs sm:text-base italic leading-relaxed line-clamp-4 opacity-90 font-serif drop-shadow-sm">
+                    <p dir="auto" className="text-xs sm:text-base italic leading-relaxed line-clamp-4 opacity-90 font-serif drop-shadow-sm">
                         {quote}
                     </p>
                 </div>
