@@ -101,7 +101,7 @@ const SymbolCard = ({ title, description, type, link }: { title: string, descrip
     </div>
 );
 
-export const AboutPage = () => {
+export const AboutPage = ({ onClose }: { onClose: () => void }) => {
     const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState<'vision' | 'phoenix' | 'sun' | 'path' | 'yantra'>('vision');
     const [showSubModal, setShowSubModal] = useState(false);
@@ -131,22 +131,30 @@ export const AboutPage = () => {
 
     return (
         <div className="min-h-screen pb-20 bg-[#FDFCFB]">
+            {/* View Page Style Sticky Header */}
+            <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 py-4 flex items-center justify-between">
+                <button onClick={onClose} className="flex items-center space-x-2 text-slate-600 hover:text-slate-900 font-medium">
+                    <Icons.ArrowLeft />
+                    <span>{t('back')}</span>
+                </button>
+            </div>
+
             {/* Header with Bigger Logo & Less Space */}
             <div className="bg-purple-900 text-white pt-8 pb-12 px-4 relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('/bg-noise.png')] opacity-10"></div>
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <div className="flex justify-center mb-4">
-                        {/* Increased Logo size, reduced padding around it */}
-                        <div className="bg-white/10 p-2 rounded-full backdrop-blur-sm">
+                        {/* Increased Logo size, reduced padding around it. Clickable to go home. */}
+                        <button onClick={onClose} className="bg-white/10 p-2 rounded-full backdrop-blur-sm hover:bg-white/20 transition-colors cursor-pointer active:scale-95">
                             <Logo width={100} height={100} />
-                        </div>
+                        </button>
                     </div>
                     <h1 className="text-3xl font-light tracking-[0.2em] uppercase text-purple-100">.seed</h1>
                 </div>
             </div>
 
-            {/* Navigation Tabs */}
-            <div className="sticky top-0 z-40 bg-[#FDFCFB]/95 backdrop-blur border-b border-slate-200 shadow-sm">
+            {/* Navigation Tabs - Top adjusted for sticky header */}
+            <div className="sticky top-[68px] z-40 bg-[#FDFCFB]/95 backdrop-blur border-b border-slate-200 shadow-sm">
                 <div className="max-w-5xl mx-auto px-0 md:px-4">
                     <div className="flex overflow-x-auto no-scrollbar md:justify-center">
                         {tabs.map(tab => (

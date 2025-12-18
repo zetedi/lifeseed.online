@@ -5,7 +5,7 @@ import { Icons } from './ui/Icons';
 import Logo from './Logo';
 import { updateLifetree, toggleGuardianship, setTreeStatus } from '../services/firebase';
 
-export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActiveTree, currentUserId }: any) => {
+export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpdate, myActiveTree, currentUserId }: any) => {
    const { t } = useLanguage();
    const isOwner = currentUserId === tree.ownerId;
    const isNature = tree.isNature;
@@ -26,13 +26,15 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
    const handleSave = async () => {
        setIsSaving(true);
        try {
-           await updateLifetree(tree.id, {
+           const updates = {
                name: editName,
                shortTitle: editShortTitle,
                body: editBody,
                latitude: Number(editLat),
                longitude: Number(editLng)
-           });
+           };
+           await updateLifetree(tree.id, updates);
+           if (onUpdate) onUpdate(updates);
            setIsEditing(false);
        } catch (e) {
            console.error(e);
@@ -45,8 +47,17 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
        if (!currentUserId) return;
        setIsSaving(true);
        try {
-           await toggleGuardianship(tree.id, currentUserId, !localIsGuardian);
-           setLocalIsGuardian(!localIsGuardian);
+           const isJoining = !localIsGuardian;
+           await toggleGuardianship(tree.id, currentUserId, isJoining);
+           setLocalIsGuardian(isJoining);
+           
+           if (onUpdate) {
+               const currentGuardians = tree.guardians || [];
+               const newGuardians = isJoining 
+                   ? [...currentGuardians, currentUserId]
+                   : currentGuardians.filter((id: string) => id !== currentUserId);
+               onUpdate({ guardians: newGuardians });
+           }
        } catch(e: any) { alert(e.message); }
        setIsSaving(false);
    }
@@ -60,6 +71,7 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, myActi
        try {
            await setTreeStatus(tree.id, newStatus);
            setLocalStatus(newStatus);
+           if (onUpdate) onUpdate({ status: newStatus });
        } catch(e: any) { alert(e.message); }
        setIsSaving(false);
    }

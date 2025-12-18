@@ -247,6 +247,14 @@ const AppContent = () => {
         setLoadingMore(false);
     };
 
+    const handleTreeUpdate = (treeId: string, updates: any) => {
+        setData(prev => prev.map(item => item.id === treeId ? { ...item, ...updates } : item));
+        if (selectedTree?.id === treeId) {
+            setSelectedTree(prev => prev ? { ...prev, ...updates } : null);
+        }
+        refreshTrees();
+    };
+
     const handleImageUpload = async (file: File, path: string) => {
         setUploading(true);
         const url = await uploadImage(file, path);
@@ -535,7 +543,7 @@ const AppContent = () => {
         }
         
         if (tab === 'about') {
-            return <AboutPage />;
+            return <AboutPage onClose={() => setTab('dashboard')} />;
         }
 
         return (
@@ -726,20 +734,22 @@ const AppContent = () => {
             <div className="fixed inset-0 z-0" style={backgroundStyle}></div>
             
             <div className="relative z-10">
-                <Navigation 
-                    lightseed={lightseed} 
-                    activeTab={tab} 
-                    setTab={setTab} 
-                    onLogin={signInWithGoogle} 
-                    onLogout={logout} 
-                    onPlant={() => { setTreeType('LIFETREE'); setShowPlantModal(true); }} 
-                    onPulse={() => setShowPulseModal(true)}
-                    onCreateVision={() => setShowVisionModal(true)}
-                    onProfile={() => setTab('profile')} 
-                    pendingMatchesCount={matches.length}
-                    myTreesCount={myTrees.length}
-                    dangerTreesCount={guardedTrees.filter(t => t.status === 'DANGER').length}
-                />
+                {tab !== 'about' && (
+                    <Navigation 
+                        lightseed={lightseed} 
+                        activeTab={tab} 
+                        setTab={setTab} 
+                        onLogin={signInWithGoogle} 
+                        onLogout={logout} 
+                        onPlant={() => { setTreeType('LIFETREE'); setShowPlantModal(true); }} 
+                        onPulse={() => setShowPulseModal(true)}
+                        onCreateVision={() => setShowVisionModal(true)}
+                        onProfile={() => setTab('profile')} 
+                        pendingMatchesCount={matches.length}
+                        myTreesCount={myTrees.length}
+                        dangerTreesCount={guardedTrees.filter(t => t.status === 'DANGER').length}
+                    />
+                )}
                 
                 {renderMainContent()}
                 <GDPRBanner />
@@ -752,6 +762,7 @@ const AppContent = () => {
                         onClose={() => setSelectedTree(null)} 
                         onPlayGrowth={setShowGrowthPlayer}
                         onValidate={(id: string) => validateLifetree(id, activeTree!.id).then(() => { alert("Validated!"); setSelectedTree(null); loadContent(true); })}
+                        onUpdate={(updates: Partial<Lifetree>) => handleTreeUpdate(selectedTree.id, updates)}
                         myActiveTree={activeTree}
                         currentUserId={lightseed?.uid}
                     />
@@ -839,35 +850,6 @@ const AppContent = () => {
                         
                         <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold uppercase tracking-widest shadow-lg active:scale-95 transition-all mt-4 mb-4">
                             {isSubmitting ? t('planting') : t('plant_lifetree')}
-                        </button>
-                    </form>
-                </Modal>
-            )}
-
-            {showVisionModal && (
-                <Modal title={t('create_vision')} onClose={() => setShowVisionModal(false)}>
-                    <form onSubmit={handleCreateVision} className="flex flex-col gap-4">
-                         <div className="border border-slate-200 p-4 rounded-xl text-center flex flex-col gap-2">
-                             {visionImageUrl ? (
-                                 <img src={visionImageUrl} className="w-full h-40 object-cover rounded-lg" />
-                             ) : (
-                                 <div className="text-slate-400 h-40 flex items-center justify-center bg-slate-50 rounded-lg">No Image</div>
-                             )}
-                             <div className="flex gap-2 justify-center">
-                                 <div className="relative overflow-hidden">
-                                    <button type="button" className="text-sm text-slate-500 hover:text-slate-800 px-3 py-1 border rounded">{t('upload_photo')}</button>
-                                    <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => { if(e.target.files?.[0]) handleImageUpload(e.target.files[0], `visions/${Date.now()}`).then(setVisionImageUrl) }} />
-                                 </div>
-                                 <button type="button" onClick={handleGenerateVisionImage} disabled={uploading} className="text-sm bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600 disabled:opacity-50">{t('generate_image')}</button>
-                             </div>
-                         </div>
-
-                        <input dir="auto" className="block w-full border p-2 rounded" placeholder={t('title')} value={visionTitle} onChange={e=>setVisionTitle(e.target.value)} required />
-                        <textarea dir="auto" className="block w-full border p-2 rounded h-24" placeholder={t('body')} value={visionBody} onChange={e=>setVisionBody(e.target.value)} required />
-                        <input dir="auto" className="block w-full border p-2 rounded" placeholder={t('webpage')} value={visionLink} onChange={e=>setVisionLink(e.target.value)} />
-                        
-                        <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-amber-500 text-white py-2 rounded font-bold hover:bg-amber-600 transition-colors disabled:opacity-50">
-                             {isSubmitting ? t('creating') : t('create_vision')}
                         </button>
                     </form>
                 </Modal>
