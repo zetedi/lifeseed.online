@@ -5,9 +5,8 @@ import { Icons } from './ui/Icons';
 import Logo from './Logo';
 import { updateLifetree, toggleGuardianship, setTreeStatus, getPulsesByTreeId } from '../services/firebase';
 import { Pulse } from '../types';
-import { PulseDetail } from './PulseDetail';
 
-export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpdate, onPulse, myActiveTree, currentUserId }: any) => {
+export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpdate, onCreatePulse, onViewPulse, myActiveTree, currentUserId }: any) => {
    const { t } = useLanguage();
    const isOwner = currentUserId === tree.ownerId;
    const isNature = tree.isNature;
@@ -26,7 +25,6 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
    const [genesisBlock, setGenesisBlock] = useState<Pulse | null>(null);
    const [growthBlocks, setGrowthBlocks] = useState<Pulse[]>([]);
    const [loadingChain, setLoadingChain] = useState(false);
-   const [selectedPulse, setSelectedPulse] = useState<Pulse | null>(null);
    
    // Local state for immediate UI feedback on actions
    const [localIsGuardian, setLocalIsGuardian] = useState(isGuardian);
@@ -368,7 +366,7 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                             {/* Action Button at the Top */}
                             {isOwner && (
                                 <button 
-                                    onClick={onPulse}
+                                    onClick={onCreatePulse}
                                     className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-full font-bold uppercase tracking-widest shadow-lg shadow-emerald-200 transition-transform active:scale-95 flex items-center gap-2 mb-8 animate-in fade-in zoom-in slide-in-from-top-4 duration-700"
                                 >
                                     <Icons.HeartPulse />
@@ -396,7 +394,7 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
 
                                                 {/* Leaf Card */}
                                                 <div 
-                                                    onClick={() => setSelectedPulse(pulse)}
+                                                    onClick={() => onViewPulse(pulse)}
                                                     className={`
                                                         relative bg-white border-2 border-emerald-100 shadow-sm hover:shadow-xl hover:border-emerald-300 
                                                         transition-all cursor-pointer group w-full max-w-sm
@@ -460,12 +458,6 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                     </div>
                 )}
             </div>
-
-            {selectedPulse && (
-                <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/90 backdrop-blur-sm">
-                    <PulseDetail pulse={selectedPulse} onClose={() => setSelectedPulse(null)} />
-                </div>
-            )}
         </div>
     )
 };

@@ -240,7 +240,7 @@ export const ensureGenesis = async () => {
                 validated: true, validatorId: 'SYSTEM', isNature: true
             });
             await setDoc(doc(db, 'visions', 'GENESIS_VISION'), {
-                lifetreeId: genesisId, authorId: 'GENESIS_SYSTEM', title: "Mahameru", body: genesisBody, createdAt: serverTimestamp()
+                lifetreeId: genesisId, authorId: 'GENESIS_SYSTEM', title: "Mahameru", body: genesisBody, createdAt: serverTimestamp(), joinedUserIds: []
             });
         }
     } catch (e) { console.warn("Genesis skip", e); }
@@ -273,7 +273,7 @@ export const plantLifetree = async (data: any) => {
         validated: true, validatorId: "SYSTEM", guardians: [], status: 'HEALTHY'
     });
     await addDoc(visionsCollection, {
-        lifetreeId: treeDoc.id, authorId: data.ownerId, title: "Root Vision", body: data.body, createdAt: serverTimestamp()
+        lifetreeId: treeDoc.id, authorId: data.ownerId, title: "Root Vision", body: data.body, createdAt: serverTimestamp(), joinedUserIds: []
     });
     return treeDoc;
 };
@@ -302,8 +302,12 @@ export const fetchVisions = async (lastD?: QueryDocumentSnapshot) => {
 }
 
 export const getMyVisions = async (uid: string) => (await getDocs(query(visionsCollection, where('authorId', '==', uid)))).docs.map(d => ({ id: d.id, ...d.data() } as Vision));
-export const createVision = (data: any) => addDoc(visionsCollection, { ...data, createdAt: serverTimestamp() });
+export const getJoinedVisions = async (uid: string) => (await getDocs(query(visionsCollection, where('joinedUserIds', 'array-contains', uid)))).docs.map(d => ({ id: d.id, ...d.data() } as Vision));
+
+export const createVision = (data: any) => addDoc(visionsCollection, { ...data, createdAt: serverTimestamp(), joinedUserIds: [] });
 export const deleteVision = (id: string) => deleteDoc(doc(db, 'visions', id));
+export const joinVision = (id: string, uid: string) => updateDoc(doc(db, 'visions', id), { joinedUserIds: arrayUnion(uid) });
+export const leaveVision = (id: string, uid: string) => updateDoc(doc(db, 'visions', id), { joinedUserIds: arrayRemove(uid) });
 
 export const fetchPulses = async (lastD?: QueryDocumentSnapshot) => {
     let q = query(pulsesCollection, orderBy('createdAt', 'desc'), limit(12));

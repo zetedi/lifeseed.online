@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Vision } from '../types';
 import { Icons } from './ui/Icons';
 import { useLanguage } from '../contexts/LanguageContext';
+import { joinVision, leaveVision } from '../services/firebase';
 
 interface VisionDetailProps {
     vision: Vision;
@@ -16,6 +17,38 @@ export const VisionDetail = ({ vision, onClose, currentUserId, onDelete }: Visio
     
     const isAuthor = currentUserId === vision.authorId;
     const isRoot = vision.title.toLowerCase() === 'root vision';
+    
+    // Manage local joined state for immediate UI feedback
+    const [isJoined, setIsJoined] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [participantCount, setParticipantCount] = useState(0);
+
+    useEffect(() => {
+        if (currentUserId && vision.joinedUserIds) {
+            setIsJoined(vision.joinedUserIds.includes(currentUserId));
+            setParticipantCount(vision.joinedUserIds.length);
+        }
+    }, [vision, currentUserId]);
+
+    const handleJoinToggle = async () => {
+        if (!currentUserId || isUpdating) return;
+        setIsUpdating(true);
+        
+        try {
+            if (isJoined) {
+                await leaveVision(vision.id, currentUserId);
+                setIsJoined(false);
+                setParticipantCount(prev => Math.max(0, prev - 1));
+            } else {
+                await joinVision(vision.id, currentUserId);
+                setIsJoined(true);
+                setParticipantCount(prev => prev + 1);
+            }
+        } catch (e: any) {
+            alert("Action failed: " + e.message);
+        }
+        setIsUpdating(false);
+    }
 
     return (
         <div className="min-h-screen animate-in fade-in zoom-in-95 duration-300 pb-20">
@@ -26,15 +59,28 @@ export const VisionDetail = ({ vision, onClose, currentUserId, onDelete }: Visio
                     <span>{t('back')}</span>
                 </button>
                 
-                {isAuthor && !isRoot && onDelete && (
-                    <button 
-                        onClick={() => onDelete(vision.id)}
-                        className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-full font-bold text-xs shadow-sm transition-all border border-red-200 flex items-center gap-1 active:scale-95"
-                    >
-                        <Icons.Trash />
-                        <span>Delete Vision</span>
-                    </button>
-                )}
+                <div className="flex gap-2">
+                    {currentUserId && !isAuthor && (
+                        <button 
+                            onClick={handleJoinToggle}
+                            disabled={isUpdating}
+                            className={`px-4 py-2 rounded-full font-bold text-xs shadow-sm transition-all border flex items-center gap-1 active:scale-95 ${isJoined ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-amber-500 hover:bg-amber-600 text-white border-amber-600'}`}
+                        >
+                            <Icons.SparkleFill />
+                            <span>{isJoined ? 'Joined' : 'Join Vision'}</span>
+                        </button>
+                    )}
+
+                    {isAuthor && !isRoot && onDelete && (
+                        <button 
+                            onClick={() => onDelete(vision.id)}
+                            className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-full font-bold text-xs shadow-sm transition-all border border-red-200 flex items-center gap-1 active:scale-95"
+                        >
+                            <Icons.Trash />
+                            <span>Delete Vision</span>
+                        </button>
+                    )}
+                </div>
                 
                 {isAuthor && isRoot && (
                     <div className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-[10px] font-bold border border-emerald-100 flex items-center gap-1">
@@ -42,8 +88,6 @@ export const VisionDetail = ({ vision, onClose, currentUserId, onDelete }: Visio
                         <span>ROOT ANCHOR</span>
                     </div>
                 )}
-
-                <div className="w-8"></div>
             </div>
 
             <div className="max-w-3xl mx-auto p-6 space-y-6">
@@ -58,8 +102,13 @@ export const VisionDetail = ({ vision, onClose, currentUserId, onDelete }: Visio
                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                      <div className="absolute bottom-6 left-6 right-6 text-white">
                          <h1 dir="auto" className="text-4xl md:text-5xl font-light tracking-tight mb-2">{vision.title}</h1>
-                         <div className="flex items-center space-x-2 text-white/80 text-sm">
+                         <div className="flex items-center space-x-4 text-white/80 text-sm">
                              <span>Created by {vision.authorId.substring(0,6)}...</span>
+                             {participantCount > 0 && (
+                                <span className="flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded-full text-xs backdrop-blur-sm">
+                                    <Icons.Globe /> {participantCount} joined
+                                </span>
+                             )}
                          </div>
                      </div>
                  </div>

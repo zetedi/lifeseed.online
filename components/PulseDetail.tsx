@@ -4,7 +4,13 @@ import { Pulse } from '../types';
 import { Icons } from './ui/Icons';
 import Logo from './Logo';
 
-export const PulseDetail = ({ pulse, onClose }: { pulse: Pulse; onClose: () => void }) => {
+interface PulseDetailProps {
+    pulse: Pulse;
+    onClose: () => void;
+    backLabel?: string;
+}
+
+export const PulseDetail = ({ pulse, onClose, backLabel = "Back" }: PulseDetailProps) => {
     // Mock Exchange State
     const [swapAmount, setSwapAmount] = useState<string>("50");
     const [isBridging, setIsBridging] = useState(false);
@@ -19,7 +25,7 @@ export const PulseDetail = ({ pulse, onClose }: { pulse: Pulse; onClose: () => v
              <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 py-4 flex items-center justify-between">
                 <button onClick={onClose} className="flex items-center space-x-2 text-slate-600 hover:text-slate-900 font-medium">
                     <Icons.ArrowLeft />
-                    <span>Back</span>
+                    <span>{backLabel}</span>
                 </button>
                 <span dir="ltr" className="text-xs font-mono text-slate-400">ERC-721: {pulse.id.substring(0,8)}...</span>
             </div>

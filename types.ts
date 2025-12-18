@@ -45,6 +45,7 @@ export interface Vision {
   link?: string;
   imageUrl?: string;
   createdAt: Timestamp;
+  joinedUserIds?: string[]; // List of users who joined this vision
 }
 
 // The Block

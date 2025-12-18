@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { type Pulse, type Lifetree, type MatchProposal, type Vision, type VisionSynergy } from '../types';
-import { getMyPulses, getMyVisions, getMyMatchesHistory, deleteUserAccount, logout, triggerSystemEmail, monitorMailStatus, sendInvite, listenToUserProfile, deleteVision } from '../services/firebase';
+import { getMyPulses, getMyVisions, getJoinedVisions, getMyMatchesHistory, deleteUserAccount, logout, triggerSystemEmail, monitorMailStatus, sendInvite, listenToUserProfile, deleteVision } from '../services/firebase';
 import { findVisionSynergies } from '../services/gemini';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Icons } from './ui/Icons';
@@ -14,6 +14,7 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
     const [activeTab, setActiveTab] = useState<'trees' | 'pulses' | 'visions' | 'history'>('trees');
     const [pulses, setPulses] = useState<Pulse[]>([]);
     const [visions, setVisions] = useState<Vision[]>([]);
+    const [joinedVisions, setJoinedVisions] = useState<Vision[]>([]);
     const [history, setHistory] = useState<MatchProposal[]>([]);
     const [loading, setLoading] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -54,8 +55,12 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                     const data = await getMyPulses(lightseed.uid);
                     setPulses(data);
                 } else if (activeTab === 'visions') {
-                    const data = await getMyVisions(lightseed.uid);
-                    setVisions(data);
+                    const [created, joined] = await Promise.all([
+                        getMyVisions(lightseed.uid),
+                        getJoinedVisions(lightseed.uid)
+                    ]);
+                    setVisions(created);
+                    setJoinedVisions(joined);
                 } else if (activeTab === 'history') {
                     const data = await getMyMatchesHistory(lightseed.uid);
                     setHistory(data);
@@ -423,30 +428,54 @@ export const LightseedProfile = ({ lightseed, myTrees, onViewTree, onDeleteTree,
                                         </div>
                                     )}
 
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                        {visions.length === 0 ? <p className="col-span-full text-slate-400 text-center py-10">No visions created yet.</p> : visions.map((vision) => (
-                                            <div key={vision.id} className="relative group">
-                                                <div onClick={() => onViewVision(vision)} className="cursor-pointer h-full">
-                                                    <VisionCard vision={vision} />
+                                    <div className="space-y-8">
+                                        {/* Created Visions */}
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                            {visions.length === 0 && joinedVisions.length === 0 ? <p className="col-span-full text-slate-400 text-center py-10">No visions created yet.</p> : visions.map((vision) => (
+                                                <div key={vision.id} className="relative group">
+                                                    <div onClick={() => onViewVision(vision)} className="cursor-pointer h-full">
+                                                        <VisionCard vision={vision} />
+                                                    </div>
+                                                    <div className="absolute top-2 left-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                                        {vision.title === "Root Vision" ? (
+                                                            <div className="bg-white/95 backdrop-blur-sm px-2 py-1.5 rounded-lg text-[9px] text-emerald-700 font-bold border border-emerald-200 shadow-sm flex flex-col">
+                                                                <span>ANCHOR (ROOT)</span>
+                                                                <span className="text-[8px] text-slate-400 font-normal leading-tight mt-0.5">This vision is the foundation of your tree and cannot be deleted.</span>
+                                                            </div>
+                                                        ) : (
+                                                            <button 
+                                                                onClick={(e) => handleDeleteVision(e, vision.id)}
+                                                                className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg border border-red-400 transition-all hover:scale-110 active:scale-95"
+                                                                title="Delete Vision"
+                                                            >
+                                                                <Icons.Trash />
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className="absolute top-2 left-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                                                    {vision.title === "Root Vision" ? (
-                                                        <div className="bg-white/95 backdrop-blur-sm px-2 py-1.5 rounded-lg text-[9px] text-emerald-700 font-bold border border-emerald-200 shadow-sm flex flex-col">
-                                                            <span>ANCHOR (ROOT)</span>
-                                                            <span className="text-[8px] text-slate-400 font-normal leading-tight mt-0.5">This vision is the foundation of your tree and cannot be deleted.</span>
+                                            ))}
+                                        </div>
+
+                                        {/* Joined Visions Section */}
+                                        {joinedVisions.length > 0 && (
+                                            <div className="border-t border-slate-100 pt-6">
+                                                <h4 className="text-sm font-bold text-amber-600 uppercase tracking-widest mb-4 flex items-center">
+                                                    <Icons.Globe /> <span className="ml-2">Joined Visions</span>
+                                                </h4>
+                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                                    {joinedVisions.map((vision) => (
+                                                        <div key={vision.id} className="relative group">
+                                                            <div onClick={() => onViewVision(vision)} className="cursor-pointer h-full">
+                                                                <VisionCard vision={vision} />
+                                                            </div>
+                                                            <div className="absolute top-2 right-2 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-md">
+                                                                JOINED
+                                                            </div>
                                                         </div>
-                                                    ) : (
-                                                        <button 
-                                                            onClick={(e) => handleDeleteVision(e, vision.id)}
-                                                            className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg border border-red-400 transition-all hover:scale-110 active:scale-95"
-                                                            title="Delete Vision"
-                                                        >
-                                                            <Icons.Trash />
-                                                        </button>
-                                                    )}
+                                                    ))}
                                                 </div>
                                             </div>
-                                        ))}
+                                        )}
                                     </div>
                                 </div>
                              )
