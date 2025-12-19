@@ -61,7 +61,7 @@ export const PulseCard = ({ pulse, lightseed, onMatch, onView }: PulseCardProps)
             </div>
 
             <div className="p-3">
-                <p dir="auto" className="text-slate-600 text-xs font-light leading-relaxed line-clamp-2 h-8">
+                <p dir="auto" className="text-slate-600 text-xs font-light leading-relaxed truncate">
                     {pulse.body}
                 </p>
                 <div className="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center">

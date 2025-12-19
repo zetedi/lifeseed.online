@@ -86,8 +86,12 @@ export const LifetreeCard = ({ tree, myActiveTree, currentUserId, onValidate, on
             ) : null}
 
             <div className="relative h-36 bg-slate-200 overflow-hidden group">
-                {tree.imageUrl ? (
-                    <img src={tree.imageUrl} alt={tree.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s] animate-[pulse_4s_ease-in-out_infinite]" />
+                {tree.latestGrowthUrl || tree.imageUrl ? (
+                    <img 
+                        src={tree.latestGrowthUrl || tree.imageUrl} 
+                        alt={tree.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s] animate-[pulse_4s_ease-in-out_infinite]" 
+                    />
                 ) : (
                     <div className={`w-full h-full ${colors.sky} flex items-center justify-center`}>
                         <Logo width={50} height={50} className="opacity-20 text-white animate-pulse" />
@@ -109,7 +113,7 @@ export const LifetreeCard = ({ tree, myActiveTree, currentUserId, onValidate, on
                 </div>
             </div>
             <div className="p-3">
-                <p dir="auto" className="text-slate-600 text-xs font-light italic leading-relaxed line-clamp-2 h-8">
+                <p dir="auto" className="text-slate-600 text-xs font-light italic leading-relaxed truncate">
                     "{tree.body}"
                 </p>
                 <div className="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center">

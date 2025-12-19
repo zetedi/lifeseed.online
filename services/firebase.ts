@@ -337,7 +337,14 @@ export const mintPulse = async (pulseData: any) => {
         const newHash = await createBlock(tree.latestHash, pulseData, Date.now());
         const newPulseRef = doc(pulsesCollection);
         t.set(newPulseRef, { ...pulseData, id: newPulseRef.id, createdAt: serverTimestamp(), hash: newHash, previousHash: tree.latestHash });
-        t.update(treeRef, { latestHash: newHash, blockHeight: (tree.blockHeight || 0) + 1 });
+        
+        const updateData: any = { latestHash: newHash, blockHeight: (tree.blockHeight || 0) + 1 };
+        // If this is a growth pulse with an image, update the tree's latest growth view
+        if (pulseData.type === 'GROWTH' && pulseData.imageUrl) {
+            updateData.latestGrowthUrl = pulseData.imageUrl;
+        }
+        
+        t.update(treeRef, updateData);
     });
 }
 

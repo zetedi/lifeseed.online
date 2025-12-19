@@ -221,19 +221,35 @@ const AppContent = () => {
         try {
             if (tab === 'forest') {
                 const res = await fetchLifetrees(currentLastDoc);
-                setData(prev => reset ? res.items : [...prev, ...res.items]);
+                setData(prev => {
+                    const newItems = res.items;
+                    if (reset) return newItems;
+                    // Deduplicate items based on ID to prevent visual duplicates
+                    const existingIds = new Set(prev.map(p => p.id));
+                    return [...prev, ...newItems.filter(i => !existingIds.has(i.id))];
+                });
                 setLastDoc(res.lastDoc);
                 setHasMore(!!res.lastDoc);
             }
             else if (tab === 'pulses') {
                 const res = await fetchPulses(currentLastDoc);
-                setData(prev => reset ? res.items : [...prev, ...res.items]);
+                setData(prev => {
+                    const newItems = res.items;
+                    if (reset) return newItems;
+                    const existingIds = new Set(prev.map(p => p.id));
+                    return [...prev, ...newItems.filter(i => !existingIds.has(i.id))];
+                });
                 setLastDoc(res.lastDoc);
                 setHasMore(!!res.lastDoc);
             }
             else if (tab === 'visions') {
                 const res = await fetchVisions(currentLastDoc);
-                setData(prev => reset ? res.items : [...prev, ...res.items]);
+                setData(prev => {
+                    const newItems = res.items;
+                    if (reset) return newItems;
+                    const existingIds = new Set(prev.map(p => p.id));
+                    return [...prev, ...newItems.filter(i => !existingIds.has(i.id))];
+                });
                 setLastDoc(res.lastDoc);
                 setHasMore(!!res.lastDoc);
             }
@@ -821,7 +837,7 @@ const AppContent = () => {
                                         treeType === type.id 
                                             ? 'bg-emerald-600 text-white border-emerald-500 shadow-md' 
                                             : treeType !== 'GUARDED' 
-                                                ? 'bg-black/20 text-white border-white/20 hover:bg-black/40' 
+                                                ? 'bg-white/10 text-white border-white/10 hover:bg-white/20' 
                                                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                                     }`}
                                 >
@@ -831,26 +847,44 @@ const AppContent = () => {
                             ))}
                         </div>
 
-                        <input dir="auto" className="block w-full border p-2 rounded bg-white/90 focus:bg-white transition-colors" placeholder={`Tree Name (Default: ${lightseed?.displayName || 'Anonymous'})`} value={treeName} onChange={e=>setTreeName(e.target.value)} />
-                        <input dir="auto" className="block w-full border p-2 rounded bg-white/90 focus:bg-white transition-colors" placeholder={t('short_title')} value={treeShortTitle} onChange={e=>setTreeShortTitle(e.target.value)} />
+                        <input 
+                            dir="auto" 
+                            className="block w-full border border-slate-300 p-3 rounded-lg bg-white text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-shadow shadow-sm" 
+                            placeholder={`Tree Name (Default: ${lightseed?.displayName || 'Anonymous'})`} 
+                            value={treeName} 
+                            onChange={e=>setTreeName(e.target.value)} 
+                        />
+                        <input 
+                            dir="auto" 
+                            className="block w-full border border-slate-300 p-3 rounded-lg bg-white text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-shadow shadow-sm" 
+                            placeholder={t('short_title')} 
+                            value={treeShortTitle} 
+                            onChange={e=>setTreeShortTitle(e.target.value)} 
+                        />
                         
                         {treeType !== 'GUARDED' && (
                             <div className="flex gap-2">
-                                <input dir="auto" className="flex-1 border p-2 rounded bg-white/90 focus:bg-white transition-colors" placeholder="Seed keywords" value={treeSeed} onChange={e=>setTreeSeed(e.target.value)} />
-                                <button type="button" onClick={() => generateLifetreeBio(treeSeed).then(setTreeBio)} disabled={uploading} className="bg-emerald-600 text-white px-4 rounded disabled:opacity-50 font-bold text-xs shadow-md">AI</button>
+                                <input 
+                                    dir="auto" 
+                                    className="flex-1 border border-slate-300 p-3 rounded-lg bg-white text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-shadow shadow-sm" 
+                                    placeholder="Seed keywords" 
+                                    value={treeSeed} 
+                                    onChange={e=>setTreeSeed(e.target.value)} 
+                                />
+                                <button type="button" onClick={() => generateLifetreeBio(treeSeed).then(setTreeBio)} disabled={uploading} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-lg disabled:opacity-50 font-bold text-xs shadow-md transition-colors">AI</button>
                             </div>
                         )}
                         
                         <textarea 
                             dir="auto"
-                            className="block w-full border p-2 rounded bg-white/90 focus:bg-white transition-colors min-h-[100px]" 
+                            className="block w-full border border-slate-300 p-3 rounded-lg bg-white text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-shadow shadow-sm min-h-[100px]" 
                             placeholder={treeType === 'GUARDED' ? "Description" : "Vision"} 
                             value={treeBio} 
                             onChange={e=>setTreeBio(e.target.value)} 
                             required 
                         />
                         
-                        <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold uppercase tracking-widest shadow-lg active:scale-95 transition-all mt-4 mb-4">
+                        <button type="submit" disabled={uploading || isSubmitting} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold uppercase tracking-widest shadow-lg active:scale-95 transition-all mt-4 mb-4">
                             {isSubmitting ? t('planting') : t('plant_lifetree')}
                         </button>
                     </form>

@@ -28,10 +28,10 @@ export const VisionCard = ({ vision }: { vision: Vision }) => {
                 )}
             </div>
             <div className="p-3">
-                <p dir="auto" className="text-slate-600 text-xs font-light italic leading-relaxed line-clamp-2 h-8">
+                <p dir="auto" className="text-slate-600 text-xs font-light italic leading-relaxed truncate">
                     "{vision.body}"
                 </p>
-                {/* Matches layout height roughly by having same p-3 and h-8 text */}
+                {/* Matches layout height roughly by having same p-3 */}
             </div>
         </div>
     );

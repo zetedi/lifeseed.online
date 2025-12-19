@@ -61,7 +61,7 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
     return (
         <div className="grid grid-cols-2 gap-3 sm:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Box 1: My Light HUD */}
-            <div onClick={() => lightseed ? onSetTab('profile') : onLogin()} className="relative h-[40vh] md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
+            <div onClick={() => lightseed ? onSetTab('profile') : onLogin()} className="relative h-[36vh] md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-purple-600"></div>
                 {lightseed && firstTreeImage && <img src={firstTreeImage} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-[5s] opacity-50" />}
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div>
@@ -105,7 +105,7 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
             </div>
 
             {/* Box 2: Plant a Lifetree */}
-            <div onClick={() => { if (!lightseed) onLogin(); else if (stats.trees === 0) onPlant(); else onSetTab('forest'); }} className="relative h-[40vh] md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
+            <div onClick={() => { if (!lightseed) onLogin(); else if (stats.trees === 0) onPlant(); else onSetTab('forest'); }} className="relative h-[36vh] md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
                 <img src={lifetreeImage} className="absolute inset-0 w-full h-full object-cover" alt="Lifetree" />
                 <video 
                     ref={videoRef}
@@ -139,7 +139,7 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
             </div>
 
             {/* Box 3: Oracle (Dynamic Quote) */}
-            <div onClick={() => onSetTab('oracle')} className="relative h-[40vh] md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
+            <div onClick={() => onSetTab('oracle')} className="relative h-[36vh] md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
                 <div className="absolute inset-0 bg-slate-900"></div>
                 <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=800" className="absolute inset-0 w-full h-full object-cover opacity-30" />
                 <div className="relative h-full p-4 flex flex-col justify-between text-white">
@@ -157,7 +157,7 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
             </div>
 
             {/* Box 4: Forest (Banner Style + Stats) */}
-            <div onClick={() => onSetTab('forest')} className="relative h-[40vh] md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
+            <div onClick={() => onSetTab('forest')} className="relative h-[36vh] md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
                 <img src="/mother.jpg" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform" />
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors"></div>
                 <div className="relative h-full p-4 flex flex-col justify-between text-white">

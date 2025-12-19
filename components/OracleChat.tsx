@@ -114,7 +114,7 @@ export const OracleChat = () => {
             await checkAndIncrementAiUsage('image');
 
             // Generate Image
-            const prompt = `Create an image from the perspective of how this conversation can be an inspiration to others. The conversation context is: ${summaryPrompt}`;
+            const prompt = `Create an abstract, artistic image representing the essence of this conversation: ${summaryPrompt}. Do not contain any text, words, letters, or typography in the image.`;
             const imageUrl = await generateImage(prompt);
             let finalImageUrl = "";
 

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-12-18" agent="ChatGPT" version="22.1.0">
+  <diagram name="Lifeseed Firestore Schema">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="users" value="users&#10;- uid (PK)&#10;- email&#10;- displayName&#10;- invitesRemaining&#10;- dailyAiText&#10;- dailyAiImage&#10;- lastAiReset&#10;- createdAt"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="260" height="200" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="lifetrees" value="lifetrees&#10;- id (PK)&#10;- ownerId (FK → users.uid)&#10;- name&#10;- body&#10;- latitude&#10;- longitude&#10;- genesisHash&#10;- latestHash&#10;- blockHeight&#10;- guardians[]&#10;- status&#10;- validated&#10;- createdAt"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;" vertex="1" parent="1">
+          <mxGeometry x="360" y="40" width="300" height="240" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="visions" value="visions&#10;- id (PK)&#10;- lifetreeId (FK)&#10;- authorId (FK → users.uid)&#10;- title&#10;- body&#10;- joinedUserIds[]&#10;- createdAt"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;" vertex="1" parent="1">
+          <mxGeometry x="720" y="40" width="280" height="200" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="pulses" value="pulses&#10;- id (PK)&#10;- lifetreeId (FK)&#10;- authorId (FK → users.uid)&#10;- type&#10;- title&#10;- body&#10;- hash&#10;- previousHash&#10;- loveCount&#10;- createdAt"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#6A1B9A;" vertex="1" parent="1">
+          <mxGeometry x="360" y="340" width="300" height="220" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="matches" value="matches&#10;- id (PK)&#10;- initiatorUid (FK → users.uid)&#10;- targetUid (FK → users.uid)&#10;- initiatorTreeId (FK)&#10;- targetTreeId (FK)&#10;- status&#10;- createdAt"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#AD1457;" vertex="1" parent="1">
+          <mxGeometry x="720" y="340" width="300" height="200" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="mail" value="mail&#10;- id (PK)&#10;- uid (FK → users.uid)&#10;- to[]&#10;- message&#10;- delivery"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#37474F;" vertex="1" parent="1">
+          <mxGeometry x="40" y="340" width="260" height="160" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="subscriptions" value="subscriptions&#10;- id (PK)&#10;- email&#10;- createdAt"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;" vertex="1" parent="1">
+          <mxGeometry x="40" y="540" width="260" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e1" style="endArrow=block;html=1;" edge="1" parent="1" source="users" target="lifetrees">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" style="endArrow=block;html=1;" edge="1" parent="1" source="lifetrees" target="visions">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" style="endArrow=block;html=1;" edge="1" parent="1" source="lifetrees" target="pulses">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" style="endArrow=block;html=1;" edge="1" parent="1" source="users" target="pulses">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" style="endArrow=block;html=1;" edge="1" parent="1" source="users" target="matches">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

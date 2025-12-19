@@ -15,6 +15,7 @@ export interface Lifetree {
   shortTitle?: string;
   body: string; // The Vision
   imageUrl?: string;
+  latestGrowthUrl?: string; // URL of the most recent growth pulse image
   latitude?: number;
   longitude?: number;
   locationName?: string;

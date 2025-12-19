@@ -8,7 +8,7 @@ const baseKeys = {
   webpage: "Webpage Link", mint: "Mint Pulse", generate: "Generate", generate_image: "Gen Image",
   block: "BLOCK", loading: "Loading...", planting: "Planting...", minting: "Minting...", creating: "Creating...",
   map_view: "Map View", list_view: "List View", upload_photo: "Upload Photo", validated: "VALIDATED",
-  unvalidated: "Unvalidated", validate_action: "Validate Tree", quick_snap: "Quick Snap", back_forest: "Back",
+  unvalidated: "Unvalidated", validate_action: "Validate Tree", quick_snap: "Capture Change", back_forest: "Back",
   genesis: "Genesis Hash", steward: "Steward", location: "Location", tree_details: "Tree Details",
   profile: "Profile", my_trees: "My Trees", my_pulses: "My Pulses", my_matches: "My Matches",
   edit: "Edit", be_mother_tree: "Plant a Lifetree", guard_tree: "Guard Tree", matches: "Matches",
@@ -38,7 +38,7 @@ export const translations: Record<Language, typeof baseKeys> = {
     ...baseKeys, forest: "Bosque", pulses: "Pulsos", visions: "Visiones", oracle: "Oráculo", about: "Acerca de", explore: "Explorar", 
     sign_in: "Iniciar sesión", sign_out: "Cerrar sesión", plant_lifetree: "Plantar Árbol", emit_pulse: "Emitir Pulso", 
     be_mother_tree: "Planta un Árbol de Vida", loading: "Cargando...", my_trees: "Mis Árboles", profile: "Perfil",
-    pending_matches: "Coincidencias Pendientes", quick_snap: "Foto Rápida", validated: "VALIDADO", 
+    pending_matches: "Coincidencias Pendientes", quick_snap: "Capturar Cambio", validated: "VALIDADO", 
     validate_action: "Validar Árbol", create_vision: "Nueva Visión", create_new_world: "Crea un Nuevo Mundo"
   },
   hu: { 

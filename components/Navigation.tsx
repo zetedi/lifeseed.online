@@ -127,8 +127,9 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                     {/* Right Side UI Controls */}
                     <div className="flex items-center gap-3">
                          <div className="relative" ref={langRef}>
-                            <button onClick={() => setIsLangOpen(!isLangOpen)} className="bg-emerald-800 text-xs border border-emerald-700 rounded-full px-3 py-1 uppercase font-bold hover:bg-emerald-700 transition-colors">
-                                {language}
+                            <button onClick={() => setIsLangOpen(!isLangOpen)} className="bg-emerald-800 text-xs border border-emerald-700 rounded-full px-3 py-1 uppercase font-bold hover:bg-emerald-700 transition-colors flex items-center gap-1">
+                                <Icons.Globe />
+                                <span>{language}</span>
                             </button>
                             {isLangOpen && (
                                 <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-xl border py-2 z-50 text-slate-700">

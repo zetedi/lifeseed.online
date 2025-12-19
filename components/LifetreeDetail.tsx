@@ -186,7 +186,7 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                 {/* Hero */}
                 <div className="relative h-64 md:h-96 w-full rounded-2xl overflow-hidden shadow-xl">
                     <img 
-                        src={tree.imageUrl || 'https://via.placeholder.com/800x400'} 
+                        src={tree.latestGrowthUrl || tree.imageUrl || 'https://via.placeholder.com/800x400'} 
                         className="w-full h-full object-cover" 
                         alt={tree.name}
                     />
