@@ -167,19 +167,19 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
 
             {/* Mobile Sidebar/Menu */}
             {isMenuOpen && (
-                <div className="lg:hidden bg-emerald-950 border-t border-emerald-800 py-6 px-4 flex flex-col gap-3 animate-in slide-in-from-top-full">
+                <div className="lg:hidden fixed inset-x-0 top-20 bottom-0 bg-emerald-950 border-t border-emerald-800 py-6 px-4 flex flex-col gap-3 overflow-y-auto animate-in slide-in-from-top-10 z-50 pb-24">
                     {lightseed && (
                         <div className="grid grid-cols-2 gap-3 mb-6">
                             {activeTab === 'visions' ? (
-                                <button onClick={() => { onCreateVision(); setIsMenuOpen(false); }} className="bg-amber-500 p-4 rounded-xl flex flex-col items-center gap-2 font-bold text-xs shadow-lg border border-amber-500/50 text-white">
+                                <button onClick={() => { onCreateVision(); setIsMenuOpen(false); }} className="bg-amber-500 p-3 rounded-xl flex flex-row items-center justify-center gap-2 font-bold text-xs shadow-lg border border-amber-500/50 text-white">
                                     <Icons.Sparkles /> <span>{t('create_vision')}</span>
                                 </button>
                             ) : (
-                                <button onClick={() => { onPlant(); setIsMenuOpen(false); }} className="bg-emerald-600 p-4 rounded-xl flex flex-col items-center gap-2 font-bold text-xs shadow-lg border border-emerald-500/50">
+                                <button onClick={() => { onPlant(); setIsMenuOpen(false); }} className="bg-emerald-600 p-3 rounded-xl flex flex-row items-center justify-center gap-2 font-bold text-xs shadow-lg border border-emerald-500/50">
                                     <Icons.Tree /> <span>{t('plant_lifetree')}</span>
                                 </button>
                             )}
-                            <button onClick={() => { onPulse(); setIsMenuOpen(false); }} className="bg-sky-600 p-4 rounded-xl flex flex-col items-center gap-2 font-bold text-xs shadow-lg border border-sky-500/50">
+                            <button onClick={() => { onPulse(); setIsMenuOpen(false); }} className="bg-sky-600 p-3 rounded-xl flex flex-row items-center justify-center gap-2 font-bold text-xs shadow-lg border border-sky-500/50">
                                 <Icons.HeartPulse /> <span>{t('emit_pulse')}</span>
                             </button>
                         </div>
@@ -192,8 +192,8 @@ export const Navigation = ({ lightseed, activeTab, setTab, onPlant, onPulse, onL
                         </button>
                     ))}
                     {lightseed && (
-                        <button onClick={() => { onLogout(); setIsMenuOpen(false); }} className="w-full text-left px-4 py-4 rounded-xl text-sm font-bold text-rose-300 mt-6 border border-rose-900/30 bg-rose-950/20 hover:bg-rose-900/40 transition-all flex items-center justify-center gap-2">
-                             <Icons.Close />
+                        <button onClick={() => { onLogout(); setIsMenuOpen(false); }} className="w-full text-left px-4 py-2.5 rounded-lg text-xs font-bold text-rose-300 mt-4 border border-rose-900/30 bg-rose-950/20 hover:bg-rose-900/40 transition-all flex items-center justify-center gap-2">
+                             <div className="scale-75"><Icons.Close /></div>
                              <span>{t('sign_out')}</span>
                         </button>
                     )}
