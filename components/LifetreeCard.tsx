@@ -117,7 +117,7 @@ export const LifetreeCard = ({ tree, myActiveTree, currentUserId, onValidate, on
                     "{tree.body}"
                 </p>
                 <div className="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center">
-                    <button onClick={(e) => { e.stopPropagation(); onPlayGrowth(tree.id); }} className="flex items-center gap-1 text-[10px] bg-slate-50 hover:bg-slate-100 text-slate-500 px-2 py-1 rounded transition-colors uppercase tracking-wider font-semibold">
+                    <button onClick={(e) => { e.stopPropagation(); onPlayGrowth(tree.id); }} className="flex items-center gap-1 text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-600 px-2 py-1 rounded transition-colors uppercase tracking-wider font-semibold">
                         <Icons.Play />
                         <span>Growth</span>
                     </button>
