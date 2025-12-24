@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from 'react';
 import { type Lifetree } from '../types';
 
-export const ForestMap = ({ trees }: { trees: Lifetree[] }) => {
+export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree: Lifetree) => void }) => {
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapInstance = useRef<any>(null);
     const markersLayer = useRef<any>(null);
@@ -124,17 +124,34 @@ export const ForestMap = ({ trees }: { trees: Lifetree[] }) => {
                     popupAnchor: [0, -24]
                 });
 
-                L.marker([tree.latitude, tree.longitude], { icon: customIcon })
-                    .addTo(markersLayer.current)
-                    .bindPopup(`
-                        <div class="text-center p-2 min-w-[150px]">
-                            <h3 class="font-bold text-lg text-slate-800 mb-1">${tree.name}</h3>
-                            ${isNature ? '<span class="text-[10px] bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full font-bold uppercase mb-2 inline-block">Nature Guardian</span>' : ''}
-                            <p class="text-xs text-slate-500 line-clamp-2 italic mb-2">"${tree.body}"</p>
-                            ${!isNature ? `<div class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full inline-block">Block: ${tree.blockHeight || 0}</div>` : ''}
-                            ${guardianCount > 0 ? `<div class="mt-1 text-[10px] text-slate-400">🛡️ ${guardianCount} Guardian${guardianCount !== 1 ? 's' : ''}</div>` : ''}
-                        </div>
-                    `);
+                const marker = L.marker([tree.latitude, tree.longitude], { icon: customIcon });
+                
+                // Create custom popup container
+                const container = document.createElement('div');
+                container.innerHTML = `
+                    <div class="text-center p-2 min-w-[150px]">
+                        <h3 class="font-bold text-lg text-slate-800 mb-1">${tree.name}</h3>
+                        ${isNature ? '<span class="text-[10px] bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full font-bold uppercase mb-2 inline-block">Nature Guardian</span>' : ''}
+                        <p class="text-xs text-slate-500 line-clamp-2 italic mb-2">"${tree.body}"</p>
+                        ${!isNature ? `<div class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full inline-block">Block: ${tree.blockHeight || 0}</div>` : ''}
+                        ${guardianCount > 0 ? `<div class="mt-1 text-[10px] text-slate-400">🛡️ ${guardianCount} Guardian${guardianCount !== 1 ? 's' : ''}</div>` : ''}
+                        <button class="view-btn mt-3 bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-emerald-700 w-full transition-colors shadow-sm flex items-center justify-center gap-1">
+                            <span>View Tree</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+                        </button>
+                    </div>
+                `;
+
+                // Add event listener to the button inside the container
+                const btn = container.querySelector('.view-btn');
+                if (btn) {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        onView(tree);
+                    });
+                }
+
+                marker.bindPopup(container).addTo(markersLayer.current);
             }
         });
 
