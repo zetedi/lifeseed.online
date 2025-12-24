@@ -536,10 +536,10 @@ const AppContent = () => {
                             matches: stats.matches,
                             danger: guardedTrees.filter(t => t.status === 'DANGER').length
                         }}
-                        firstTreeImage={myTrees[0]?.imageUrl}
+                        firstTreeImage={activeTree?.latestGrowthUrl || activeTree?.imageUrl}
                         onSetTab={setTab} 
                         onPlant={() => { setTreeType('LIFETREE'); setShowPlantModal(true); }}
-                        onLogin={signInWithGoogle}
+                        onLogin={signInWithGoogle} 
                     />
                 </div>
             );
@@ -918,7 +918,7 @@ const AppContent = () => {
             )}
         </div>
     );
-};
+}
 
 const App = () => {
   return (
