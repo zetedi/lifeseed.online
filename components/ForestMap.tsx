@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { type Lifetree } from '../types';
 
@@ -18,7 +19,7 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
     const [expandedClusterId, setExpandedClusterId] = useState<string | null>(null);
     const [clusterPage, setClusterPage] = useState<number>(0);
 
-    // Lightseed Logo SVG String for Cluster Icon - Updated from user request
+    // Lightseed Logo SVG String for Cluster Icon
     const logoSvg = `
     <svg width="100%" height="100%" viewBox="0 0 262 262" xmlns="http://www.w3.org/2000/svg">
         <defs><clipPath id="c"><circle cx="131" cy="131" r="131" /></clipPath></defs>
@@ -125,7 +126,7 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
         }
     }, [trees, expandedClusterId, clusterPage]);
 
-    const getHtmlForTree = (tree: Lifetree, isSmall = false) => {
+    const getHtmlForTree = (tree: Lifetree, isSmall = false, delay = 0) => {
         const isNature = tree.isNature;
         const isDanger = tree.status === 'DANGER';
         const guardianCount = tree.guardians ? tree.guardians.length : 0;
@@ -134,13 +135,17 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
         
         // Prioritize latestGrowthUrl over standard imageUrl
         const displayImage = tree.latestGrowthUrl || tree.imageUrl || 'https://via.placeholder.com/150';
+        
+        // Force image fill
+        const imgStyle = "width: 100%; height: 100%; object-fit: cover; display: block;";
+        const animStyle = `animation-delay: ${delay}ms;`;
 
         if (isNature) {
             return `
-            <div class="relative ${sizeClass} hover:scale-110 transition-transform duration-300 group">
+            <div class="marker-pop relative ${sizeClass} hover:scale-110 transition-transform duration-300 group" style="${animStyle}">
                 <div class="absolute inset-0 bg-sky-500 rounded-full animate-pulse opacity-20"></div>
                 <div class="relative ${sizeClass} rounded-full ${borderClass} border-white shadow-xl overflow-hidden bg-white z-10">
-                    <img src="${displayImage}" class="w-full h-full object-cover" />
+                    <img src="${displayImage}" style="${imgStyle}" class="w-full h-full object-cover" />
                 </div>
                 <div class="absolute -top-1 -right-1 z-20 w-4 h-4 bg-sky-500 border border-white rounded-full flex items-center justify-center text-[8px] text-white font-bold shadow-md">
                     ${guardianCount}
@@ -150,10 +155,10 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
         }
         
         return `
-        <div class="relative ${sizeClass} hover:scale-110 transition-transform duration-300">
+        <div class="marker-pop relative ${sizeClass} hover:scale-110 transition-transform duration-300" style="${animStyle}">
             <div class="absolute inset-0 bg-emerald-500 rounded-full animate-ping opacity-20"></div>
             <div class="relative ${sizeClass} rounded-full ${borderClass} border-white shadow-xl overflow-hidden bg-white">
-                <img src="${displayImage}" class="w-full h-full object-cover" />
+                <img src="${displayImage}" style="${imgStyle}" class="w-full h-full object-cover" />
             </div>
             ${tree.validated ? '<div class="absolute -top-1 -right-1 bg-emerald-500 border border-white w-3 h-3 rounded-full"></div>' : ''}
         </div>`;
@@ -244,9 +249,9 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
                 if (isExpanded) {
                     // --- SEED OF LIFE EXPANSION ---
                     
-                    // 1. Render Center (Oldest)
+                    // 1. Render Center (Oldest) - Animate it too
                     const centerIcon = L.divIcon({
-                        html: getHtmlForTree(cluster.center),
+                        html: getHtmlForTree(cluster.center, false, 0),
                         className: 'z-[1000]', // Ensure center is on top
                         iconSize: [48, 48],
                         iconAnchor: [24, 24]
@@ -289,8 +294,9 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
                         }).addTo(markersLayer.current);
 
                         const childIcon = L.divIcon({
-                            html: getHtmlForTree(child, true), // Small version (40px)
-                            className: 'animate-in fade-in zoom-in duration-300',
+                            // Add delay based on index for bloom effect
+                            html: getHtmlForTree(child, true, (index + 1) * 50), // Small version (40px)
+                            className: '',
                             iconSize: [40, 40],
                             iconAnchor: [20, 20],
                             popupAnchor: [0, -20]
@@ -315,7 +321,7 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
                         const btnLatLng = map.layerPointToLatLng(btnPoint);
 
                         const btnHtml = `
-                        <div class="w-10 h-10 rounded-full bg-amber-500 border-2 border-white shadow-lg flex items-center justify-center text-white cursor-pointer hover:bg-amber-600 transition-colors">
+                        <div class="marker-pop w-10 h-10 rounded-full bg-amber-500 border-2 border-white shadow-lg flex items-center justify-center text-white cursor-pointer hover:bg-amber-600 transition-colors" style="animation-delay: 300ms;">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                         </div>`;
 
@@ -382,5 +388,20 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
         };
     }, []);
 
-    return <div ref={mapContainer} style={{ width: '100%', height: '60vh', minHeight: '400px', zIndex: 1 }} className="w-full rounded-xl shadow-inner border border-slate-200 bg-slate-100" />;
+    return (
+        <>
+            <style>{`
+                @keyframes pop-in {
+                    0% { transform: scale(0); opacity: 0; }
+                    70% { transform: scale(1.1); opacity: 1; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+                .marker-pop {
+                    animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                    opacity: 0;
+                }
+            `}</style>
+            <div ref={mapContainer} style={{ width: '100%', height: '60vh', minHeight: '400px', zIndex: 1 }} className="w-full rounded-xl shadow-inner border border-slate-200 bg-slate-100" />
+        </>
+    );
 };
