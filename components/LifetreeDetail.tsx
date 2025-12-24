@@ -367,7 +367,7 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                             {isOwner && (
                                 <button 
                                     onClick={onCreatePulse}
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-full font-bold uppercase tracking-widest shadow-lg shadow-emerald-200 transition-transform active:scale-95 flex items-center gap-2 mb-8 animate-in fade-in zoom-in slide-in-from-top-4 duration-700"
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-full font-bold uppercase tracking-widest transition-transform active:scale-95 flex items-center gap-2 mb-8 animate-in fade-in zoom-in slide-in-from-top-4 duration-700"
                                 >
                                     <Icons.HeartPulse />
                                     <span>Grow your tree with a pulse</span>
@@ -376,29 +376,46 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                         </div>
                         
                         <div className="relative flex flex-col items-start md:items-center">
-                            {/* Central Line - Mobile: Left-4, Desktop: Left-1/2 */}
-                            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 -ml-px bg-gradient-to-b from-emerald-500 via-emerald-300 to-amber-900"></div>
+                            {/* Central Tree Trunk */}
+                            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-3 md:w-6 -ml-1.5 md:-ml-3 bg-[#5D4037] rounded-full shadow-inner overflow-hidden z-0">
+                                {/* Bark texture simulation */}
+                                <div className="absolute inset-0 opacity-20 bg-black/20" style={{backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px)'}}></div>
+                            </div>
 
-                            <div className="w-full space-y-12 md:space-y-24 pb-24">
+                            <div className="w-full space-y-12 md:space-y-24 pb-24 relative z-10">
                                 {growthBlocks.map((pulse, index) => {
-                                    const isLeft = index % 2 === 0;
+                                    // Visual positioning logic:
+                                    // index 0, 2, 4 (Even) -> Right Side (Desktop)
+                                    // index 1, 3, 5 (Odd) -> Left Side (Desktop)
+                                    const isRightSide = index % 2 === 0;
                                     
                                     return (
-                                        <div key={pulse.id} className={`flex w-full relative ${isLeft ? 'md:justify-end' : 'md:justify-start'} justify-start`}>
-                                            {/* Container: Mobile pl-12 (for left line), Desktop standard */}
+                                        <div key={pulse.id} className={`flex w-full relative ${isRightSide ? 'md:justify-end' : 'md:justify-start'} justify-start`}>
+                                            
+                                            {/* Container Wrapper */}
+                                            {/* Mobile: Padded left to avoid trunk. Desktop: Half width. */}
                                             <div className={`
                                                 w-full md:w-1/2 relative flex items-center
-                                                pl-12 md:pl-0 md:px-8
-                                                ${isLeft ? 'md:justify-end' : 'md:justify-start'}
+                                                pl-12 md:pl-0
+                                                ${isRightSide ? 'md:pl-16' : 'md:pr-16 md:flex-row-reverse'}
                                             `}>
                                                 
-                                                {/* Mobile Connector (Left Side) */}
-                                                <div className="md:hidden absolute top-1/2 left-4 w-8 h-[2px] bg-emerald-300"></div>
-                                                <div className="md:hidden absolute top-1/2 left-[14px] w-2 h-2 rounded-full bg-emerald-500 border-2 border-white z-10"></div>
+                                                {/* Mobile Branch (Always Left Trunk to Card) */}
+                                                <svg className="md:hidden absolute top-1/2 -mt-6 left-[1.15rem] w-12 h-12 text-[#5D4037] pointer-events-none z-0" viewBox="0 0 50 50" preserveAspectRatio="none">
+                                                    {/* Curve from left (trunk) to right (card) */}
+                                                    <path d="M0,25 Q25,25 50,25" stroke="currentColor" strokeWidth="6" fill="none" strokeLinecap="round" />
+                                                </svg>
 
-                                                {/* Desktop Connector */}
-                                                <div className={`hidden md:block absolute top-1/2 ${isLeft ? 'right-0' : 'left-0'} w-8 h-[2px] bg-emerald-300`}></div>
-                                                <div className={`hidden md:block absolute top-1/2 ${isLeft ? 'right-0 -mr-1' : 'left-0 -ml-1'} w-2 h-2 rounded-full bg-emerald-500 border-2 border-white z-10`}></div>
+                                                {/* Desktop Branch */}
+                                                <svg className={`hidden md:block absolute top-1/2 -mt-4 w-20 h-12 text-[#5D4037] pointer-events-none z-0 ${isRightSide ? 'left-0 -ml-2' : 'right-0 -mr-2'}`} viewBox="0 0 80 40" preserveAspectRatio="none">
+                                                    {isRightSide ? (
+                                                        // From Left (Trunk) to Right (Card)
+                                                        <path d="M0,20 C40,20 40,20 80,20" stroke="currentColor" strokeWidth="8" fill="none" strokeLinecap="round" />
+                                                    ) : (
+                                                        // From Right (Trunk) to Left (Card)
+                                                        <path d="M80,20 C40,20 40,20 0,20" stroke="currentColor" strokeWidth="8" fill="none" strokeLinecap="round" />
+                                                    )}
+                                                </svg>
 
                                                 {/* Leaf Card */}
                                                 <div 
@@ -406,19 +423,19 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                                                     className={`
                                                         relative bg-white border-2 border-emerald-100 shadow-sm hover:shadow-xl hover:border-emerald-300 
                                                         transition-all cursor-pointer group w-full md:max-w-sm rounded-xl
-                                                        ${isLeft 
-                                                            ? 'md:rounded-tr-[3rem] md:rounded-bl-[3rem] md:text-right' 
-                                                            : 'md:rounded-tl-[3rem] md:rounded-br-[3rem] md:text-left'}
-                                                        text-left
+                                                        ${isRightSide 
+                                                            ? 'md:rounded-tl-[0] md:rounded-bl-[3rem] md:rounded-tr-[2rem] md:rounded-br-[2rem] md:text-left' 
+                                                            : 'md:rounded-tr-[0] md:rounded-br-[3rem] md:rounded-tl-[2rem] md:rounded-bl-[2rem] md:text-right'}
+                                                        text-left z-10
                                                     `}
                                                 >
                                                     {/* Decorative Vein SVG */}
                                                     <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-5 text-emerald-500" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                                        <path d={isLeft ? "M0,100 Q50,50 100,0" : "M100,100 Q50,50 0,0"} stroke="currentColor" strokeWidth="1" fill="none" />
+                                                        <path d={isRightSide ? "M0,50 Q50,25 100,0" : "M100,50 Q50,25 0,0"} stroke="currentColor" strokeWidth="1" fill="none" />
                                                     </svg>
 
                                                     <div className="p-4 md:p-6 relative z-10">
-                                                        <div className={`flex items-center gap-2 mb-3 ${isLeft ? 'md:flex-row-reverse' : ''} flex-row`}>
+                                                        <div className={`flex items-center gap-2 mb-3 ${isRightSide ? '' : 'md:flex-row-reverse'} flex-row`}>
                                                             {pulse.type === 'GROWTH' ? (
                                                                 <span className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">GROWTH</span>
                                                             ) : (
@@ -427,7 +444,7 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                                                             <span className="text-xs text-slate-400 font-mono">{new Date(pulse.createdAt?.toMillis()).toLocaleDateString()}</span>
                                                         </div>
 
-                                                        <div className={`flex gap-4 ${isLeft ? 'md:flex-row-reverse' : ''} flex-row items-start`}>
+                                                        <div className={`flex gap-4 ${isRightSide ? '' : 'md:flex-row-reverse'} flex-row items-start`}>
                                                             {pulse.imageUrl && (
                                                                 <img src={pulse.imageUrl} className="w-16 h-16 rounded-lg object-cover bg-slate-50 shrink-0 border border-slate-100" />
                                                             )}
@@ -437,7 +454,7 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                                                             </div>
                                                         </div>
                                                         
-                                                        <div className={`mt-4 pt-2 border-t border-slate-50 text-[9px] font-mono text-slate-300 truncate ${isLeft ? 'md:text-right' : 'md:text-left'} text-left`}>
+                                                        <div className={`mt-4 pt-2 border-t border-slate-50 text-[9px] font-mono text-slate-300 truncate ${isRightSide ? 'md:text-left' : 'md:text-right'} text-left`}>
                                                             Hash: {pulse.hash.substring(0, 16)}...
                                                         </div>
                                                     </div>
@@ -450,19 +467,18 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                                 {/* Genesis Block at the Bottom */}
                                 {genesisBlock && (
                                     <div className="flex w-full justify-start md:justify-center pt-8 md:pt-12 relative pl-12 md:pl-0">
-                                         {/* Mobile Connector */}
-                                         <div className="md:hidden absolute top-0 left-4 w-0.5 h-full bg-gradient-to-b from-amber-900 to-transparent"></div>
+                                         {/* Root Connection SVG */}
+                                         <svg className="md:hidden absolute top-0 left-[1.15rem] w-8 h-12 text-[#5D4037] pointer-events-none z-0" viewBox="0 0 20 40" preserveAspectRatio="none">
+                                             <path d="M0,0 L0,40" stroke="currentColor" strokeWidth="6" />
+                                         </svg>
                                          
-                                         {/* Dot Position */}
-                                         <div className="absolute top-8 md:top-0 left-[13px] md:left-1/2 md:-ml-3 md:-mt-1 w-6 h-6 rounded-full bg-amber-900 border-4 border-white shadow-md z-10 flex items-center justify-center"></div>
-                                         
-                                         <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl shadow-inner text-center max-w-sm relative z-10 w-full md:w-auto">
-                                             <div className="w-12 h-12 mx-auto bg-amber-100 rounded-full flex items-center justify-center mb-2 text-amber-700">
+                                         <div className="bg-[#5D4037] border-4 border-[#3E2723] p-6 rounded-2xl shadow-xl text-center max-w-sm relative z-10 w-full md:w-auto text-amber-100">
+                                             <div className="w-12 h-12 mx-auto bg-amber-900/50 rounded-full flex items-center justify-center mb-2 text-amber-200 border border-amber-500/30">
                                                  <Logo width={24} height={24} />
                                              </div>
-                                             <h4 className="font-bold text-amber-900 uppercase tracking-widest text-xs mb-1">Genesis Block</h4>
-                                             <p className="text-[10px] text-amber-800/60 font-mono break-all px-4">{genesisBlock.hash}</p>
-                                             <p className="text-xs text-amber-700 mt-2 italic">"Rooted in the eternal now"</p>
+                                             <h4 className="font-bold text-amber-200 uppercase tracking-widest text-xs mb-1">Genesis Block</h4>
+                                             <p className="text-[10px] text-amber-100/60 font-mono break-all px-4">{genesisBlock.hash}</p>
+                                             <p className="text-xs text-amber-300/80 mt-2 italic">"Rooted in the eternal now"</p>
                                          </div>
                                     </div>
                                 )}
