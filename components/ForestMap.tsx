@@ -1,14 +1,79 @@
-
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { type Lifetree } from '../types';
+
+interface Cluster {
+    id: string; // ID of the center tree
+    center: Lifetree;
+    children: Lifetree[];
+    lat: number;
+    lng: number;
+}
 
 export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree: Lifetree) => void }) => {
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapInstance = useRef<any>(null);
     const markersLayer = useRef<any>(null);
+    
+    // State to track expanded clusters and their pagination page
+    const [expandedClusterId, setExpandedClusterId] = useState<string | null>(null);
+    const [clusterPage, setClusterPage] = useState<number>(0);
+
+    // Lightseed Logo SVG String for Cluster Icon - Updated from user request
+    const logoSvg = `
+    <svg width="100%" height="100%" viewBox="0 0 262 262" xmlns="http://www.w3.org/2000/svg">
+        <defs><clipPath id="c"><circle cx="131" cy="131" r="131" /></clipPath></defs>
+        <g>
+            <circle cx="131" cy="131" r="131" fill="white" stroke="#334155" stroke-width="7" clip-path="url(#c)" />
+            <circle cx="-35.28" cy="-29" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="-35.28" cy="35" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="-35.28" cy="99" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="-35.28" cy="163" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="-35.28" cy="227" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="-35.28" cy="291" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="20.15" cy="3" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="20.15" cy="67" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="20.15" cy="131" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="20.15" cy="195" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="20.15" cy="259" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="75.57" cy="-29" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="75.57" cy="35" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="75.57" cy="99" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="75.57" cy="163" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="75.57" cy="227" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="75.57" cy="291" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="131" cy="3" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="131" cy="67" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="131" cy="131" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="131" cy="195" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="131" cy="259" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="186.43" cy="-29" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="186.43" cy="35" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="186.43" cy="99" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="186.43" cy="163" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="186.43" cy="227" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="186.43" cy="291" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="241.85" cy="3" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="241.85" cy="67" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="241.85" cy="131" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="241.85" cy="195" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="241.85" cy="259" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="297.28" cy="-29" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="297.28" cy="35" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="297.28" cy="99" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="297.28" cy="163" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="297.28" cy="227" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="297.28" cy="291" r="64" fill="none" stroke="#334155" stroke-width=".7" clip-path="url(#c)" />
+            <circle cx="75.57" cy="99" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#c)" />
+            <circle cx="75.57" cy="163" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#c)" />
+            <circle cx="131" cy="67" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#c)" />
+            <circle cx="131" cy="131" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#c)" />
+            <circle cx="131" cy="195" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#c)" />
+            <circle cx="186.43" cy="99" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#c)" />
+            <circle cx="186.43" cy="163" r="16" fill="white" stroke="#334155" stroke-width="3" clip-path="url(#c)" />
+        </g>
+    </svg>`;
 
     useEffect(() => {
-        // Polling loop to wait for Leaflet to be ready from the script tag
         const checkLeaflet = setInterval(() => {
             const L = (window as any).L;
             if (L && mapContainer.current) {
@@ -16,18 +81,11 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
                 initMap(L);
             }
         }, 100);
-
         return () => clearInterval(checkLeaflet);
     }, []);
 
     const initMap = (L: any) => {
-        if (!mapContainer.current) return;
-        
-        // Prevent double initialization
-        if (mapInstance.current) {
-            mapInstance.current.remove();
-            mapInstance.current = null;
-        }
+        if (!mapContainer.current || mapInstance.current) return;
 
         mapInstance.current = L.map(mapContainer.current, {
             zoomControl: false,
@@ -40,137 +98,280 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
             maxZoom: 19
         }).addTo(mapInstance.current);
 
-        // Add zoom control
         L.control.zoom({ position: 'bottomright' }).addTo(mapInstance.current);
-
         markersLayer.current = L.layerGroup().addTo(mapInstance.current);
         
-        // Force resize
+        mapInstance.current.on('zoomend', () => {
+            setExpandedClusterId(null); // Close clusters on zoom
+            updateMarkers(L);
+        });
+
+        // Click on map background closes cluster
+        mapInstance.current.on('click', () => {
+            setExpandedClusterId(null);
+        });
+
         setTimeout(() => {
             mapInstance.current?.invalidateSize();
             updateMarkers(L);
         }, 250);
     }
 
-    const updateMarkers = (L: any) => {
-        if (!markersLayer.current || !mapInstance.current) return;
-        
-        markersLayer.current.clearLayers();
-        const bounds = L.latLngBounds([]);
-        let hasMarkers = false;
-
-        trees.forEach(tree => {
-            if (tree.latitude && tree.longitude) {
-                hasMarkers = true;
-                bounds.extend([tree.latitude, tree.longitude]);
-                
-                // Styling logic
-                const isNature = tree.isNature;
-                const isDanger = tree.status === 'DANGER';
-                const guardianCount = tree.guardians ? tree.guardians.length : 0;
-                
-                let iconHtml = '';
-                
-                if (isNature) {
-                    iconHtml = `
-                    <div class="relative w-12 h-12 hover:scale-110 transition-transform duration-300 group">
-                        <div class="absolute inset-0 bg-sky-500 rounded-full animate-pulse opacity-20"></div>
-                        
-                        <!-- Main Image (Circle) -->
-                        <div class="relative w-12 h-12 rounded-full border-2 border-white shadow-xl overflow-hidden bg-white z-10">
-                            <img src="${tree.imageUrl || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover" />
-                        </div>
-
-                        <!-- Top Left: Shield with Guardian Count -->
-                        <div class="absolute -top-2 -left-2 z-20 w-6 h-6 filter drop-shadow-md">
-                            <svg viewBox="0 0 24 24" fill="#0284c7" stroke="white" stroke-width="2" class="w-full h-full">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                            </svg>
-                            <div class="absolute inset-0 flex items-center justify-center text-white text-[9px] font-bold pt-0.5 font-sans">${guardianCount}</div>
-                        </div>
-
-                        <!-- Top Right: Danger Dot -->
-                        ${isDanger ? `
-                        <div class="absolute -top-1 -right-1 z-20 w-4 h-4 bg-red-500 border-2 border-white rounded-full shadow-md animate-bounce"></div>
-                        ` : ''}
-                    </div>
-                    `;
-                } else {
-                    iconHtml = `
-                    <div class="relative w-12 h-12 hover:scale-110 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-emerald-500 rounded-full animate-ping opacity-20"></div>
-                        <div class="relative w-12 h-12 rounded-full border-2 border-white shadow-xl overflow-hidden bg-white">
-                            <img src="${tree.imageUrl || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover" />
-                        </div>
-                        ${tree.validated ? '<div class="absolute -top-1 -right-1 bg-emerald-500 border border-white w-4 h-4 rounded-full flex items-center justify-center"><div class="w-2 h-2 bg-white rounded-full"></div></div>' : ''}
-                        
-                        ${guardianCount > 0 ? `
-                        <div class="absolute -top-2 -left-2 z-20 w-5 h-5 filter drop-shadow-md opacity-80">
-                            <svg viewBox="0 0 24 24" fill="#64748b" stroke="white" stroke-width="2" class="w-full h-full">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                            </svg>
-                            <div class="absolute inset-0 flex items-center justify-center text-white text-[8px] font-bold pt-0.5 font-sans">${guardianCount}</div>
-                        </div>
-                        ` : ''}
-                    </div>
-                    `;
-                }
-                
-                const customIcon = L.divIcon({
-                    html: iconHtml,
-                    className: '',
-                    iconSize: [48, 48],
-                    iconAnchor: [24, 24],
-                    popupAnchor: [0, -24]
-                });
-
-                const marker = L.marker([tree.latitude, tree.longitude], { icon: customIcon });
-                
-                // Create custom popup container
-                const container = document.createElement('div');
-                container.innerHTML = `
-                    <div class="text-center p-2 min-w-[150px]">
-                        <h3 class="font-bold text-lg text-slate-800 mb-1">${tree.name}</h3>
-                        ${isNature ? '<span class="text-[10px] bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full font-bold uppercase mb-2 inline-block">Nature Guardian</span>' : ''}
-                        <p class="text-xs text-slate-500 line-clamp-2 italic mb-2">"${tree.body}"</p>
-                        ${!isNature ? `<div class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full inline-block">Block: ${tree.blockHeight || 0}</div>` : ''}
-                        ${guardianCount > 0 ? `<div class="mt-1 text-[10px] text-slate-400">🛡️ ${guardianCount} Guardian${guardianCount !== 1 ? 's' : ''}</div>` : ''}
-                        <button class="view-btn mt-3 bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-emerald-700 w-full transition-colors shadow-sm flex items-center justify-center gap-1">
-                            <span>View Tree</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-                        </button>
-                    </div>
-                `;
-
-                // Add event listener to the button inside the container
-                const btn = container.querySelector('.view-btn');
-                if (btn) {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        onView(tree);
-                    });
-                }
-
-                marker.bindPopup(container).addTo(markersLayer.current);
-            }
-        });
-
-        if (hasMarkers && mapInstance.current) {
-            mapInstance.current.fitBounds(bounds, { 
-                padding: [50, 50], 
-                maxZoom: 14,
-                animate: true 
-            });
-        }
-    }
-
-    // React to trees changing after initial load
+    // Re-render markers when trees change or expansion state changes
     useEffect(() => {
         const L = (window as any).L;
         if (L && mapInstance.current) {
             updateMarkers(L);
         }
-    }, [trees]);
+    }, [trees, expandedClusterId, clusterPage]);
+
+    const getHtmlForTree = (tree: Lifetree, isSmall = false) => {
+        const isNature = tree.isNature;
+        const isDanger = tree.status === 'DANGER';
+        const guardianCount = tree.guardians ? tree.guardians.length : 0;
+        const sizeClass = isSmall ? 'w-10 h-10' : 'w-12 h-12';
+        const borderClass = isSmall ? 'border' : 'border-2';
+        
+        // Prioritize latestGrowthUrl over standard imageUrl
+        const displayImage = tree.latestGrowthUrl || tree.imageUrl || 'https://via.placeholder.com/150';
+
+        if (isNature) {
+            return `
+            <div class="relative ${sizeClass} hover:scale-110 transition-transform duration-300 group">
+                <div class="absolute inset-0 bg-sky-500 rounded-full animate-pulse opacity-20"></div>
+                <div class="relative ${sizeClass} rounded-full ${borderClass} border-white shadow-xl overflow-hidden bg-white z-10">
+                    <img src="${displayImage}" class="w-full h-full object-cover" />
+                </div>
+                <div class="absolute -top-1 -right-1 z-20 w-4 h-4 bg-sky-500 border border-white rounded-full flex items-center justify-center text-[8px] text-white font-bold shadow-md">
+                    ${guardianCount}
+                </div>
+                ${isDanger ? `<div class="absolute -top-1 -left-1 z-20 w-3 h-3 bg-red-500 border border-white rounded-full animate-bounce"></div>` : ''}
+            </div>`;
+        }
+        
+        return `
+        <div class="relative ${sizeClass} hover:scale-110 transition-transform duration-300">
+            <div class="absolute inset-0 bg-emerald-500 rounded-full animate-ping opacity-20"></div>
+            <div class="relative ${sizeClass} rounded-full ${borderClass} border-white shadow-xl overflow-hidden bg-white">
+                <img src="${displayImage}" class="w-full h-full object-cover" />
+            </div>
+            ${tree.validated ? '<div class="absolute -top-1 -right-1 bg-emerald-500 border border-white w-3 h-3 rounded-full"></div>' : ''}
+        </div>`;
+    }
+
+    const createPopupContent = (tree: Lifetree) => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <div class="text-center p-2 min-w-[150px]">
+                <h3 class="font-bold text-lg text-slate-800 mb-1">${tree.name}</h3>
+                <p class="text-xs text-slate-500 line-clamp-2 italic mb-2">"${tree.body}"</p>
+                <button class="view-btn mt-2 bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-full w-full">View Tree</button>
+            </div>
+        `;
+        div.querySelector('.view-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            onView(tree);
+        });
+        return div;
+    }
+
+    const updateMarkers = (L: any) => {
+        if (!markersLayer.current || !mapInstance.current) return;
+        markersLayer.current.clearLayers();
+
+        // 1. Cluster Logic
+        // We use pixels to determine clustering based on current zoom
+        // Modified threshold to 50px so clustering only happens when markers (approx 48px)
+        // physically touch or overlap, preventing premature clustering.
+        const CLUSTER_THRESHOLD_PX = 50; 
+        const clusters: Cluster[] = [];
+        const processed = new Set<string>();
+        const map = mapInstance.current;
+
+        // Sort trees by age (Oldest first) to ensure the oldest is the "Seed" of the cluster
+        const sortedTrees = [...trees].sort((a, b) => 
+            (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)
+        );
+
+        sortedTrees.forEach(tree => {
+            if (processed.has(tree.id)) return;
+            if (!tree.latitude || !tree.longitude) return;
+
+            const treePoint = map.latLngToLayerPoint([tree.latitude, tree.longitude]);
+            const cluster: Cluster = {
+                id: tree.id,
+                center: tree,
+                children: [],
+                lat: tree.latitude,
+                lng: tree.longitude
+            };
+            processed.add(tree.id);
+
+            // Find neighbors
+            sortedTrees.forEach(other => {
+                if (processed.has(other.id)) return;
+                if (!other.latitude || !other.longitude) return;
+
+                const otherPoint = map.latLngToLayerPoint([other.latitude, other.longitude]);
+                if (treePoint.distanceTo(otherPoint) < CLUSTER_THRESHOLD_PX) {
+                    cluster.children.push(other);
+                    processed.add(other.id);
+                }
+            });
+
+            clusters.push(cluster);
+        });
+
+        // 2. Render Clusters/Markers
+        clusters.forEach(cluster => {
+            const isExpanded = expandedClusterId === cluster.id;
+            const count = 1 + cluster.children.length; // Center + Children
+
+            if (count === 1) {
+                // SINGLE TREE
+                const icon = L.divIcon({
+                    html: getHtmlForTree(cluster.center),
+                    className: '',
+                    iconSize: [48, 48],
+                    iconAnchor: [24, 24],
+                    popupAnchor: [0, -24]
+                });
+                L.marker([cluster.lat, cluster.lng], { icon })
+                 .addTo(markersLayer.current)
+                 .bindPopup(createPopupContent(cluster.center));
+            } else {
+                // CLUSTER
+                if (isExpanded) {
+                    // --- SEED OF LIFE EXPANSION ---
+                    
+                    // 1. Render Center (Oldest)
+                    const centerIcon = L.divIcon({
+                        html: getHtmlForTree(cluster.center),
+                        className: 'z-[1000]', // Ensure center is on top
+                        iconSize: [48, 48],
+                        iconAnchor: [24, 24]
+                    });
+                    
+                    const centerMarker = L.marker([cluster.lat, cluster.lng], { icon: centerIcon })
+                        .addTo(markersLayer.current);
+                    
+                    centerMarker.bindPopup(createPopupContent(cluster.center));
+
+                    // 2. Render Petals (Paged)
+                    const ITEMS_PER_PAGE = 6;
+                    const totalChildren = cluster.children.length;
+                    
+                    const showNextButton = totalChildren > (clusterPage + 1) * ITEMS_PER_PAGE;
+                    const renderCount = showNextButton ? 5 : 6;
+                    
+                    const startIdx = clusterPage * ITEMS_PER_PAGE;
+                    const visibleChildren = cluster.children.slice(startIdx, startIdx + renderCount);
+
+                    visibleChildren.forEach((child, index) => {
+                        // Calculate position in circle (Seed of Life pattern)
+                        // To make them "touch" or "kiss":
+                        // Center Radius (24px) + Child Radius (20px) + Gap (1px) = 45px Radius
+                        const angle = (index * 60) * (Math.PI / 180); 
+                        const radius = 45; 
+                        
+                        const centerPoint = map.latLngToLayerPoint([cluster.lat, cluster.lng]);
+                        const childPoint = L.point(
+                            centerPoint.x + radius * Math.cos(angle),
+                            centerPoint.y + radius * Math.sin(angle)
+                        );
+                        const childLatLng = map.layerPointToLatLng(childPoint);
+
+                        // Draw Stem Line (Optional, keeping it subtle as per previous structure)
+                        L.polyline([[cluster.lat, cluster.lng], childLatLng], {
+                            color: '#5D4037',
+                            weight: 1,
+                            opacity: 0.2
+                        }).addTo(markersLayer.current);
+
+                        const childIcon = L.divIcon({
+                            html: getHtmlForTree(child, true), // Small version (40px)
+                            className: 'animate-in fade-in zoom-in duration-300',
+                            iconSize: [40, 40],
+                            iconAnchor: [20, 20],
+                            popupAnchor: [0, -20]
+                        });
+
+                        L.marker(childLatLng, { icon: childIcon })
+                         .addTo(markersLayer.current)
+                         .bindPopup(createPopupContent(child));
+                    });
+
+                    // Render "More" Button if needed (at the 6th position usually)
+                    if (showNextButton || clusterPage > 0) {
+                        // Position at 300 degrees (bottom rightish) or where the 6th item would be
+                        const nextIndex = 5; 
+                        const angle = (nextIndex * 60) * (Math.PI / 180);
+                        const radius = 45;
+                        const centerPoint = map.latLngToLayerPoint([cluster.lat, cluster.lng]);
+                        const btnPoint = L.point(
+                            centerPoint.x + radius * Math.cos(angle),
+                            centerPoint.y + radius * Math.sin(angle)
+                        );
+                        const btnLatLng = map.layerPointToLatLng(btnPoint);
+
+                        const btnHtml = `
+                        <div class="w-10 h-10 rounded-full bg-amber-500 border-2 border-white shadow-lg flex items-center justify-center text-white cursor-pointer hover:bg-amber-600 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+                        </div>`;
+
+                        const btnIcon = L.divIcon({
+                            html: btnHtml,
+                            className: '',
+                            iconSize: [40, 40],
+                            iconAnchor: [20, 20]
+                        });
+
+                        const btnMarker = L.marker(btnLatLng, { icon: btnIcon }).addTo(markersLayer.current);
+                        btnMarker.on('click', (e: any) => {
+                            L.DomEvent.stopPropagation(e);
+                            if (showNextButton) {
+                                setClusterPage(p => p + 1);
+                            } else {
+                                setClusterPage(0); // Reset to start
+                            }
+                        });
+                    }
+
+                } else {
+                    // --- COLLAPSED CLUSTER (Logo) ---
+                    // Using w-20 h-20 (80px) container to show the SVG clearly
+                    // SVG is set to fill width/height
+                    const html = `
+                    <div class="relative w-16 h-16 group cursor-pointer hover:scale-110 transition-transform duration-300">
+                        <div class="absolute inset-0 drop-shadow-xl">
+                            ${logoSvg}
+                        </div>
+                        <div class="absolute top-0 right-0 w-6 h-6 bg-emerald-600 border-2 border-white text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md z-20">
+                            ${count}
+                        </div>
+                    </div>
+                    `;
+
+                    const icon = L.divIcon({
+                        html: html,
+                        className: '',
+                        iconSize: [64, 64],
+                        iconAnchor: [32, 32]
+                    });
+
+                    const marker = L.marker([cluster.lat, cluster.lng], { icon });
+                    marker.on('click', (e: any) => {
+                        L.DomEvent.stopPropagation(e);
+                        // Center map on cluster slightly to give space for expansion
+                        map.setView([cluster.lat, cluster.lng], map.getZoom(), { animate: true });
+                        setExpandedClusterId(cluster.id);
+                        setClusterPage(0);
+                    });
+                    marker.addTo(markersLayer.current);
+                }
+            }
+        });
+    }
 
     useEffect(() => {
         return () => {
@@ -181,6 +382,5 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
         };
     }, []);
 
-    // Explicit style to ensure it occupies space
     return <div ref={mapContainer} style={{ width: '100%', height: '60vh', minHeight: '400px', zIndex: 1 }} className="w-full rounded-xl shadow-inner border border-slate-200 bg-slate-100" />;
 };
