@@ -807,6 +807,64 @@ const AppContent = () => {
 
             {showGrowthPlayer && !selectedTree && <GrowthPlayerModal treeId={showGrowthPlayer} onClose={() => setShowGrowthPlayer(null)} />}
 
+            {showVisionModal && (
+                <Modal title={t('create_vision')} onClose={() => setShowVisionModal(false)}>
+                    <form onSubmit={handleCreateVision} className="flex flex-col gap-4">
+                        <ImagePicker 
+                            onChange={(e: any) => handleImageUpload(e.target.files[0], `visions/${Date.now()}`).then(setVisionImageUrl)} 
+                            previewUrl={visionImageUrl} 
+                            loading={uploading} 
+                        />
+                        
+                        <div className="flex justify-end">
+                             <button 
+                                type="button" 
+                                onClick={handleGenerateVisionImage}
+                                disabled={uploading || !visionBody}
+                                className="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-bold hover:bg-amber-200 disabled:opacity-50 flex items-center gap-1"
+                             >
+                                 <Icons.Sparkles /> 
+                                 <span>{t('generate_image')}</span>
+                             </button>
+                        </div>
+
+                        <input 
+                            dir="auto" 
+                            className="block w-full border border-slate-300 p-2 rounded-lg" 
+                            placeholder={t('title')} 
+                            value={visionTitle} 
+                            onChange={e=>setVisionTitle(e.target.value)} 
+                            required 
+                        />
+                        
+                        <textarea 
+                            dir="auto" 
+                            className="block w-full border border-slate-300 p-2 rounded-lg min-h-[100px]" 
+                            placeholder={t('body')} 
+                            value={visionBody} 
+                            onChange={e=>setVisionBody(e.target.value)} 
+                            required 
+                        />
+
+                        <input 
+                            dir="ltr" 
+                            className="block w-full border border-slate-300 p-2 rounded-lg" 
+                            placeholder={t('webpage')} 
+                            value={visionLink} 
+                            onChange={e=>setVisionLink(e.target.value)} 
+                        />
+
+                        <button 
+                            type="submit" 
+                            disabled={uploading || isSubmitting} 
+                            className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-bold shadow-md disabled:opacity-50"
+                        >
+                            {isSubmitting ? t('creating') : t('create_vision')}
+                        </button>
+                    </form>
+                </Modal>
+            )}
+
             {showPlantModal && (
                 <Modal 
                     title={treeType === 'GUARDED' ? t('guard_tree') : t('plant_lifetree')} 

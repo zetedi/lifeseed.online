@@ -140,7 +140,7 @@ export const Dashboard = ({ lightseed, stats, firstTreeImage, onSetTab, onPlant,
             {/* Box 3: Oracle (Dynamic Quote) */}
             <div onClick={() => onSetTab('oracle')} className="relative h-56 md:h-64 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
                 <div className="absolute inset-0 bg-slate-900"></div>
-                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=800" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+                <img src="/oracle.jpg" className="absolute inset-0 w-full h-full object-cover opacity-30" alt="Oracle" />
                 <div className="relative h-full p-4 flex flex-col justify-between text-white">
                     <div className="flex justify-between items-start">
                         <h2 className="text-sm sm:text-lg font-bold uppercase tracking-widest text-white drop-shadow-md">{t('oracle')}</h2>
