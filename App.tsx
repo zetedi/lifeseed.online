@@ -564,30 +564,6 @@ const AppContent = () => {
 
         return (
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-[80vh]">
-                {tab === 'forest' && (
-                    <div 
-                        onClick={() => { setTreeType('LIFETREE'); setShowPlantModal(true); }}
-                        className="relative w-full h-32 mb-4 rounded-2xl overflow-hidden shadow-lg group cursor-pointer"
-                    >
-                        <img 
-                            src="/mother.jpg" 
-                            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
-                            alt="Mother Tree"
-                            onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                target.parentElement!.classList.add('bg-gradient-to-r', 'from-emerald-800', 'to-emerald-900');
-                            }}
-                        />
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <h2 className="text-3xl font-light text-white tracking-[0.2em] uppercase drop-shadow-xl border-y border-white/20 py-2 px-6 backdrop-blur-sm bg-white/5">
-                                {t('be_mother_tree')}
-                            </h2>
-                        </div>
-                    </div>
-                )}
-
                 {tab !== 'matches' && tab !== 'profile' && tab !== 'oracle' && tab !== 'about' && tab !== 'dashboard' && (
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                         <div className="relative w-full md:max-w-md">
@@ -609,6 +585,17 @@ const AppContent = () => {
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
+                            {tab === 'forest' && (
+                                <button 
+                                    onClick={() => { setTreeType('LIFETREE'); setShowPlantModal(true); }}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center gap-2 transition-colors h-10"
+                                >
+                                    <Icons.Tree />
+                                    <span className="hidden sm:inline">{t('plant_lifetree')}</span>
+                                    <span className="sm:hidden">Plant</span>
+                                </button>
+                            )}
+
                             {tab === 'forest' && myTrees.length > 0 && (
                                 <button 
                                     onClick={() => { setTreeType('GUARDED'); setShowPlantModal(true); }}
