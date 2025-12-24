@@ -93,9 +93,9 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
             attributionControl: false
         }).setView([20, 0], 2);
         
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap & CartoDB',
-            subdomains: 'abcd',
+        // Use Esri World Imagery for Globe/Earth look
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
             maxZoom: 19
         }).addTo(mapInstance.current);
 
@@ -287,10 +287,11 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
                         const childLatLng = map.layerPointToLatLng(childPoint);
 
                         // Draw Stem Line (Optional, keeping it subtle as per previous structure)
+                        // Using white/opacity to be visible on dark satellite map
                         L.polyline([[cluster.lat, cluster.lng], childLatLng], {
-                            color: '#5D4037',
+                            color: 'white',
                             weight: 1,
-                            opacity: 0.2
+                            opacity: 0.3
                         }).addTo(markersLayer.current);
 
                         const childIcon = L.divIcon({
@@ -401,7 +402,7 @@ export const ForestMap = ({ trees, onView }: { trees: Lifetree[], onView: (tree:
                     opacity: 0;
                 }
             `}</style>
-            <div ref={mapContainer} style={{ width: '100%', height: '60vh', minHeight: '400px', zIndex: 1 }} className="w-full rounded-xl shadow-inner border border-slate-200 bg-slate-100" />
+            <div ref={mapContainer} style={{ width: '100%', height: '60vh', minHeight: '400px', zIndex: 1 }} className="w-full rounded-xl shadow-inner border border-slate-700 bg-slate-900" />
         </>
     );
 };
