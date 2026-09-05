@@ -453,6 +453,11 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isOwner(userId) || isStaff();
       allow create, delete: if isOwner(userId) || isStaff();
+      // PUSH (ring 2026-09-06): a being's own devices — theirs to add and drop, no one else's to
+      // see. functions/onReachCreated reads them with the admin hand when a reach arrives.
+      match /pushSubscriptions/{subId} {
+        allow read, write: if isOwner(userId) || isStaff();
+      }
       // `invitesRemaining` is a server-authoritative allowance. From the client a user may only
       // SPEND it (lower it) or hold it within the self-serve allotment (144, granted on community
       // creation) — it can never be inflated past that, closing the "set invitesRemaining:1e6 →

@@ -64,6 +64,8 @@ export default defineConfig(({ mode }) => {
             ],
           },
           workbox: {
+            // The push half of the worker (public/push-sw.js) rides inside the generated one.
+            importScripts: ['push-sw.js'],
             globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
             // Leave the media library (webp/mp4) to the network — precaching it would bloat installs.
             maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,

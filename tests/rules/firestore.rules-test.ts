@@ -2126,6 +2126,18 @@ describe('offerings: only the author flips the lifecycle switch, and only the sw
   });
 });
 
+describe('push subscriptions — a being\'s own devices', () => {
+  const sub = { endpoint: 'https://push.example/abc', keys: { p256dh: 'p', auth: 'a' } };
+  it('the owner adds, reads and drops their own; no other hand may', async () => {
+    await assertSucceeds(setDoc(doc(db(ALICE), 'users', ALICE, 'pushSubscriptions', 'dev1'), sub));
+    await assertSucceeds(getDoc(doc(db(ALICE), 'users', ALICE, 'pushSubscriptions', 'dev1')));
+    await assertFails(setDoc(doc(db(MALLORY), 'users', ALICE, 'pushSubscriptions', 'dev2'), sub));
+    await assertFails(getDoc(doc(db(MALLORY), 'users', ALICE, 'pushSubscriptions', 'dev1')));
+    await assertFails(getDoc(doc(db(), 'users', ALICE, 'pushSubscriptions', 'dev1')));
+    await assertSucceeds(deleteDoc(doc(db(ALICE), 'users', ALICE, 'pushSubscriptions', 'dev1')));
+  });
+});
+
 describe('the offering of care — born open, withdrawn by its author, declined by the receiver, accepted by the server alone', () => {
   const answer = (status: string, extra: Record<string, unknown> = {}) => ({ offeringStatus: status, offeringAnsweredAt: serverTimestamp(), updatedAt: serverTimestamp(), ...extra });
 

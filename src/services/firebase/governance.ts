@@ -5,6 +5,7 @@ import { type Pulse, type Community, type Decision, type DecisionNature, type De
 import { createBlock } from '../../utils/crypto';
 import { uuidv7 } from '../../utils/id';
 import { type PulseVisibility } from '../../domain/pulse';
+import { toBase62 } from '../../domain/lid62';
 import {
   DECISION_EPOCH_DOMAIN, decisionIdentity, decisionEnacted, decisionAuthoritative,
   decisionEpochSignaturePayload, verifiedDecisionSigners, decisionDeletable,
@@ -490,6 +491,46 @@ export const createOffering = async (data: Partial<Pulse> & { title: string }) =
         hash,
         createdAt: serverTimestamp(),
     });
+    // The offering of care knocks: a private reach to the receiver's keeper, in the thread between
+    // the offerer's tree and the receiver (a vision's root tree), carrying the leaf's door. A nudge,
+    // not a chain block (the WATER_ALERT shape) — and the push law (domain/push) opens the door.
+    const keeper = typeof data.offeredToKeeperUid === 'string' ? data.offeredToKeeperUid : '';
+    const fromTreeId = typeof data.offeringFromTreeId === 'string' ? data.offeringFromTreeId : '';
+    if (keeper && data.authorId && keeper !== data.authorId && fromTreeId) {
+        const partnerTreeId = (data.offeredToKind === 'tree' ? data.offeredToId : (data as { offeredToRootTreeId?: string }).offeredToRootTreeId) || keeper;
+        const door = `/b/${toBase62(lid)}`;
+        const text = `${data.authorName || 'A being'} offered «${data.title}» to ${data.offeredToName || (data.offeredToKind === 'vision' ? 'your vision' : 'your tree')}. Answer on its leaf: ${door}`;
+        try {
+            await addDoc(pulsesCollection, {
+                lid: uuidv7(),
+                lifetreeId: fromTreeId,
+                type: 'reach',
+                visibility: 'private',
+                title: `Reach: ${data.offeringFromTreeName || 'a tree'} -> ${data.offeredToName || 'a being'}`,
+                body: text,
+                content: text,
+                door,
+                reachTreeId: partnerTreeId,
+                reachTreeName: data.offeredToName || '',
+                recipientName: data.offeredToName || '',
+                recipientUid: keeper,
+                participantUids: [data.authorId, keeper],
+                threadId: [fromTreeId, partnerTreeId].sort().join('__'),
+                seenBy: [],
+                authorId: data.authorId,
+                authorName: data.offeringFromTreeName || data.authorName || 'A being',
+                authorPhoto: data.authorPhoto || undefined,
+                domain,
+                loveCount: 0,
+                commentCount: 0,
+                previousHash: 'OFFER_NOTICE',
+                hash: uuidv7(),
+                createdAt: serverTimestamp(),
+            });
+        } catch (e) {
+            console.warn('[lightseed] the offering stands; its notice could not be sent', e);
+        }
+    }
     return { id: ref.id, lid, ...payload, loveCount: 0, commentCount: 0, previousHash: 'OFFERING', hash } as Pulse;
 };
 

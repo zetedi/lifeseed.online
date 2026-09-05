@@ -121,6 +121,7 @@ export const OfferModal = ({ onClose, onCreated, offering, onSaved, to }: {
                     ...(to.lid ? { offeredToLid: to.lid } : {}),
                     ...(to.name ? { offeredToName: to.name } : {}),
                     ...(to.keeperUid ? { offeredToKeeperUid: to.keeperUid } : {}),
+                    ...(to.rootTreeId ? { offeredToRootTreeId: to.rootTreeId } : {}),
                     offeringFromTreeId: fromTreeId,
                     ...(standing.find(tr => tr.id === fromTreeId)?.name ? { offeringFromTreeName: standing.find(tr => tr.id === fromTreeId)!.name } : {}),
                     offeringStatus: 'open' as const,

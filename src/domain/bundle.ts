@@ -31,7 +31,7 @@ export const BUNDLE_FORMAT_VERSION = 1 as const;
 // Chain roots that are NOT another block's hash — a pulse whose previousHash is one of
 // these is its own beginning (person-reaches and standalone records), never a broken link.
 // Mirrored from the services' sentinels; the bundle test greps them true.
-export const NON_CHAIN_ROOTS = new Set(['0', 'PERSON_REACH', 'DECISION', 'EVENT', 'OFFERING', 'COMMUNITY_EVENT', 'WATER_ALERT', 'LIGHT_HOUSE']);
+export const NON_CHAIN_ROOTS = new Set(['0', 'PERSON_REACH', 'DECISION', 'EVENT', 'OFFERING', 'COMMUNITY_EVENT', 'WATER_ALERT', 'OFFER_NOTICE', 'LIGHT_HOUSE']);
 
 // ── The travel plan ─────────────────────────────────────────────────────────────────────
 // One rule per collection signature. `path` uses '*' for id segments ('lifetrees/*/loves');
@@ -59,6 +59,7 @@ export interface TravelRule {
 export const TRAVEL_PLAN: readonly TravelRule[] = [
   // Identity & custody
   { path: 'users', mode: 'verbatim', idIsLocalUid: true },
+  { path: 'users/*/pushSubscriptions', mode: 'excluded', reason: "a device's push endpoint binds to this node's VAPID key and a browser session; the far node knocks with its own key, so a being re-allows there" },
   { path: 'persons', mode: 'verbatim', idIsLocalUid: true },
   { path: 'persons/*/keys', mode: 'verbatim', deterministicIds: 'sha256 fingerprint of the pubkey' },
   { path: 'persons/*/keyEvents', mode: 'verbatim', deterministicIds: 'anchor_<fp> | freeze_<epochId> | rotation/recovery event ids' },

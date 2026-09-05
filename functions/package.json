@@ -18,9 +18,11 @@
     "@google/generative-ai": "^0.24.1",
     "firebase-admin": "^14.2.0",
     "firebase-functions": "^7.3.2",
-    "sharp": "^0.35.4"
+    "sharp": "^0.35.4",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@types/web-push": "^3.6.4",
     "typescript": "^5.8.2"
   },
   "private": true

@@ -9,6 +9,8 @@ import { SectionTitle } from '../ui/SectionTitle';
 import { Modal } from '../ui/Modal';
 import { SigningKeyModal } from '../modals/SigningKeyModal';
 import { speak } from '../../utils/translations';
+import { useSession } from '../../contexts/SessionContext';
+import { pushState, enablePush, disablePush, type PushState } from '../../services/push';
 
 import { Picture } from '../ui/Picture';
 // Module-scope (not created during render) so React keeps the DOM node between renders.
@@ -55,6 +57,18 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
   const { t } = useLanguage();
   const [togglingNewsletter, setTogglingNewsletter] = useState(false);
   const [togglingDmEmail, setTogglingDmEmail] = useState(false);
+  // PUSH on this device (ring 2026-09-06): the state is the browser's, read on mount.
+  const { lightseed } = useSession();
+  const [push, setPush] = useState<PushState>('unsupported');
+  const [togglingPush, setTogglingPush] = useState(false);
+  useEffect(() => { let live = true; pushState().then(st => { if (live) setPush(st); }); return () => { live = false; }; }, []);
+  const handlePushToggle = async () => {
+    if (!lightseed || togglingPush) return;
+    setTogglingPush(true);
+    try { setPush(push === 'on' ? await disablePush(lightseed.uid) : await enablePush(lightseed.uid)); }
+    catch { notify(speak('err_generic')); }
+    setTogglingPush(false);
+  };
   const [exporting, setExporting] = useState(false);
   const [togglingValidatedReach, setTogglingValidatedReach] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -181,6 +195,13 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
             <p className="text-xs text-slate-500">{t('toggle_anytime')}</p>
           </div>
           <Toggle on={dmEmailNotifications} onClick={handleDmEmailToggle} disabled={togglingDmEmail || !email} />
+        </div>
+        <div className="p-4 flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className="font-semibold text-slate-800 text-sm">{t('push_toggle')}</p>
+            <p className="text-xs text-slate-500">{push === 'unsupported' ? t('push_unsupported') : push === 'denied' ? t('push_denied') : t('push_note')}</p>
+          </div>
+          <Toggle on={push === 'on'} onClick={handlePushToggle} disabled={togglingPush || push === 'unsupported' || push === 'denied'} />
         </div>
         <div className="p-4 flex items-center justify-between gap-4">
           <div className="min-w-0">

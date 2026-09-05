@@ -6,6 +6,29 @@ with new ones (this file is itself append-only in spirit).
 
 ---
 
+**2026-09-06 · The offering knocks: a notice to the keeper, and push on the device** — an
+offering of care waited on its leaf for a keeper who had no way to know. Two doors, one ring.
+(1) *The notice*: createOffering now posts a private reach to the receiver's keeper, in the
+thread between the offerer's tree and the receiver (a vision's root tree), carrying the leaf's
+door (`door: /b/<lid62>`) — a nudge in the WATER_ALERT shape, never a chain block; the offering
+stands even if the notice fails. (2) *Push*: the seed is a PWA, so the browser may hand the node
+a subscription; the law is domain/push (pushSubscriptionIdOf — the endpoint's digest, so a device
+re-subscribing lands on its own document; notificationOf — a reach read into one small notice:
+the author as title, the words trimmed, the door it carries or the app's root, the thread as tag
+so a burst collapses), mirrored in functions/src/push.ts and held by tests/push.test.ts. The
+subscription rests under users/{uid}/pushSubscriptions, the owner's alone (rules, tested); the
+worker's push half is public/push-sw.js imported into the generated service worker
+(vite.config workbox.importScripts); functions/onReachCreated — which already emailed — now
+knocks every recipient's devices first, dropping dead subscriptions (404/410); the VAPID
+private key is a functions secret, the public half the client's. The switch lives in Profile →
+Settings ("Notifications on this device"), honest about iOS: install to the home screen first.
+REJECTED: Firebase Cloud Messaging for web (a console-minted key pair and another SDK where
+web-push and one secret suffice); a native app for notifications alone (the PWA knocks on
+Android and on installed iOS today — the app earns its place when tapping and tags become
+daily acts, ring to come).
+
+---
+
 **2026-09-06 · Care with an offering: accepted on its leaf, minted on both chains** — the
 keeper asked that people may care for trees and visions with an OFFERING, that the offering
 be answered on its own leaf with a green yes/no, withdrawn until answered, and on acceptance

@@ -36,6 +36,7 @@ export interface OfferedTo {
     lid?: string;
     name?: string;
     keeperUid?: string; // the tree's keeper / the vision's author, denormalized for the leaf
+    rootTreeId?: string; // a vision's root tree — the thread the keeper's notice lands in
 }
 
 export interface OfferingDraft {

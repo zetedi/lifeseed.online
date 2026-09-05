@@ -14,6 +14,9 @@ import { resolveTxt } from "node:dns/promises";
 import { judgeWitness, kindleDayKeyFromMs, uuidv7, releaseRay } from "./mint";
 import { entryFor, COLLECTION_FOR_KIND } from "./beingIndex";
 import { faceFeedOf, feedDomainOf } from "./faceEvents";
+import { notificationOf } from "./push";
+import { defineSecret } from "firebase-functions/params";
+import webpush from "web-push";
 import { judgeOfferingAccept, offeringTwinBlocks, type OfferedToKind } from "./offering";
 import { createBlock, computeCanonicalHash, BLOCK_HASH_VERSION } from "./chain";
 import { FACE_PREVIEW_MAX_BYTES, facePreviewAttempts, facePreviewDoorOf, facePreviewKeyOf, facePreviewUrlOf } from "./facePreview";
@@ -772,7 +775,13 @@ export const sendSystemEmail = onCall({ cors: true }, async (request) => {
 // notifications are ON by default for everyone (early network) — only an explicit
 // users/{uid}.emailNotifications.directMessages === false opts out. Newsletter
 // subscription status is intentionally NOT used here.
-export const onReachCreated = onDocumentCreated("pulses/{pulseId}", async (event) => {
+// PUSH (ring 2026-09-06): the private half of the VAPID pair is a secret; the public half is
+// the client's (services/push.ts). The subject is the node keeper's contact, as the spec asks.
+const VAPID_PRIVATE_KEY = defineSecret("VAPID_PRIVATE_KEY");
+const VAPID_PUBLIC_KEY = "BHHrMXnTTVSfakF1_z8O4ghj6l8wChMQlYnSiihaVG77KbXZbeJeuU_JygukoRtv2nTKcoBw3_QdhFpznS7JvDU";
+const VAPID_SUBJECT = "mailto:zetedi@gmail.com";
+
+export const onReachCreated = onDocumentCreated({ document: "pulses/{pulseId}", secrets: [VAPID_PRIVATE_KEY] }, async (event) => {
     const snap = event.data;
     if (!snap) return;
     const pulse = snap.data() as any;
@@ -785,6 +794,32 @@ export const onReachCreated = onDocumentCreated("pulses/{pulseId}", async (event
     const recipients = (participantUids.length ? participantUids : (pulse.recipientUid ? [pulse.recipientUid] : []))
         .filter((uid: string) => uid && uid !== pulse.authorId);
     if (recipients.length === 0) return;
+
+    // PUSH: every recipient's devices are knocked with the notice the push law shapes (./push,
+    // mirrored from domain/push) — the offering of care's notice to a keeper among them. A dead
+    // subscription (404 / 410) is dropped; nothing here throttles, a knock is one line.
+    const origin = typeof pulse.domain === "string" && pulse.domain ? `https://${pulse.domain}` : "https://lightseed.online";
+    const notice = notificationOf(pulse, origin);
+    if (notice && VAPID_PRIVATE_KEY.value()) {
+        webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY.value());
+        await Promise.all(recipients.map(async (uid: string) => {
+            try {
+                const subs = await db.collection(`users/${uid}/pushSubscriptions`).get();
+                await Promise.all(subs.docs.map(async (d) => {
+                    const sub = d.data() as { endpoint?: string; keys?: { p256dh?: string; auth?: string } };
+                    if (!sub.endpoint || !sub.keys?.p256dh || !sub.keys?.auth) return;
+                    try {
+                        await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth } }, JSON.stringify(notice), { TTL: 3600 });
+                    } catch (e: any) {
+                        if (e?.statusCode === 404 || e?.statusCode === 410) await d.ref.delete().catch(() => undefined);
+                        else console.warn(`push to ${uid} failed:`, e?.statusCode || e);
+                    }
+                }));
+            } catch (e) {
+                console.warn(`push subscriptions of ${uid} unreadable:`, e);
+            }
+        }));
+    }
 
     // Basic per-thread throttle: at most one DM email per thread per recipient within this
     // window, so a burst of messages in one thread doesn't flood any one inbox.

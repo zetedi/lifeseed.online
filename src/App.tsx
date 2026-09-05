@@ -1509,7 +1509,7 @@ const AppContent = () => {
                             myTrees={myTrees}
                             onGrow={(v) => openVisionGrowth(v)}
                             onViewPulse={(p) => setSelectedPulse(p)}
-                            onOffer={(v) => { setOfferTo({ kind: 'vision', id: v.id, lid: v.lid, name: v.title, keeperUid: v.authorId }); setShowOfferModal(true); }}
+                            onOffer={(v) => { setOfferTo({ kind: 'vision', id: v.id, lid: v.lid, name: v.title, keeperUid: v.authorId, rootTreeId: v.lifetreeId }); setShowOfferModal(true); }}
                             onViewTree={(tree) => { setSelectedVision(null); setSelectedTree(tree); }}
                             hostStrictScope={(impersonatedCommunity || hostCommunity)?.strictScope}
                         />

@@ -101,6 +101,8 @@ export interface Pulse extends Being {
   offeredToLid?: string;
   offeredToName?: string;
   offeredToKeeperUid?: string;   // the tree's keeper / the vision's author, for the leaf's eye
+  offeredToRootTreeId?: string;  // a vision's root tree — where the keeper's notice lands
+  door?: string;                 // a reach may carry a /b/ door the push opens (domain/push)
   offeringFromTreeId?: string;   // the offerer's own tree, whose chain carries its twin block
   offeringFromTreeName?: string;
   offeringStatus?: 'open' | 'accepted' | 'withdrawn' | 'declined';
