@@ -6,6 +6,25 @@ with new ones (this file is itself append-only in spirit).
 
 ---
 
+**2026-09-05 · A shared door hands over a small face** — with the label honest (ring below),
+the shared tree's card still failed where it matters most: WhatsApp refuses an og:image
+much over 300 KB, and a tree's latest watering photo weighs 2–4 MB (a logo, 28). Rather
+than rewrite stored bytes, the /b/ card now points og:image (and twitter:image) at
+/face/<door>.jpg, a new function: the being resolved through the same public-only gate as
+the card, its photo fetched bounded (40 MB, 20 s), decoded and fitted once with sharp
+(upright by EXIF, flattened onto the night, never enlarged), then JPEG-encoded down a
+ladder of (edge, quality) — 1200/960/720 × 82/70/58 — until it weighs under 250 KB; kept
+in the bucket at previews/<lid>/<digest>.jpg and served with a day of CDN cache. The digest
+is of the source URL, and rides the card's URL as ?v=, so a new photo is a new preview AND
+a new address in every crawler's cache; a being without a photo still shows og.png. The
+law (ladder, door, digest, key, URL) is domain/facePreview, mirrored the faceEvents way and
+held by tests/facePreview.test.ts. REJECTED: re-encoding the stored originals (irreversible,
+and the chain's proof photos should stay as uploaded); serving the original with a smaller
+label (the bytes are what they are); rendering per request without keeping the result
+(a crawler storm would decode a 28 MB PNG each time).
+
+---
+
 **2026-09-05 · A gathering shows its face at the door** — the cradle feed (ring 2026-08-25)
 spoke a gathering's name, words and moment, but not its picture; the mother site's cards
 stood as plain text beside the seed's own pictured ones. The feed now carries a sixth field,

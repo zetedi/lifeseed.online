@@ -42,6 +42,10 @@
           "function": "beingPreview"
         },
         {
+          "source": "/face/**",
+          "function": "facePreview"
+        },
+        {
           "source": "/sitemap.xml",
           "function": "sitemap"
         },
@@ -105,6 +109,10 @@
           "function": "beingPreview"
         },
         {
+          "source": "/face/**",
+          "function": "facePreview"
+        },
+        {
           "source": "/faceEvents",
           "function": "faceEvents"
         },
@@ -159,6 +167,10 @@
         {
           "source": "/b/**",
           "function": "beingPreview"
+        },
+        {
+          "source": "/face/**",
+          "function": "facePreview"
         },
         {
           "source": "/faceEvents",
@@ -217,6 +229,10 @@
           "function": "beingPreview"
         },
         {
+          "source": "/face/**",
+          "function": "facePreview"
+        },
+        {
           "source": "/faceEvents",
           "function": "faceEvents"
         },
@@ -271,6 +287,10 @@
         {
           "source": "/b/**",
           "function": "beingPreview"
+        },
+        {
+          "source": "/face/**",
+          "function": "facePreview"
         },
         {
           "source": "/faceEvents",

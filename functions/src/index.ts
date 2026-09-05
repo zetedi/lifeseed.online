@@ -14,6 +14,9 @@ import { resolveTxt } from "node:dns/promises";
 import { judgeWitness, kindleDayKeyFromMs, uuidv7, releaseRay } from "./mint";
 import { entryFor, COLLECTION_FOR_KIND } from "./beingIndex";
 import { faceFeedOf, feedDomainOf } from "./faceEvents";
+import { FACE_PREVIEW_MAX_BYTES, facePreviewAttempts, facePreviewDoorOf, facePreviewKeyOf, facePreviewUrlOf } from "./facePreview";
+import { getStorage } from "firebase-admin/storage";
+import sharp from "sharp";
 
 // Every lid a server function mints is a UUIDv7 (the LIN invariant: a Being's true name is
 // time-ordered and portable). node:crypto supplies the randomness; mint.ts the pure algorithm.
@@ -2366,7 +2369,17 @@ export const deleteMyAccount = onCall({ cors: true }, async (request) => {
 // ---------------------------------------------------------------------------
 
 // Node 22 ships global fetch; the functions tsconfig lib (es2022) has no type for it.
-declare const fetch: (url: string, init?: { headers?: Record<string, string> }) => Promise<{ ok: boolean; text(): Promise<string> }>;
+// The slice of fetch these functions use (lib is es2022, no DOM): the shell as text for the
+// /b/ card, a being's photo as bytes — bounded by a signal — for the face preview.
+declare const fetch: (
+    url: string,
+    init?: { headers?: Record<string, string>; signal?: AbortSignal; redirect?: "follow" | "error" | "manual" },
+) => Promise<{
+    ok: boolean;
+    headers: { get(name: string): string | null };
+    text(): Promise<string>;
+    arrayBuffer(): Promise<ArrayBuffer>;
+}>;
 
 // Mirrors src/domain/beingLink.ts lidFromPath — the lid a /b/ path names.
 // Both door shapes (mirror of src/domain/beingLink + lid62): the canonical dashed lid AND
@@ -2578,7 +2591,10 @@ export const beingPreview = onRequest(async (req, res) => {
         if (!being || !being.name) { res.status(200).send(shell); return; } // generic card
 
         const description = truncate160(collapseWhitespace(being.body)) || `${being.name} — a living being on Lightseed.`;
-        const image = being.image && /^https?:\/\//.test(being.image) ? being.image : `https://${host}/og.png`;
+        // The being's own photo rides as its FACE PREVIEW (/face/<door>.jpg, below): a small,
+        // honest JPEG every crawler will fetch, never the stored original (2–28 MB).
+        const own = being.image && /^https?:\/\//.test(being.image) ? being.image : null;
+        const image = own ? facePreviewUrlOf(host, rawDoor, own) : `https://${host}/og.png`;
         const url = `https://${host}/b/${rawDoor}`;
         const placeLd = being.place ? {
             "@context": "https://schema.org",
@@ -2601,6 +2617,83 @@ export const beingPreview = onRequest(async (req, res) => {
     } catch (e) {
         console.error("beingPreview failed:", e);
         res.status(200).send(shell); // never a broken page — the generic shell stands in
+    }
+});
+
+// --- FACE PREVIEW --------------------------------------------------------------------------
+// /face/<door>.jpg — the small, honest picture behind a shared /b/ door. The card above
+// points og:image here instead of at the being's stored photo, which can weigh 2–28 MB and
+// which the strictest crawlers (WhatsApp, near 300 KB) refuse. The law — the ladder, the
+// door, the cache key — lives in domain/facePreview (mirrored in ./facePreview); this
+// endpoint owns the plumbing: resolve the being through the same public-only gate the card
+// uses, fetch its photo (bounded), walk the ladder with sharp, keep the result in the
+// bucket under a key that changes with the source, answer with JPEG bytes. Cached long at
+// the CDN: the URL itself carries ?v=<digest>, so a new photo is a new URL, not a stale hit.
+const FACE_BUCKET = "lifeseed-75dfe.firebasestorage.app";
+const FACE_SOURCE_MAX_BYTES = 40 * 1024 * 1024;
+const FACE_FETCH_TIMEOUT_MS = 20_000;
+const FACE_GROUND = "#04070f"; // the night the app stands on — under any transparency
+
+// The being's own photo, bounded: a foreign or runaway source never holds the function.
+const fetchFaceSource = async (url: string): Promise<Buffer | null> => {
+    const r = await fetch(url, { signal: AbortSignal.timeout(FACE_FETCH_TIMEOUT_MS), redirect: "follow" });
+    if (!r.ok) return null;
+    if (Number(r.headers.get("content-length") || 0) > FACE_SOURCE_MAX_BYTES) return null;
+    const bytes = Buffer.from(await r.arrayBuffer());
+    return bytes.length > FACE_SOURCE_MAX_BYTES ? null : bytes;
+};
+
+// Decode and fit ONCE (upright by EXIF, flattened onto the night, never enlarged), then walk
+// the ladder from that small raster: each attempt is a cheap re-encode, not a re-decode of a
+// 28 MB original. The first attempt under the budget wins; failing all, the smallest made.
+const renderFacePreview = async (source: Buffer): Promise<Buffer> => {
+    const [first] = facePreviewAttempts();
+    const base = await sharp(source, { failOn: "none", limitInputPixels: 80_000_000 })
+        .rotate()
+        .flatten({ background: FACE_GROUND })
+        .resize({ width: first.edge, height: first.edge, fit: "inside", withoutEnlargement: true })
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+    let best: Buffer | null = null;
+    for (const { edge, quality } of facePreviewAttempts()) {
+        const out = await sharp(base.data, { raw: { width: base.info.width, height: base.info.height, channels: base.info.channels } })
+            .resize({ width: edge, height: edge, fit: "inside", withoutEnlargement: true })
+            .jpeg({ quality, mozjpeg: true })
+            .toBuffer();
+        if (!best || out.length < best.length) best = out;
+        if (out.length <= FACE_PREVIEW_MAX_BYTES) return out;
+    }
+    return best!;
+};
+
+export const facePreview = onRequest({ memory: "1GiB", timeoutSeconds: 60 }, async (req, res) => {
+    const host = canonicalHost(req);
+    // No face to show: the site's own og.png stands in, as it does on the card itself.
+    const fallback = () => res.redirect(302, `https://${host}/og.png`);
+    try {
+        const door = facePreviewDoorOf(req.path || "");
+        const lid = door ? lidFromDoor(door) : null;
+        const being = lid ? await findPublicBeingByLid(lid) : null;
+        const source = being?.image && /^https?:\/\//.test(being.image) ? being.image : null;
+        if (!lid || !source) { fallback(); return; }
+
+        const file = getStorage().bucket(FACE_BUCKET).file(facePreviewKeyOf(lid, source));
+        const answer = (bytes: Buffer) => {
+            res.set("Content-Type", "image/jpeg");
+            res.set("Cache-Control", "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800");
+            res.status(200).send(bytes);
+        };
+        const [exists] = await file.exists();
+        if (exists) { answer((await file.download())[0]); return; }
+
+        const original = await fetchFaceSource(source);
+        if (!original) { fallback(); return; }
+        const preview = await renderFacePreview(original);
+        await file.save(preview, { contentType: "image/jpeg", resumable: false, metadata: { metadata: { source, lid } } });
+        answer(preview);
+    } catch (e) {
+        console.error("facePreview failed:", e);
+        fallback();
     }
 });
 
