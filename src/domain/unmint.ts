@@ -26,6 +26,7 @@ export interface UnmintPulseFacts {
   vetoes?: string[];          // a guardian's conscience already acted
   matchId?: string;           // alignment sync-blocks are CO-MINTED across two chains
   matchedLifetreeId?: string;
+  offeringId?: string;        // an accepted offering's twin (ring 2026-09-06): co-minted, co-held
 }
 
 export type UnmintRefusal = Extract<DomainKey,
@@ -40,7 +41,8 @@ export const isCoHeld = (pulse: UnmintPulseFacts, authorUid: string): boolean =>
   || (pulse.loveCount || 0) > 0
   || (pulse.vetoes || []).length > 0
   || !!pulse.matchId
-  || !!pulse.matchedLifetreeId;
+  || !!pulse.matchedLifetreeId
+  || !!pulse.offeringId;
 
 // Which refusals the STAFF HAND may pass through (worn with the amber SuperDot — power by
 // role, not authorship): co-holding and authorship are social guards a steward may override

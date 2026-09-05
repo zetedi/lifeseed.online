@@ -28,6 +28,9 @@ export const BLOCK_CONTENT_FIELDS = [
   'threadId', 'participantUids', 'audience', 'threadName', 'isGroup',
   'care', 'careAlert',
   'isMatch', 'matchedLifetreeId', 'matchId',
+  // An accepted offering's twin blocks (ring 2026-09-06): each names the offering and the other
+  // chain, so the agreement is sealed on both sides.
+  'offeringId', 'offeringLid', 'offeringRole', 'offeringTwinOf', 'offeringTwinKind',
   'authorId', 'authorName', 'authorPersonName', 'authorPhoto', 'growthCategory', 'visionTitle',
 ] as const;
 

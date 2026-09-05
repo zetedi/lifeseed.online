@@ -229,6 +229,9 @@ export const ChainTree: React.FC<ChainTreeProps> = ({
                                                 ) : (
                                                     <span className="bg-sky-100 text-sky-700 text-[10px] px-2 py-0.5 rounded-full font-bold">PULSE</span>
                                                 )}
+                                                {pulse.offeringId && (
+                                                    <span className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold" title={pulse.offeringRole === 'from' ? 'offered from this chain' : 'accepted on this chain'}>OFFERING ✓</span>
+                                                )}
                                                 {pulse.care === 'watering' && (
                                                     <span className="bg-sky-100 text-sky-700 text-[10px] px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1" title={pulse.wateringConfirmation?.note || ''}>💧 {typeof pulse.wateringConfirmation?.confidence === 'number' ? `${pulse.wateringConfirmation.confidence}%` : ''}{pulse.wateringConfirmedBy === 'guardian' ? ' ✓' : ''}</span>
                                                 )}

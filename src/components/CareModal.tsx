@@ -4,6 +4,7 @@ import { Icons } from './ui/Icons';
 import { markWateredOffChain } from './../services/firebase';
 import type { Lifetree } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
+import { tabTone } from '../utils/tabTheme';
 
 import { Picture } from './ui/Picture';
 // THE CARE SHEET — the care droplet opens this small, focused modal instead of steering to a
@@ -11,12 +12,14 @@ import { Picture } from './ui/Picture';
 // section for more (photo proof, schedule, witnessing), and — when one is starred — the vision.
 // An inner BLUE glow (water, not the emerald of the app) sets it apart; full-screen on mobile so
 // the small content uses the space and the thumb has room.
-export const CareModal = ({ tree, sender, hasVision, onOpenCare, onOpenVision, onClose }: {
+export const CareModal = ({ tree, sender, hasVision, onOpenCare, onOpenVision, onOffer, onClose }: {
     tree: Lifetree;
     sender: { uid: string; displayName?: string | null; photoURL?: string | null };
     hasVision?: boolean;
     onOpenCare: () => void;
     onOpenVision?: () => void;
+    // Care with an OFFERING (ring 2026-09-06): opens the offer form pointed at this tree.
+    onOffer?: () => void;
     onClose: () => void;
 }) => {
     const { t } = useLanguage();
@@ -56,6 +59,15 @@ export const CareModal = ({ tree, sender, hasVision, onOpenCare, onOpenVision, o
                         {busy ? t('watering_busy') : `${t('i_watered_today')} 💧`}
                     </button>
                 )}
+
+                {/* The third way to care: an offering to this tree, answered on its own leaf. */}
+                {onOffer && (
+                    <button onClick={onOffer} className={modalButton('primary', { extra: 'hover:brightness-110' })}
+                        style={{ backgroundColor: tabTone('offerings'), boxShadow: '0 10px 15px -3px rgba(41,132,66,0.25)' }}>
+                        <span className="[&>svg]:h-4 [&>svg]:w-4"><Icons.Sun /></span> {t('care_offer')}
+                    </button>
+                )}
+
                 <div className="flex items-center gap-4">
                     <button onClick={onOpenCare} className="inline-flex items-center gap-1 text-xs font-bold text-sky-600 transition-colors hover:text-sky-700">
                         {t('open_full_care')} <Icons.ArrowRight size={14} />

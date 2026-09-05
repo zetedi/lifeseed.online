@@ -101,6 +101,7 @@ import { DialogHost, showAlert, showConfirm } from './components/ui/Dialog';
 import { isExplicitlyValidatedTree } from './utils/validation';
 import { speak, spokenLine } from './utils/translations';
 
+import type { OfferedTo } from './domain/offering';
 // Route pages, detail overlays, and modals are code-split: each becomes its own chunk that loads
 // only when first shown, so the initial bundle (and Quill, which only the modals use) no longer
 // ships on first paint. Named exports are adapted to lazy()'s default-export contract.
@@ -194,6 +195,8 @@ const AppContent = () => {
     // A care ping in the reaches opens the simple care modal FOR THAT TREE — the same modal the
     // bead opens, aimed by the message instead of the default-tree cascade.
     const [careOverride, setCareOverride] = useState<Lifetree | null>(null);
+    // The offering of care (ring 2026-09-06): the being the offer form is pointed at, when it is.
+    const [offerTo, setOfferTo] = useState<OfferedTo | null>(null);
     // A Light House opened into its own profile page (from the map marker or the LightHouse tab).
     const [viewingLightHouse, setViewingLightHouse] = useState<LightHouse | null>(null);
     // The Path overview — the Light Path's full ruleset, opened from the card's label.
@@ -1337,6 +1340,12 @@ const AppContent = () => {
                             const vision = await getVisionById(defaultVisionId).catch(() => null);
                             if (vision) { setSelectedTree(null); setSelectedVision(vision); }
                         } : undefined}
+                        onOffer={() => {
+                            setCareModalOpen(false);
+                            setShowReachModal(false);
+                            setOfferTo({ kind: 'tree', id: careTarget.id, lid: careTarget.lid, name: careTarget.name, keeperUid: careTarget.ownerId });
+                            setShowOfferModal(true);
+                        }}
                         onClose={() => { setCareModalOpen(false); setCareOverride(null); }}
                     />
                 );
@@ -1500,6 +1509,7 @@ const AppContent = () => {
                             myTrees={myTrees}
                             onGrow={(v) => openVisionGrowth(v)}
                             onViewPulse={(p) => setSelectedPulse(p)}
+                            onOffer={(v) => { setOfferTo({ kind: 'vision', id: v.id, lid: v.lid, name: v.title, keeperUid: v.authorId }); setShowOfferModal(true); }}
                             onViewTree={(tree) => { setSelectedVision(null); setSelectedTree(tree); }}
                             hostStrictScope={(impersonatedCommunity || hostCommunity)?.strictScope}
                         />
@@ -1752,7 +1762,8 @@ const AppContent = () => {
 
             {showOfferModal && (
                 <OfferModal
-                    onClose={() => setShowOfferModal(false)}
+                    to={offerTo ?? undefined}
+                    onClose={() => { setShowOfferModal(false); setOfferTo(null); }}
                     onCreated={() => { if (tab === 'offerings') loadContent(true); }}
                 />
             )}

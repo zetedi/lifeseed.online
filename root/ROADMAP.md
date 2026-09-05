@@ -193,6 +193,9 @@ Tend this file when seasons turn; don't let it promise what the roots can't hold
   the lived result, and take part in whether it belongs. The flow:
   need → Reach → session → root inspection → proposal → review → human
   authorization → commit + ring + deployment.
+  First rung alive (ring 2026-09-06): a pull request may be OFFERED as CODE to a tree
+  or a vision and accepted on its leaf, the acceptance minted on both chains — the
+  Code Tree's council will accept there once the Code Tree is planted.
 - Embedded Gaussian-splat viewer for Light House 3D doors (today: external URL).
 - Initiation layer growth: the git ledger beyond its first three sponsors.
 - **The Book**: the White Paper reader generalized, every being's root as a

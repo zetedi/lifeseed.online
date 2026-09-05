@@ -6,6 +6,37 @@ with new ones (this file is itself append-only in spirit).
 
 ---
 
+**2026-09-06 · Care with an offering: accepted on its leaf, minted on both chains** — the
+keeper asked that people may care for trees and visions with an OFFERING, that the offering
+be answered on its own leaf with a green yes/no, withdrawn until answered, and on acceptance
+minted on both participating chains — and that pull requests may be offered the same way.
+Built on what stood: an offering was already a being with a leaf (ring 2026-07-26), and an
+alignment already co-mints twin sync blocks on two chains (engagement.acceptAlignment). The
+law is domain/offering (offeringProblem grows a CODE kind — a pull request IS its link — and
+the offered-to form; offeringStatusOf / canWithdrawOffering / canAnswerOffering; and
+judgeOfferingAccept, the whole order of acceptance), mirrored in functions/src/offering.ts
+and held by tests/offering.test.ts. The rules: born OPEN (no client writes an answer at
+birth); withdraw is the author's one flip while open; decline is one flip by a hand standing
+for the receiver — a tree's carer, a vision's author — never the offerer; ACCEPTANCE IS NOT A
+CLIENT WRITE AT ALL. It is functions/acceptOffering: server-read facts, the mirrored judgment,
+then in one transaction the twin blocks — the offerer's tree chain and the receiver's own
+chain (a tree's, or the vision's own idea-twin) — each naming the offering and the other
+side, sealed by functions/src/chain.ts, the first server mirror of the chain's hashing
+(canonical on locked nodes, legacy elsewhere; tests/chain.test.ts holds both hands to the
+same hash), and the twins join BLOCK_CONTENT_FIELDS and the co-held guard (an accepted twin
+cannot be unminted, in domain and rules alike). No light moves at acceptance: the suggested
+appreciation stays the after-gift it always was; circulation remains the coming rung. The
+doors: the care sheet's third way (CareModal → OfferModal pointed at the tree, standing on
+one of the offerer's own trees), a vision's own "care with an offering", the leaf's banner
+(offered to whom, from which tree, the status, Accept → yes / not now, Decline, Withdraw),
+the offerings made to a being on its care section and its vision's About, and an OFFERING ✓
+chip on the twin blocks. REJECTED: accepting client-side under a rules carve-out for the
+foreign head (the roadmap's named debt says the settlement is the server's); moving light at
+acceptance (the exchange rung has its own law to come); a new pulse type for the twins (the
+alignment's 'standard' + marker shape already reads everywhere).
+
+---
+
 **2026-09-06 · The picture is served small, and the primary is made light** — the morning's
 survey: 27 public trees with a picture weigh 182 MB, a median tree 4 MB, the five heaviest
 18–28 MB of phone PNG labelled WebP; and the forest view fetched every one of them at full

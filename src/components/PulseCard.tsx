@@ -61,6 +61,7 @@ export const PulseCard = ({ pulse, lightseed, onMatch, onView, density = 'cards'
             )}
             {images.length > 1 && <span className="bg-white/90 text-slate-600 text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm">{images.length} IMG</span>}
             {pulse.isMatch && <span className="bg-sky-100 text-sky-600 text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm">MATCH</span>}
+            {pulse.offeringId && <span className="bg-emerald-100 text-emerald-700 text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm">OFFERING ✓</span>}
         </>
     );
 

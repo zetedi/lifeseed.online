@@ -2,8 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { canonicalize } from '../src/domain/chain/canonical';
 import {
   blockContent, blockPreimage, computeCanonicalHash, verifyBlockSeal, verifyChain,
-  BLOCK_HASH_VERSION, type ChainBlock,
+  BLOCK_HASH_VERSION, BLOCK_CONTENT_FIELDS, type ChainBlock,
 } from '../src/domain/chain/verify';
+import { createBlock } from '../src/domain/chain/hash';
+import {
+  canonicalize as serverCanonicalize, createBlock as serverCreateBlock, computeCanonicalHash as serverComputeCanonicalHash,
+  blockContent as serverBlockContent, blockPreimage as serverBlockPreimage,
+  BLOCK_HASH_VERSION as SERVER_BLOCK_HASH_VERSION, BLOCK_CONTENT_FIELDS as SERVER_BLOCK_CONTENT_FIELDS,
+} from '../functions/src/chain';
 
 // A Firestore-Timestamp-like value (the canonical encoder only needs toMillis).
 const ts = (ms: number) => ({ toMillis: () => ms });
@@ -142,5 +148,41 @@ describe('verifyChain — the end-to-end walk', () => {
     expect((await verifyChain(gapped)).issues.some(i => i.code === 'height')).toBe(true);
     const dup = [chain[0], { ...chain[1], hash: 'h1', previousHash: 'h1' }];
     expect((await verifyChain(dup)).issues.some(i => i.code === 'duplicate-hash')).toBe(true);
+  });
+});
+
+// THE SERVER MIRROR (ring 2026-09-06): functions/src/chain.ts seals a server-minted block —
+// the offering of care's acceptance twins — exactly as the browser seals one. Both hands over
+// the same block must produce the same bytes and the same hash, legacy and canonical alike.
+describe('the functions mirror of the chain law stays true', () => {
+  const twin = {
+    lid: '019f0000-0000-7000-8000-000000000001', lifetreeId: 'treeA', type: 'standard', title: 'Offering accepted',
+    body: 'A night of song — accepted.', offeringId: 'off1', offeringLid: 'off-lid', offeringRole: 'from',
+    offeringTwinOf: 'v1', offeringTwinKind: 'vision', authorId: 'ana', authorName: 'Ana', visibility: 'public',
+    domain: 'lightseed.online', mintedAt: 1757145600000, createdAt: ts(1757145600123), loveCount: 0, hashVersion: 'x',
+  };
+
+  it('carries the same version and the same sealed fields, the twins among them', () => {
+    expect(SERVER_BLOCK_HASH_VERSION).toBe(BLOCK_HASH_VERSION);
+    expect([...SERVER_BLOCK_CONTENT_FIELDS]).toEqual([...BLOCK_CONTENT_FIELDS]);
+    for (const f of ['offeringId', 'offeringLid', 'offeringRole', 'offeringTwinOf', 'offeringTwinKind']) {
+      expect(BLOCK_CONTENT_FIELDS as readonly string[]).toContain(f);
+    }
+  });
+
+  it('canonicalizes, picks content and builds the preimage identically', () => {
+    for (const v of [twin, { b: [1, 'x', null, ts(5)], a: { z: true, y: undefined } }, 'plain', 7, null]) {
+      expect(serverCanonicalize(v)).toBe(canonicalize(v));
+    }
+    expect(serverBlockContent(twin)).toEqual(blockContent(twin));
+    expect(serverBlockPreimage('prev', 1757145600000, blockContent(twin))).toBe(blockPreimage('prev', 1757145600000, blockContent(twin)));
+  });
+
+  it('seals the same hash, canonical and legacy', async () => {
+    expect(await serverComputeCanonicalHash('prev', twin.mintedAt, twin)).toBe(await computeCanonicalHash('prev', twin.mintedAt, twin));
+    expect(await serverCreateBlock('prev', { match: 'a1' }, 1757145600000)).toBe(await createBlock('prev', { match: 'a1' }, 1757145600000));
+    // and a server-sealed twin verifies under the browser's own seal check
+    const hash = await serverComputeCanonicalHash('prev', twin.mintedAt, twin);
+    expect(await verifyBlockSeal({ ...twin, hash, previousHash: 'prev', hashVersion: BLOCK_HASH_VERSION })).toBe(true);
   });
 });

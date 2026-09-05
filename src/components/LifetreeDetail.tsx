@@ -28,6 +28,7 @@ import { TreeConnections } from './lifetree/TreeConnections';
 import { TreeDetails, type TreeDetailsUpdates } from './lifetree/TreeDetails';
 
 import { Picture } from './ui/Picture';
+import { OfferingsTo } from './offerings/OfferingsTo';
 interface LifetreeDetailProps {
     tree: Lifetree;
     onClose: () => void;
@@ -410,7 +411,9 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                // Carers care; GUARDIANS see the same card read-only (the schedule, the rhythm,
                // the pending witnesses) with a door to ask for stewardship. Outsiders see neither.
                (isOwner || isCarer || isAdmin || isSuperAdmin || isGuardian)
-                   ? <TreeCare
+                   ? <>
+                   <OfferingsTo kind="tree" id={tree.id} onView={onViewPulse} />
+                   <TreeCare
                        tree={tree}
                        growthBlocks={growthBlocks}
                        currentUserId={currentUserId}
@@ -424,6 +427,7 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                        onUpdate={onUpdate}
                        onChainRefresh={loadChain}
                    />
+                   </>
                    : <p className="rounded-2xl border border-slate-100 bg-white p-6 text-center text-sm text-slate-400">{t('circle_only_care')}</p>
            ),
        },

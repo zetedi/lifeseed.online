@@ -118,6 +118,14 @@ trust, never purchased; it may name a **suggested appreciation** in light that f
 it is received, an agreement and not a gate) ·
 *appreciation* (taking an offering with care: the mint event of light; an
 offering untaken is a token, and taken it becomes a token of appreciation) ·
+*offer to* (an offering of CARE made to a being — a tree or a vision — from one of
+the offerer's own trees; it lives on its own leaf and waits there: a service, a bed, or
+CODE, a pull request offered to the Code Tree) · *accept* (the receiver's hand — a
+tree's keeper, co-owner or steward, a vision's author — saying yes on the leaf: the
+agreement is minted as TWIN BLOCKS, one on the offerer's tree chain and one on the
+receiver's own chain, each naming the other; no light moves at acceptance) ·
+*withdraw* (the offerer taking an open offering back — a mark, never a delete; an
+answered offering never moves again) ·
 *kindle* (to bring new light into being by tending life: the only origin of
 light; witnessed care, bounded by the tended being's own rhythms) ·
 *ray* (a lid-bearing being born of appreciation: care's visible trace, branching

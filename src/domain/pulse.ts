@@ -82,7 +82,7 @@ export interface Pulse extends Being {
   eventMaxParticipants?: number | null;
   // Offerings (type 'offering'): a bed or service offered through trust. The author may name a
   // suggested appreciation in light, given AFTER the contribution and never gating access.
-  offeringKind?: 'bed' | 'service';
+  offeringKind?: 'bed' | 'service' | 'code';
   offeringAppreciationLight?: number;
   offeringBedId?: string;
   offeringBedName?: string;
@@ -90,8 +90,29 @@ export interface Pulse extends Being {
   // (hidden from the shared feed, still theirs to see and rewake). Toggled via its own
   // author-only rules branch; never deleted, the being keeps its history.
   offeringActive?: boolean;
-  // An optional door to more detail (the offerer's page, a booking form, a menu).
+  // An optional door to more detail (the offerer's page, a booking form, a menu); for a CODE
+  // offering, the pull request itself.
   offeringUrl?: string;
+  // THE OFFERING OF CARE (ring 2026-09-06): an offering made TO a being. Absent = a standalone
+  // listing. Born 'open'; withdrawn by its author or declined by the receiver's hand (rules
+  // flips); ACCEPTED only by functions/acceptOffering, which mints twin blocks on both chains.
+  offeredToKind?: 'tree' | 'vision';
+  offeredToId?: string;
+  offeredToLid?: string;
+  offeredToName?: string;
+  offeredToKeeperUid?: string;   // the tree's keeper / the vision's author, for the leaf's eye
+  offeringFromTreeId?: string;   // the offerer's own tree, whose chain carries its twin block
+  offeringFromTreeName?: string;
+  offeringStatus?: 'open' | 'accepted' | 'withdrawn' | 'declined';
+  offeringAnsweredBy?: string;
+  offeringAnsweredAt?: Stamp;
+  offeringAcceptedPulseIds?: { from: string; to: string };
+  // The twin blocks themselves (type 'standard'): each names the offering and the other chain.
+  offeringId?: string;
+  offeringLid?: string;
+  offeringRole?: 'from' | 'to';
+  offeringTwinOf?: string;
+  offeringTwinKind?: 'tree' | 'vision';
   reachTreeId?: string;
   reachTreeName?: string;
   reachResponse?: string; // The reached tree's reply, kept so reach threads persist.

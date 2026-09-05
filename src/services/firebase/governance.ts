@@ -1,4 +1,5 @@
 import { query, getDocs, getDoc, addDoc, setDoc, collection, serverTimestamp, doc, runTransaction, where, updateDoc, deleteDoc, Timestamp, type DocumentData } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { announce } from '../refreshBus';
 import { type Pulse, type Community, type Decision, type DecisionNature, type DecisionMode, type ConsensusStance, votesRequired } from '../../types';
 import { createBlock } from '../../utils/crypto';
@@ -10,7 +11,7 @@ import {
 } from '../../domain/decision';
 import { signatureFromDoc } from '../../domain/covenant';
 import { ensureSigningKey, publishSigningKey, isKeyInLineage, getPublishedSigningKey, sign as signWithKey, verify as verifyWithKey } from '../keys';
-import { auth, db, toMillis, mapDoc, pulsesCollection } from './core';
+import { functions, auth, db, toMillis, mapDoc, pulsesCollection } from './core';
 import { normalizeDomain } from './trees';
 
 // ---------------------------------------------------------------------------
@@ -490,6 +491,42 @@ export const createOffering = async (data: Partial<Pulse> & { title: string }) =
         createdAt: serverTimestamp(),
     });
     return { id: ref.id, lid, ...payload, loveCount: 0, commentCount: 0, previousHash: 'OFFERING', hash } as Pulse;
+};
+
+// ── THE OFFERING OF CARE (ring 2026-09-06) ────────────────────────────────────────────────
+// An offering made TO a being — a tree or a vision — answered on its own leaf. Withdraw and
+// decline are one-flip client writes the rules guard (domain/offering: the author while open;
+// a hand standing for the receiver while open). ACCEPTANCE is the server's alone: the
+// acceptOffering callable judges (judgeOfferingAccept, mirrored) and mints the twin blocks on
+// the offerer's tree chain and the receiver's own chain in one transaction.
+
+export const withdrawOffering = async (id: string): Promise<void> => {
+    const patch = { offeringStatus: 'withdrawn' as const, offeringAnsweredAt: serverTimestamp(), updatedAt: serverTimestamp() };
+    await updateDoc(doc(pulsesCollection, id), patch);
+    announce('pulses', id, { offeringStatus: 'withdrawn' });
+};
+
+export const declineOffering = async (id: string, byUid: string): Promise<void> => {
+    const patch = { offeringStatus: 'declined' as const, offeringAnsweredBy: byUid, offeringAnsweredAt: serverTimestamp(), updatedAt: serverTimestamp() };
+    await updateDoc(doc(pulsesCollection, id), patch);
+    announce('pulses', id, { offeringStatus: 'declined', offeringAnsweredBy: byUid });
+};
+
+export interface OfferingAccepted { fromPulseId: string; toPulseId: string }
+
+export const acceptOffering = async (id: string): Promise<OfferingAccepted> => {
+    const fn = httpsCallable<{ offeringId: string }, OfferingAccepted>(functions, 'acceptOffering');
+    const res = await fn({ offeringId: id });
+    announce('pulses', id, { offeringStatus: 'accepted' });
+    return res.data;
+};
+
+// The offerings made to one being, newest first — the receiver finds them on the being's face.
+export const getOfferingsTo = async (kind: 'tree' | 'vision', id: string): Promise<Pulse[]> => {
+    const snap = await getDocs(query(pulsesCollection, where('type', '==', 'offering'), where('offeredToKind', '==', kind), where('offeredToId', '==', id)));
+    return snap.docs
+        .map(d => ({ id: d.id, ...(d.data() as DocumentData) }) as Pulse)
+        .sort((a, b) => ((b.createdAt as any)?.toMillis?.() || 0) - ((a.createdAt as any)?.toMillis?.() || 0));
 };
 
 // The offering's lifecycle switch: its author pauses or rewakes it. A paused offering leaves the

@@ -874,10 +874,15 @@ service cloud.firestore {
           ? (request.resource.data.get('authorId', '') == request.auth.uid
              && (isStaff() || isTreeCarer(request.resource.data.get('lifetreeId', '')))
              && request.resource.data.get('wateringConfirmedBy', 'pending') != 'guardian')
-          : (request.resource.data.type != 'event'
-             || !('communityId' in request.resource.data)   // standalone event — anyone may plant one
-             || isStaff()
-             || isCommunityOwner(request.resource.data.communityId))
+          : ((request.resource.data.type != 'event'
+              || !('communityId' in request.resource.data)   // standalone event — anyone may plant one
+              || isStaff()
+              || isCommunityOwner(request.resource.data.communityId))
+             // An OFFERING OF CARE (ring 2026-09-06) is born OPEN: no client writes an answer at
+             // birth. Acceptance is the server's (functions/acceptOffering); withdraw and decline
+             // are the flips below.
+             && (request.resource.data.get('type', '') != 'offering'
+                 || request.resource.data.get('offeringStatus', 'open') == 'open'))
       );
       // The append-only ledger: a pulse's identity and chain fields (hash, previousHash, authorId,
       // type, createdAt, lifetreeId, treeId, communityId, participantUids, …) are FROZEN after
@@ -1022,9 +1027,45 @@ service cloud.firestore {
         || (
              resource.data.get('type', '') == 'offering'
              && (isStaff() || resource.data.authorId == request.auth.uid)
+             && resource.data.get('offeringStatus', 'open') != 'accepted'   // the agreed words stand
              && request.resource.data.diff(resource.data).affectedKeys()
                   .hasOnly(['title', 'body', 'content', 'imageUrl', 'imageUrls',
                             'offeringAppreciationLight', 'offeringUrl', 'visibility', 'updatedAt'])
+           )
+
+        // (i3) WITHDRAW — the offering of care's author takes an OPEN offering back (domain/
+        //      offering.canWithdrawOffering): one flip to 'withdrawn', its moment beside it,
+        //      nothing else riding. Answered offerings never move again.
+        || (
+             resource.data.get('type', '') == 'offering'
+             && resource.data.authorId == request.auth.uid
+             && resource.data.get('offeredToKind', '') in ['tree', 'vision']
+             && resource.data.get('offeringStatus', 'open') == 'open'
+             && request.resource.data.get('offeringStatus', '') == 'withdrawn'
+             && request.resource.data.diff(resource.data).affectedKeys()
+                  .hasOnly(['offeringStatus', 'offeringAnsweredAt', 'updatedAt'])
+           )
+
+        // (i4) DECLINE — a hand that STANDS for the receiver answers no (canAnswerOffering): a
+        //      tree's carer (keeper / co-owner / steward), a vision's author; never the offering's
+        //      own author. 'accepted' is NOT writable here — acceptance mints twin blocks on both
+        //      chains and is the server's alone (functions/acceptOffering).
+        || (
+             resource.data.get('type', '') == 'offering'
+             && resource.data.authorId != request.auth.uid
+             && resource.data.get('offeringStatus', 'open') == 'open'
+             && request.resource.data.get('offeringStatus', '') == 'declined'
+             && request.resource.data.get('offeringAnsweredBy', '') == request.auth.uid
+             && request.resource.data.diff(resource.data).affectedKeys()
+                  .hasOnly(['offeringStatus', 'offeringAnsweredAt', 'offeringAnsweredBy', 'updatedAt'])
+             && (
+                  (resource.data.get('offeredToKind', '') == 'tree'
+                   && (isStaff() || isTreeCarer(resource.data.get('offeredToId', ''))))
+                  || (resource.data.get('offeredToKind', '') == 'vision'
+                      && resource.data.get('offeredToId', '') != ''
+                      && exists(/databases/$(database)/documents/visions/$(resource.data.offeredToId))
+                      && (isStaff() || get(/databases/$(database)/documents/visions/$(resource.data.offeredToId)).data.authorId == request.auth.uid))
+                )
            )
 
         // (h) RETRACTION — a reach's AUTHOR may mark their own message retracted (ring
@@ -1114,6 +1155,7 @@ service cloud.firestore {
              && resource.data.get('vetoes', []).size() == 0
              && resource.data.get('matchId', '') == ''
              && resource.data.get('matchedLifetreeId', '') == ''
+             && resource.data.get('offeringId', '') == ''   // an accepted offering's twin stands
              && get(/databases/$(database)/documents/lifetrees/$(resource.data.lifetreeId)).data.get('latestHash', '') == resource.data.get('hash', '')
              && getAfter(/databases/$(database)/documents/lifetrees/$(resource.data.lifetreeId)).data.get('latestHash', '') == resource.data.get('previousHash', '')
              && getAfter(/databases/$(database)/documents/lifetrees/$(resource.data.lifetreeId)).data.get('blockHeight', 0)

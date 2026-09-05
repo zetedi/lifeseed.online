@@ -4,7 +4,8 @@ import { Icons } from '../ui/Icons';
 import { BeingQr } from '../ui/BeingQr';
 import { LoveButton } from '../ui/LoveButton';
 import { mintBeingQr } from '../../services/firebase/beings';
-import { setOfferingActive } from '../../services/firebase';
+import { setOfferingActive, acceptOffering, declineOffering, withdrawOffering } from '../../services/firebase';
+import { offeringStatusOf, canWithdrawOffering, canAnswerOffering } from '../../domain/offering';
 import { BeingProfile, type BeingSection } from '../BeingProfile';
 import { ChainTree } from '../sections/ChainTree';
 import { formatLight } from '../../domain/light';
@@ -29,10 +30,91 @@ interface OfferingProfileProps {
 
 export const OfferingProfile: React.FC<OfferingProfileProps> = ({ offering, onClose, onUpdate, onEdit }) => {
     const { t } = useLanguage();
-  const { lightseed } = useSession();
+  const { lightseed, myTrees, tendedTrees } = useSession();
   const isAuthor = !!lightseed && offering.authorId === lightseed.uid;
   const [active, setActive] = useState(offering.offeringActive !== false);
   const [busy, setBusy] = useState(false);
+
+  // THE OFFERING OF CARE (ring 2026-09-06): made TO a being, answered here. The receiver's
+  // side — the tree's keeper, co-owners and stewards, the vision's author — sees a green
+  // Accept (yes / not now) and a Decline; the author sees Withdraw while it is open. Accepting
+  // calls the server, which mints the twin blocks on both chains (functions/acceptOffering).
+  const [status, setStatus] = useState(offeringStatusOf(offering));
+  const [confirming, setConfirming] = useState(false);
+  const uid = lightseed?.uid || '';
+  const standsForReceiver = !!uid && (
+    offering.offeredToKeeperUid === uid
+    || (offering.offeredToKind === 'tree' && [...(myTrees || []), ...(tendedTrees || []).map(x => x.tree)].some(tr => tr.id === offering.offeredToId))
+  );
+  const lifecycle = { authorId: offering.authorId, offeredToKind: offering.offeredToKind, offeringStatus: status };
+  const mayAnswer = canAnswerOffering(lifecycle, uid, standsForReceiver);
+  const mayWithdraw = canWithdrawOffering(lifecycle, uid);
+
+  const answer = async (what: 'accept' | 'decline' | 'withdraw') => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (what === 'accept') { await acceptOffering(offering.id); setStatus('accepted'); onUpdate?.({ offeringStatus: 'accepted' }); notify(t('offer_accepted_toast')); }
+      else if (what === 'decline') { await declineOffering(offering.id, uid); setStatus('declined'); onUpdate?.({ offeringStatus: 'declined' }); notify(t('offer_declined_toast')); }
+      else { await withdrawOffering(offering.id); setStatus('withdrawn'); onUpdate?.({ offeringStatus: 'withdrawn' }); notify(t('offer_withdrawn_toast')); }
+    } catch (err: any) {
+      showAlert(err?.message || 'err_offering_change');
+    }
+    setConfirming(false);
+    setBusy(false);
+  };
+
+  const statusTone = { open: 'bg-amber-50 text-amber-700', accepted: 'bg-emerald-50 text-emerald-700', withdrawn: 'bg-slate-100 text-slate-500', declined: 'bg-slate-100 text-slate-500' } as const;
+  // The offered-to card: visible in every section (BeingProfile's banner seat).
+  const careBanner = status ? (
+    <div className="mx-auto mb-4 max-w-2xl rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{t('offering_offered_to')}</div>
+          <p dir="auto" className="truncate text-sm font-semibold text-slate-800">{offering.offeredToName || (offering.offeredToKind === 'vision' ? 'a vision' : 'a tree')}</p>
+          {offering.offeringFromTreeName && <p className="truncate text-xs text-slate-500">{t('offering_from')} {offering.offeringFromTreeName}</p>}
+        </div>
+        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${statusTone[status]}`}>{t(`offering_status_${status}`)}</span>
+      </div>
+      {(mayAnswer || mayWithdraw) && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+          {mayAnswer && !confirming && (
+            <>
+              <button type="button" disabled={busy} onClick={() => setConfirming(true)}
+                className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
+                style={{ backgroundColor: tabTone('offerings') }}>
+                <span className="[&>svg]:h-3.5 [&>svg]:w-3.5"><Icons.Sun /></span> {t('offer_accept')}
+              </button>
+              <button type="button" disabled={busy} onClick={() => answer('decline')}
+                className="rounded-full border border-slate-200 px-4 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-50">
+                {t('offer_decline')}
+              </button>
+            </>
+          )}
+          {mayAnswer && confirming && (
+            <div className="flex w-full flex-wrap items-center gap-2">
+              <p className="mr-auto text-xs font-medium text-slate-600">{t('offer_accept_q')}</p>
+              <button type="button" disabled={busy} onClick={() => answer('accept')}
+                className="rounded-full px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
+                style={{ backgroundColor: tabTone('offerings') }}>
+                {busy ? t('saving') : t('offer_accept_yes')}
+              </button>
+              <button type="button" disabled={busy} onClick={() => setConfirming(false)}
+                className="rounded-full border border-slate-200 px-4 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-slate-50">
+                {t('offer_accept_no')}
+              </button>
+            </div>
+          )}
+          {mayWithdraw && (
+            <button type="button" disabled={busy} onClick={() => answer('withdraw')}
+              className="rounded-full border border-slate-200 px-4 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-50">
+              {t('offer_withdraw')}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  ) : null;
   const HEART = tabTone('offerings');
   const isBed = offering.offeringKind === 'bed';
   // The same face the card wears: the first of imageUrls, else the single imageUrl.
@@ -156,6 +238,7 @@ export const OfferingProfile: React.FC<OfferingProfileProps> = ({ offering, onCl
     <BeingProfile
       className="min-h-screen animate-in fade-in zoom-in-95 duration-300"
       onClose={onClose}
+      banner={careBanner}
       backLabel="Back"
       hero={{
         imageUrl: img,

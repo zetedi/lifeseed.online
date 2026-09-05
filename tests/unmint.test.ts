@@ -37,6 +37,7 @@ describe('unmintRefusal', () => {
     expect(unmintRefusal(mint({ loveCount: 1 }), { latestHash: 'h9' }, 'ana')).toBe('unmint_coheld');
     expect(unmintRefusal(mint({ vetoes: ['lumo'] }), { latestHash: 'h9' }, 'ana')).toBe('unmint_coheld');
     expect(unmintRefusal(mint({ matchId: 'align1' }), { latestHash: 'h9' }, 'ana')).toBe('unmint_coheld');
+    expect(unmintRefusal(mint({ offeringId: 'off1' }), { latestHash: 'h9' }, 'ana')).toBe('unmint_coheld');
   });
   it('the staff hand may pass the social guards only — never the structural ones', () => {
     expect(STAFF_OVERRIDABLE_REFUSALS.has('unmint_coheld')).toBe(true);

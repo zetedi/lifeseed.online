@@ -64,6 +64,13 @@ const seed = async () => {
     await setDoc(doc(d, 'visions', 'vision1'), { authorId: ALICE, title: 'A clearing', visibility: 'public', loveCount: 0 });
     await setDoc(doc(d, 'pulses', 'pulseLove'), { authorId: BOB, type: 'standard', title: 'A pulse', visibility: 'public', loveCount: 0, validationScore: 0 });
     await setDoc(doc(d, 'pulses', 'offer1'), { authorId: ALICE, type: 'offering', offeringKind: 'service', title: 'Herbal walk', visibility: 'public', offeringActive: true });
+    // The offering of care (ring 2026-09-06): ALICE offers a night of song to BOB's treeB from her own treeA;
+    // BOB offers a pull request to ALICE's vision1 from treeB. Both born open.
+    await setDoc(doc(d, 'lifetrees', 'treeA'), { ownerId: ALICE, name: 'Alices oak', validated: false, validatorId: null, loveCount: 0 });
+    await setDoc(doc(d, 'pulses', 'offerCare1'), { authorId: ALICE, type: 'offering', offeringKind: 'service', title: 'A night of song', visibility: 'public', offeringActive: true,
+      offeredToKind: 'tree', offeredToId: 'treeB', offeredToKeeperUid: BOB, offeringFromTreeId: 'treeA', offeringStatus: 'open' });
+    await setDoc(doc(d, 'pulses', 'offerCode1'), { authorId: BOB, type: 'offering', offeringKind: 'code', title: 'Fix the door', offeringUrl: 'https://github.com/x/y/pull/7', visibility: 'public', offeringActive: true,
+      offeredToKind: 'vision', offeredToId: 'vision1', offeredToKeeperUid: ALICE, offeringFromTreeId: 'treeB', offeringStatus: 'open' });
     for (const uid of [ALICE, BOB]) {
       await setDoc(doc(d, 'persons', uid), {
         lid: `${uid}-lid`,
@@ -741,6 +748,19 @@ describe('the unmint — only the head block, only its author, only with the rol
     const b = writeBatch(store);
     b.delete(doc(store, 'pulses', 'b1'));
     b.update(doc(store, 'lifetrees', TREE), { latestHash: 'g0', blockHeight: 1, updatedAt: 1 });
+    await assertFails(b.commit());
+  });
+
+  it("an accepted offering's twin block stands — it is co-held, and no rollback unsays it", async () => {
+    await seedChain();
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'pulses', 't3'), { authorId: ALICE, type: 'standard', lifetreeId: TREE, offeringId: 'off1', offeringRole: 'from', hash: 'h3', previousHash: 'h2', title: 'Offering accepted' });
+      await updateDoc(doc(ctx.firestore(), 'lifetrees', TREE), { latestHash: 'h3', blockHeight: 3 });
+    });
+    const store = db(ALICE);
+    const b = writeBatch(store);
+    b.delete(doc(store, 'pulses', 't3'));
+    b.update(doc(store, 'lifetrees', TREE), { latestHash: 'h2', blockHeight: 2, updatedAt: 1 });
     await assertFails(b.commit());
   });
 
@@ -2103,6 +2123,60 @@ describe('offerings: only the author flips the lifecycle switch, and only the sw
 
   it('the switch belongs to offerings alone: a standard pulse refuses it', async () => {
     await assertFails(updateDoc(doc(db(BOB), 'pulses', 'pulseLove'), { offeringActive: false, updatedAt: serverTimestamp() }));
+  });
+});
+
+describe('the offering of care — born open, withdrawn by its author, declined by the receiver, accepted by the server alone', () => {
+  const answer = (status: string, extra: Record<string, unknown> = {}) => ({ offeringStatus: status, offeringAnsweredAt: serverTimestamp(), updatedAt: serverTimestamp(), ...extra });
+
+  it('is born open — a client may never plant one already answered', async () => {
+    const draft = { authorId: ALICE, type: 'offering', offeringKind: 'service', title: 'Weeding', visibility: 'public', offeringActive: true, offeredToKind: 'tree', offeredToId: 'treeB', offeringFromTreeId: 'treeA' };
+    await assertSucceeds(setDoc(doc(db(ALICE), 'pulses', 'offerNew1'), { ...draft, offeringStatus: 'open' }));
+    await assertSucceeds(setDoc(doc(db(ALICE), 'pulses', 'offerNew2'), draft));
+    await assertFails(setDoc(doc(db(ALICE), 'pulses', 'offerNew3'), { ...draft, offeringStatus: 'accepted' }));
+    await assertFails(setDoc(doc(db(ALICE), 'pulses', 'offerNew4'), { ...draft, offeringStatus: 'declined' }));
+  });
+
+  it('the author withdraws an open offering — one flip, nothing riding, never twice', async () => {
+    await assertFails(updateDoc(doc(db(ALICE), 'pulses', 'offerCare1'), answer('withdrawn', { title: 'renamed' })));
+    await assertFails(updateDoc(doc(db(BOB), 'pulses', 'offerCare1'), answer('withdrawn')));
+    await assertFails(updateDoc(doc(db(MALLORY), 'pulses', 'offerCare1'), answer('withdrawn')));
+    await assertSucceeds(updateDoc(doc(db(ALICE), 'pulses', 'offerCare1'), answer('withdrawn')));
+    await assertFails(updateDoc(doc(db(ALICE), 'pulses', 'offerCare1'), answer('open')));       // answered: final
+    await assertFails(updateDoc(doc(db(BOB), 'pulses', 'offerCare1'), answer('declined', { offeringAnsweredBy: BOB })));
+  });
+
+  it("a hand standing for the receiver declines — the tree's carer, the vision's author; never the offerer, never a stranger", async () => {
+    await assertFails(updateDoc(doc(db(MALLORY), 'pulses', 'offerCare1'), answer('declined', { offeringAnsweredBy: MALLORY })));
+    await assertFails(updateDoc(doc(db(ALICE), 'pulses', 'offerCare1'), answer('declined', { offeringAnsweredBy: ALICE })));
+    await assertFails(updateDoc(doc(db(BOB), 'pulses', 'offerCare1'), answer('declined', { offeringAnsweredBy: ALICE })));   // the answer names its own hand
+    await assertFails(updateDoc(doc(db(BOB), 'pulses', 'offerCare1'), answer('declined')));                                  // and must name it
+    await assertSucceeds(updateDoc(doc(db(BOB), 'pulses', 'offerCare1'), answer('declined', { offeringAnsweredBy: BOB })));
+    // the vision's author declines the code offering; its offerer and a stranger cannot
+    await assertFails(updateDoc(doc(db(BOB), 'pulses', 'offerCode1'), answer('declined', { offeringAnsweredBy: BOB })));
+    await assertFails(updateDoc(doc(db(MALLORY), 'pulses', 'offerCode1'), answer('declined', { offeringAnsweredBy: MALLORY })));
+    await assertSucceeds(updateDoc(doc(db(ALICE), 'pulses', 'offerCode1'), answer('declined', { offeringAnsweredBy: ALICE })));
+  });
+
+  it("a co-owner of the tree stands for it too", async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'links', `${MALLORY}__co_owner__treeB`), { from: MALLORY, rel: 'co_owner', to: 'treeB' });
+    });
+    await assertSucceeds(updateDoc(doc(db(MALLORY), 'pulses', 'offerCare1'), answer('declined', { offeringAnsweredBy: MALLORY })));
+  });
+
+  it('acceptance is never a client write — not by the receiver, not by the author (staff keeps its mending hand, by role)', async () => {
+    await assertFails(updateDoc(doc(db(BOB), 'pulses', 'offerCare1'), answer('accepted', { offeringAnsweredBy: BOB })));
+    await assertFails(updateDoc(doc(db(ALICE), 'pulses', 'offerCare1'), answer('accepted')));
+  });
+
+  it('once accepted, the agreed words stand — the author may no longer retell it', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await updateDoc(doc(ctx.firestore(), 'pulses', 'offerCare1'), { offeringStatus: 'accepted' });
+    });
+    await assertFails(updateDoc(doc(db(ALICE), 'pulses', 'offerCare1'), { title: 'A different song', updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(doc(db(ALICE), 'pulses', 'offerCare1'), answer('withdrawn')));
+    await assertSucceeds(updateDoc(doc(db(ALICE), 'pulses', 'offer1'), { title: 'A longer herbal walk', updatedAt: serverTimestamp() })); // a listing still may
   });
 });
 

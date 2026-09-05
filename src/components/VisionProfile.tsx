@@ -24,6 +24,8 @@ import { TreeParticipants } from './TreeParticipants';
 import { Lifetree } from '../types';
 
 import { Picture } from './ui/Picture';
+import { tabTone } from '../utils/tabTheme';
+import { OfferingsTo } from './offerings/OfferingsTo';
 // The vision's genesis is a sealed block, not a pulse (like a bed) — so the chain view draws its
 // root from the vision itself; any pulse whose previousHash is the sentinel is treated as a root.
 const isGenesisPulse = (p: Pulse) => p.previousHash === '0' || p.title === 'Genesis Pulse';
@@ -43,6 +45,8 @@ interface VisionProfileProps {
     onViewTree?: (tree: Lifetree) => void;
     // View a single contribution/leaf.
     onViewPulse?: (pulse: Pulse) => void;
+    // Care with an OFFERING (ring 2026-09-06): open the offer form pointed at this vision.
+    onOffer?: (vision: Vision) => void;
     // The host's scoping — a strict-scoped host shows one place by definition, so the
     // place-of-record stamp (staff sight, staff mend) is hidden there entirely.
     hostStrictScope?: boolean | null;
@@ -50,7 +54,7 @@ interface VisionProfileProps {
 
 type VisionSection = 'about' | 'participants' | 'contributions' | 'shadow';
 
-export const VisionProfile = ({ vision, onClose, currentUserId, onDelete, myTrees, onGrow, onViewTree, onViewPulse, hostStrictScope }: VisionProfileProps) => {
+export const VisionProfile = ({ vision, onClose, currentUserId, onDelete, myTrees, onGrow, onViewTree, onViewPulse, onOffer, hostStrictScope }: VisionProfileProps) => {
     const { t } = useLanguage();
     const { isAdmin, isSuperAdmin } = useSession();
     const isAuthor = currentUserId === vision.authorId;
@@ -191,6 +195,17 @@ export const VisionProfile = ({ vision, onClose, currentUserId, onDelete, myTree
                                 <span>{t('care')}</span>
                             </button>
                         )}
+                        {currentUserId && !isAuthor && onOffer && (
+                            <button
+                                onClick={() => onOffer(vision)}
+                                title={t('care_offer')}
+                                className="flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:brightness-110 active:scale-95"
+                                style={{ backgroundColor: tabTone('offerings') }}
+                            >
+                                <Icons.Sun />
+                                <span>{t('care_offer')}</span>
+                            </button>
+                        )}
                         {currentUserId && !isAuthor && (
                             <button
                                 onClick={handleJoinToggle}
@@ -273,6 +288,9 @@ export const VisionProfile = ({ vision, onClose, currentUserId, onDelete, myTree
                 overlapClassName="-mt-8"
                 menu={<SectionMenu items={sections} active={section} onSelect={(k) => setSection(k as VisionSection)} />}
             >
+                {section === 'about' && onViewPulse && (
+                    <div className="mb-4"><OfferingsTo kind="vision" id={vision.id} onView={onViewPulse} /></div>
+                )}
                 {section === 'about' && (
                     <div>
                         <SectionTitle title={t('vision')} sub="What this vision is calling towards." />

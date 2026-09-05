@@ -21,6 +21,8 @@ export const DOMAIN_KEYS = [
   // offering — a sound offering draft
   'offering_choose_kind', 'offering_name', 'offering_appreciation_positive',
   'offering_appreciation_whole', 'offering_link_http', 'offering_link_long',
+  // the offering of care (ring 2026-09-06)
+  'offering_code_link', 'offering_to_being', 'offering_from_tree',
   // appearance — landing sections composed in the database (domain/appearance)
   'appearance_unknown_kind', 'appearance_bad_props',
   // lightHouse — the kinds a Light House may be consecrated as (domain/lightHouse)
