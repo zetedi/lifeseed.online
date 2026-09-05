@@ -6,6 +6,20 @@ with new ones (this file is itself append-only in spirit).
 
 ---
 
+**2026-09-05 · A gathering shows its face at the door** — the cradle feed (ring 2026-08-25)
+spoke a gathering's name, words and moment, but not its picture; the mother site's cards
+stood as plain text beside the seed's own pictured ones. The feed now carries a sixth field,
+`imageUrl`: `faceImageOf` picks the first http(s) entry of the pulse's `imageUrls`, else its
+single `imageUrl`, else '' — the same preference PulseCard has, so the face and the seed show
+one picture. Only web addresses ride: a blob:, data: or javascript: string stored by mistake
+falls to '' rather than being handed to every face's `<img>`. Mirrored in
+functions/src/faceEvents.ts, held true by tests/faceEvents.test.ts. First drinker again:
+theohouse.org, whose event cards now wear the picture and a soft gold light. REJECTED:
+sending the whole `imageUrls` carousel (a doorstep card wants one face; the /b/ door behind it
+has the rest); returning the raw field unchecked (the feed is the last gate, on pictures too).
+
+---
+
 **2026-09-03 · Three more, the same evening** — (1) *The hero waits for its ground*: on Per
 Auset (strict, no custom landing) the dashboard hero fetched before the host community had
 answered, so its strictness was unknown and the creator-never-lost merge folded the keeper's

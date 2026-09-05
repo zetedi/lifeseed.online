@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import {
-  FACE_FEED_VISIBILITIES, isFaceFeedVisible, faceFeedOf, feedDomainOf,
+  FACE_FEED_VISIBILITIES, isFaceFeedVisible, faceFeedOf, faceImageOf, feedDomainOf,
 } from '../src/domain/faceEvents';
 import {
   FACE_FEED_VISIBILITIES as SERVER_FACE_FEED_VISIBILITIES,
   isFaceFeedVisible as serverIsFaceFeedVisible,
   faceFeedOf as serverFaceFeedOf,
+  faceImageOf as serverFaceImageOf,
   feedDomainOf as serverFeedDomainOf,
 } from '../functions/src/faceEvents';
 
@@ -59,7 +60,7 @@ describe('faceFeedOf — shape and order', () => {
     expect(feed.map(e => e.title)).toEqual(['sooner', 'later', 'whenever', 'unreadable']);
   });
 
-  it('shapes to the five feed fields and normalizes the legacy cloak', () => {
+  it('shapes to the six feed fields and normalizes the legacy cloak', () => {
     const [row] = faceFeedOf([event({ visibility: undefined, authorId: 'never-on-the-feed' })]);
     expect(row).toEqual({
       lid: '019ea86e-0000-7000-8000-00000000bf17',
@@ -67,6 +68,7 @@ describe('faceFeedOf — shape and order', () => {
       body: 'The fourth fire at The O House.',
       eventDate: '2026-09-11T19:37',
       visibility: 'public',
+      imageUrl: '',
     });
     expect('authorId' in row).toBe(false);
   });
@@ -79,6 +81,34 @@ describe('faceFeedOf — shape and order', () => {
     ]);
     expect(feed[0].title).toBe('dated');
     expect(feed).toHaveLength(3);
+  });
+});
+
+describe('faceImageOf — the gathering\'s one face', () => {
+  const fire = 'https://firebasestorage.googleapis.com/v0/b/x/o/fire.webp?alt=media';
+  const drum = 'https://firebasestorage.googleapis.com/v0/b/x/o/drum.webp?alt=media';
+
+  it('prefers the first picture of the carousel, as the seed\'s own card does', () => {
+    expect(faceImageOf(event({ imageUrls: [drum, fire], imageUrl: fire }))).toBe(drum);
+  });
+
+  it('falls back to the single imageUrl, and to nothing at all', () => {
+    expect(faceImageOf(event({ imageUrl: fire }))).toBe(fire);
+    expect(faceImageOf(event({ imageUrls: [], imageUrl: fire }))).toBe(fire);
+    expect(faceImageOf(event())).toBe('');
+    expect(faceImageOf(event({ imageUrl: null, imageUrls: null }))).toBe('');
+  });
+
+  it('lets only a web address ride — never a blob, data or script string', () => {
+    expect(faceImageOf(event({ imageUrl: 'javascript:alert(1)' }))).toBe('');
+    expect(faceImageOf(event({ imageUrl: 'data:image/png;base64,AAAA' }))).toBe('');
+    expect(faceImageOf(event({ imageUrls: ['blob:https://seed/x', 42, fire] }))).toBe(fire);
+    expect(faceImageOf(event({ imageUrls: 'not-a-list', imageUrl: 'HTTP://UPPER.CASE/ok.jpg' }))).toBe('HTTP://UPPER.CASE/ok.jpg');
+  });
+
+  it('rides the feed as imageUrl', () => {
+    const [row] = faceFeedOf([event({ imageUrls: [fire] })]);
+    expect(row.imageUrl).toBe(fire);
   });
 });
 
@@ -111,8 +141,11 @@ describe('the functions mirror stays true', () => {
       event({ visibility: undefined, eventDate: '', title: 'legacy' }),
       event({ visibility: 'public', eventDate: '2025-01-01', title: 'early' }),
       event({ type: 'reach' }),
+      event({ imageUrls: ['blob:nope', 'https://a/1.webp'], imageUrl: 'https://a/2.webp', title: 'pictured' }),
+      event({ imageUrl: 'javascript:alert(1)', title: 'unpictured' }),
     ];
     expect(serverFaceFeedOf(rows)).toEqual(faceFeedOf(rows));
+    for (const row of rows) expect(serverFaceImageOf(row)).toBe(faceImageOf(row));
     for (const v of ['public', 'node', 'private', undefined, '']) {
       expect(serverIsFaceFeedVisible(v)).toBe(isFaceFeedVisible(v));
     }

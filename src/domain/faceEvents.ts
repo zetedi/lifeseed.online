@@ -9,11 +9,14 @@
 //
 // Plain contract — guaranteed now: isFaceFeedVisible admits exactly 'public', 'node' and
 // the legacy absent-visibility (= public) forms; faceFeedOf keeps only type 'event' rows
-// that pass it, shapes them to the five feed fields, and orders dated gatherings soonest
-// first with dateless ones last. Not guaranteed: past-event hiding (consumers decide, as
-// domain/calendar does for the seed's own room) and community-rooted events (the feed
-// carries a face's DOMAIN-stamped happenings only). Enforced by tests/faceEvents.test.ts,
-// which also holds the functions/src/faceEvents.ts mirror true.
+// that pass it, shapes them to the six feed fields, and orders dated gatherings soonest
+// first with dateless ones last. The feed carries ONE face per gathering (imageUrl): the
+// first http(s) entry of the pulse's imageUrls, else its single imageUrl — the same
+// preference the seed's own card has — or '' when the gathering has no picture. Not
+// guaranteed: past-event hiding (consumers decide, as domain/calendar does for the seed's
+// own room) and community-rooted events (the feed carries a face's DOMAIN-stamped
+// happenings only). Enforced by tests/faceEvents.test.ts, which also holds the
+// functions/src/faceEvents.ts mirror true.
 
 export const FACE_FEED_VISIBILITIES = ['public', 'node'] as const;
 
@@ -23,6 +26,7 @@ export type FaceFeedEvent = {
   body: string;
   eventDate: string;
   visibility: string;
+  imageUrl: string;
 };
 
 // Absent visibility is the legacy-public form — every early pulse predates the field.
@@ -50,6 +54,17 @@ const momentOf = (eventDate: string): number => {
 
 const str = (v: unknown): string => (typeof v === 'string' ? v : '');
 
+// Only a web address may ride the feed as a picture: a blob:, data: or javascript: string
+// stored by mistake would otherwise be handed to every face's <img> verbatim.
+const isHttpUrl = (v: unknown): v is string => typeof v === 'string' && /^https?:\/\//i.test(v);
+
+// The gathering's one face, the seed's own preference: the carousel's first picture wins,
+// the single imageUrl stands in for it, and a pulse without a picture says so plainly.
+export const faceImageOf = (row: Record<string, unknown>): string => {
+  const many = Array.isArray(row.imageUrls) ? row.imageUrls.find(isHttpUrl) : undefined;
+  return many ?? (isHttpUrl(row.imageUrl) ? row.imageUrl : '');
+};
+
 // Raw pulse rows (already narrowed to one domain at the query) → the feed. This filter
 // is the LAST gate: whatever the query returned, only events wearing a feed-visible
 // cloak pass, soonest gathering first.
@@ -62,6 +77,7 @@ export const faceFeedOf = (rows: Array<Record<string, unknown>>): FaceFeedEvent[
       body: str(row.body),
       eventDate: str(row.eventDate),
       visibility: normalizedVisibility(row.visibility) ?? 'public',
+      imageUrl: faceImageOf(row),
     }))
     .sort((a, b) => momentOf(a.eventDate) - momentOf(b.eventDate));
 
