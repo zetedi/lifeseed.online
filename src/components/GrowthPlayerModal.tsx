@@ -6,6 +6,7 @@ import { Icons } from './ui/Icons';
 import { speak } from '../utils/translations';
 import { useLanguage } from '../contexts/LanguageContext';
 
+import { Picture } from './ui/Picture';
 // One frame of the evolution: the planting/genesis image first, then each growth pulse.
 interface Frame {
     imageUrl?: string;
@@ -89,7 +90,7 @@ export const GrowthPlayerModal = ({ treeId, onClose }: { treeId: string, onClose
                 !f ? <div className="p-10 text-center">{t('no_growth_pictures')}</div> :
                 <div className="flex flex-col items-center">
                     <div className="relative w-full">
-                        <img src={f.imageUrl} className="w-full h-64 object-cover rounded-lg shadow-lg mb-4" />
+                        <Picture size={1200} src={f.imageUrl} className="w-full h-64 object-cover rounded-lg shadow-lg mb-4" />
                         {f.isGenesis && (
                             <span className="absolute left-2 top-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800 shadow">🌱 PLANTING</span>
                         )}

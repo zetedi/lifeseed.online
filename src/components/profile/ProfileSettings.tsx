@@ -10,6 +10,7 @@ import { Modal } from '../ui/Modal';
 import { SigningKeyModal } from '../modals/SigningKeyModal';
 import { speak } from '../../utils/translations';
 
+import { Picture } from '../ui/Picture';
 // Module-scope (not created during render) so React keeps the DOM node between renders.
 const Toggle = ({ on, onClick, disabled }: { on: boolean; onClick: () => void; disabled?: boolean }) => (
   <button
@@ -271,7 +272,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
                             className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 hover:bg-amber-50"
                           >
                             {(tr.latestGrowthUrl || tr.imageUrl)
-                              ? <img src={tr.latestGrowthUrl || tr.imageUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+                              ? <Picture size={480} src={tr.latestGrowthUrl || tr.imageUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
                               : <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"><Icons.Tree /></span>}
                             <span className="truncate">{tr.name}</span>
                           </button>

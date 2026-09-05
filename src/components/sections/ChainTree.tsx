@@ -5,6 +5,7 @@ import { SuperDot } from '../ui/SuperDot';
 import Logo from '../Logo';
 import { Pulse } from '../../types';
 
+import { Picture } from '../ui/Picture';
 // ChainTree — renders ANY being's chain (Indra's net). The "digital tree" is the universal
 // chain renderer: every being (human, AI, community, node, tree) shares one profile anatomy,
 // and its immutable pulse chain always draws as a living tree — trunk, branch, leaf, root.
@@ -241,7 +242,7 @@ export const ChainTree: React.FC<ChainTreeProps> = ({
                                             <div className={`flex gap-4 ${isRightSide ? '' : 'md:flex-row-reverse'} flex-row items-start`}>
                                                 {pulseImages.length > 0 && (
                                                     <div className="relative shrink-0">
-                                                        <img src={pulseImages[0]} className="w-16 h-16 rounded-lg object-cover bg-slate-50 border border-slate-100" />
+                                                        <Picture size={480} src={pulseImages[0]} className="w-16 h-16 rounded-lg object-cover bg-slate-50 border border-slate-100" />
                                                         {pulseImages.length > 1 && (
                                                             <span className="absolute -right-1 -top-1 rounded-full bg-white px-1.5 py-0.5 text-[9px] font-bold text-slate-600 shadow">{pulseImages.length}</span>
                                                         )}
@@ -293,7 +294,7 @@ export const ChainTree: React.FC<ChainTreeProps> = ({
                              <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border-4 border-[#3E2723] bg-[#5D4037] text-amber-100 shadow-xl ring-4 ring-emerald-600/25 md:w-auto">
                                  {root.imageUrl && (
                                      <div className="relative h-40 w-full">
-                                         <img src={root.imageUrl} alt={root.name} className="h-full w-full object-cover opacity-90" />
+                                         <Picture size={1200} src={root.imageUrl} alt={root.name} className="h-full w-full object-cover opacity-90" />
                                          <div className="absolute inset-0 bg-gradient-to-t from-[#5D4037] via-[#5D4037]/40 to-transparent" />
                                          <span className="absolute left-3 top-3 rounded-full bg-amber-100/90 px-2 py-0.5 text-[10px] font-bold text-amber-900 shadow">🌱 PLANTING</span>
                                      </div>

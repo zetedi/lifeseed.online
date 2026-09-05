@@ -16,6 +16,8 @@ import { entryFor, COLLECTION_FOR_KIND } from "./beingIndex";
 import { faceFeedOf, feedDomainOf } from "./faceEvents";
 import { FACE_PREVIEW_MAX_BYTES, facePreviewAttempts, facePreviewDoorOf, facePreviewKeyOf, facePreviewUrlOf } from "./facePreview";
 import { getStorage } from "firebase-admin/storage";
+import { onObjectFinalized } from "firebase-functions/v2/storage";
+import { IMAGE_VARIANT_SIZES, IMAGE_VARIANT_QUALITY, imageVariantKeyOf, isDerivedImagePath } from "./imageVariant";
 import sharp from "sharp";
 
 // Every lid a server function mints is a UUIDv7 (the LIN invariant: a Being's true name is
@@ -2694,6 +2696,39 @@ export const facePreview = onRequest({ memory: "1GiB", timeoutSeconds: 60 }, asy
     } catch (e) {
         console.error("facePreview failed:", e);
         fallback();
+    }
+});
+
+// --- IMAGE VARIANTS ------------------------------------------------------------------------
+// Every primary picture written to the bucket gets its small faces made here, once, at
+// upload: thumbs/<path>@480.webp and @1200.webp (domain/imageVariant, mirrored in
+// ./imageVariant). Fitted inside, never enlarged, upright by EXIF, alpha kept; immutable at
+// the CDN, because a primary's path never changes (uploads are named by their moment, and
+// the recode of stored primaries keeps path and token — ring 2026-09-06). A derived object
+// never derives again (isDerivedImagePath), and a picture the decoder cannot read leaves no
+// variant — the renderer's fallback to the primary stands.
+const RASTER_IMAGE_RE = /^image\/(jpeg|jpg|png|webp|gif|heic|heif|avif|tiff)$/i;
+
+export const deriveImageVariants = onObjectFinalized({ bucket: FACE_BUCKET, memory: "1GiB", timeoutSeconds: 120 }, async (event) => {
+    const name = event.data.name || "";
+    if (!name || isDerivedImagePath(name) || !RASTER_IMAGE_RE.test(event.data.contentType || "")) return;
+    const bucket = getStorage().bucket(event.data.bucket);
+    try {
+        const [source] = await bucket.file(name).download();
+        const upright = sharp(source, { failOn: "none", limitInputPixels: 80_000_000 }).rotate();
+        for (const size of IMAGE_VARIANT_SIZES) {
+            const out = await upright.clone()
+                .resize({ width: size, height: size, fit: "inside", withoutEnlargement: true })
+                .webp({ quality: IMAGE_VARIANT_QUALITY })
+                .toBuffer();
+            await bucket.file(imageVariantKeyOf(name, size)).save(out, {
+                contentType: "image/webp",
+                resumable: false,
+                metadata: { cacheControl: "public, max-age=31536000, immutable", metadata: { source: name } },
+            });
+        }
+    } catch (e) {
+        console.error(`deriveImageVariants failed for ${name}:`, e);
     }
 });
 

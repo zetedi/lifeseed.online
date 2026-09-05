@@ -9,6 +9,7 @@ import { SectionTitle } from '../ui/SectionTitle';
 import { GuardianButton } from '../community/GuardianButton';
 import { useLanguage } from '../../contexts/LanguageContext';
 
+import { Picture } from '../ui/Picture';
 // Being-generic trees section — the lifetrees standing with any being (Indra's net).
 // A community, a node or a person gathers trees the same way; only where the gathering is
 // rooted (and therefore how trees are listed, searched and invited) differs, so the owner
@@ -110,7 +111,7 @@ export const TreesSection: React.FC<TreesSectionProps> = ({
               ) : inviteCandidates.map(tr => (
                 <div key={tr.id} className="flex items-center gap-3 rounded-lg border border-slate-100 bg-white p-2.5">
                   <div className="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-                    {tr.latestGrowthUrl || tr.imageUrl ? <img src={tr.latestGrowthUrl || tr.imageUrl} className="h-full w-full object-cover" alt="" /> : <div className="h-full w-full" style={{ backgroundColor: placeholderColor }} />}
+                    {tr.latestGrowthUrl || tr.imageUrl ? <Picture size={480} src={tr.latestGrowthUrl || tr.imageUrl} className="h-full w-full object-cover" alt="" /> : <div className="h-full w-full" style={{ backgroundColor: placeholderColor }} />}
                   </div>
                   <span className="min-w-0 flex-1 truncate text-sm font-bold text-slate-800">{tr.name}</span>
                   <button onClick={() => handleInviteTree(tr)} disabled={inviteBusyId === tr.id} className="shrink-0 rounded-full border border-teal-200 bg-white px-3 py-1.5 text-xs font-bold text-teal-700 hover:bg-teal-50 disabled:opacity-50">
@@ -136,7 +137,7 @@ export const TreesSection: React.FC<TreesSectionProps> = ({
               onClick={() => onViewTree?.(tree)}
             >
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-                {tree.latestGrowthUrl || tree.imageUrl ? <img src={tree.latestGrowthUrl || tree.imageUrl} className="h-full w-full object-cover" alt={tree.name} /> : <div className="h-full w-full" style={{ backgroundColor: placeholderColor }} />}
+                {tree.latestGrowthUrl || tree.imageUrl ? <Picture size={480} src={tree.latestGrowthUrl || tree.imageUrl} className="h-full w-full object-cover" alt={tree.name} /> : <div className="h-full w-full" style={{ backgroundColor: placeholderColor }} />}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="break-words text-sm font-bold text-slate-800">{tree.name}</p>

@@ -6,6 +6,7 @@ import Logo from './Logo';
 import { speak } from '../utils/translations';
 import { useLanguage } from '../contexts/LanguageContext';
 
+import { Picture } from './ui/Picture';
 interface Props {
     domain: string;
     onClose?: () => void;
@@ -102,7 +103,7 @@ export const LifeseedWidget: React.FC<Props> = ({ domain, onClose }) => {
                                     className="flex gap-3 p-3 hover:bg-slate-50 transition-colors"
                                 >
                                     {(tree.latestGrowthUrl || tree.imageUrl) ? (
-                                        <img
+                                        <Picture size={480}
                                             src={tree.latestGrowthUrl || tree.imageUrl}
                                             alt={tree.name}
                                             className="w-14 h-14 rounded-lg object-cover flex-shrink-0 bg-slate-100"

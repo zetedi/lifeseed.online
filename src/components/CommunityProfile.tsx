@@ -41,6 +41,7 @@ import { isParticipant } from '../domain/views/participation';
 import { canCareForTree } from '../domain/policy';
 import { speak, spokenLine } from '../utils/translations';
 
+import { Picture } from './ui/Picture';
 interface CommunityProfileProps {
   community: Community;
   // An invitation the viewer arrived holding (/i/<id>) — the door greets them by it.
@@ -800,7 +801,7 @@ export const CommunityProfile: React.FC<CommunityProfileProps> = ({
         avatar: (
           <div className="flex h-14 w-14 md:h-20 md:w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow-xl">
             {logoUrl ? (
-              <img src={logoUrl} className="h-full w-full object-cover" alt={`${community.name} logo`} referrerPolicy="no-referrer" />
+              <Picture size={480} src={logoUrl} className="h-full w-full object-cover" alt={`${community.name} logo`} referrerPolicy="no-referrer" />
             ) : (
               <span className="text-slate-300"><Icons.Globe /></span>
             )}

@@ -9,6 +9,7 @@ import { showAlert } from '../ui/Dialog';
 import { LightHouseCard } from '../LightHouseCard';
 import { useLanguage } from '../../contexts/LanguageContext';
 
+import { Picture } from '../ui/Picture';
 // Being-generic lightHouses section — the sacred places that hold any being's lifetrees
 // (Indra's net), shown as a card garden. Each card opens the Light House's own profile page;
 // keepers consecrate new ones here. The owner shell loads (and visibility-gates) the list
@@ -205,7 +206,7 @@ export const LightHouseSection: React.FC<LightHouseSectionProps> = ({
       <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{t('lh_open_step')}</p>
       {adoptable.map(s => (
         <div key={s.id} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-2.5">
-          <img src={s.imageUrl || '/lighthouse.webp'} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover bg-[#04070f]" />
+          <Picture size={480} src={s.imageUrl || '/lighthouse.webp'} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover bg-[#04070f]" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold text-slate-800">{s.name}</p>
             <p className="truncate text-[11px] text-slate-400">{s.locationName || s.domain || ''}</p>

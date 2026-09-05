@@ -6,6 +6,33 @@ with new ones (this file is itself append-only in spirit).
 
 ---
 
+**2026-09-06 · The picture is served small, and the primary is made light** — the morning's
+survey: 27 public trees with a picture weigh 182 MB, a median tree 4 MB, the five heaviest
+18–28 MB of phone PNG labelled WebP; and the forest view fetched every one of them at full
+weight. The encoder (ring 2026-07-05) was working on Chrome, was PNG-fallen on Safari until
+yesterday, and never saw the AI road at all (`uploadBase64Image` wrote the data URL raw).
+Three moves, one ring. (1) *Variants*: every primary written to the bucket now gets
+thumbs/<path>@480.webp and @1200.webp (functions/deriveImageVariants on finalize; the law in
+domain/imageVariant, mirrored, tested), immutable at the CDN and readable without a token —
+the rules already open every path to reading; seats ask through `<Picture size>` and fall
+back to the primary when the variant is not (yet) there. (2) *The primary made light*: the
+stored pictures are recoded IN PLACE by scripts/recode-images.mjs — fitted inside 1600, WebP
+82, the same truth the uploader uses — at the SAME path with the SAME download token, so
+every stored URL keeps answering and NO BLOCK IS RE-HASHED: the chain binds the URL string,
+not the bytes. This reverses yesterday's rejection of touching stored originals, on the
+keeper's judgement that lightening them now is cheaper than moving 200 MB of primaries later;
+the as-uploaded bytes go to originals/<path> first, metadata and all, and are never deleted
+(append-only in spirit: mark, never delete). (3) *The AI road*: a data URL now takes the same
+encoder as a picked photo. Named, not done: binding a picture's BYTES to its block (a digest
+beside the URL in BLOCK_CONTENT_FIELDS) so a future move of the primaries never touches a
+hash either — the shape federation will want. REJECTED: re-hashing chains to point at new
+addresses (nothing requires it, and an append-only chain should not be rewritten to follow a
+file); on-request resizing for every seat (a function on the viewing path, a storm on the
+first crawl); Firebase's resize extension (fine, but the ladder and the mirror pattern
+already live here and stay under test).
+
+---
+
 **2026-09-05 · A shared door hands over a small face** — with the label honest (ring below),
 the shared tree's card still failed where it matters most: WhatsApp refuses an og:image
 much over 300 KB, and a tree's latest watering photo weighs 2–4 MB (a logo, 28). Rather

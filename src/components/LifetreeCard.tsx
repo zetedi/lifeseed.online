@@ -11,6 +11,7 @@ import { isWateringOverdue } from '../domain/watering';
 import { tabTone } from '../utils/tabTheme';
 import { ImageCropModal } from './ui/ImageCropModal';
 
+import { Picture } from './ui/Picture';
 interface LifetreeCardProps {
     tree: Lifetree;
     myActiveTree: Lifetree | null;
@@ -108,7 +109,7 @@ export const LifetreeCard = ({ tree, myActiveTree, isAdmin, isSuperAdmin, isInit
 
             <div className="relative h-36 bg-slate-200 overflow-hidden group">
                 {tree.latestGrowthUrl || tree.imageUrl || tree.id === 'GENESIS_TREE' ? (
-                    <img
+                    <Picture size={480}
                         src={tree.latestGrowthUrl || tree.imageUrl || '/mahameru.svg'}
                         alt={tree.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]"

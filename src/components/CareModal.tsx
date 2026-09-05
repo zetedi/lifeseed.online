@@ -5,6 +5,7 @@ import { markWateredOffChain } from './../services/firebase';
 import type { Lifetree } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 
+import { Picture } from './ui/Picture';
 // THE CARE SHEET — the care droplet opens this small, focused modal instead of steering to a
 // whole page: the target tree, a single "watered today" breath of care, a door to the full Care
 // section for more (photo proof, schedule, witnessing), and — when one is starred — the vision.
@@ -38,7 +39,7 @@ export const CareModal = ({ tree, sender, hasVision, onOpenCare, onOpenVision, o
             <div className="-m-4 flex flex-col items-center gap-4 p-6 text-center shadow-[inset_0_0_70px_rgba(59,130,246,0.3)]">
                 <div className="relative">
                     {img
-                        ? <img src={img} alt={tree.name} className="h-20 w-20 rounded-full border-4 border-white object-cover shadow-lg" referrerPolicy="no-referrer" />
+                        ? <Picture size={480} src={img} alt={tree.name} className="h-20 w-20 rounded-full border-4 border-white object-cover shadow-lg" referrerPolicy="no-referrer" />
                         : <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-emerald-700 text-white shadow-lg"><Icons.Tree /></div>}
                     <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-sky-500 text-white shadow"><Icons.Drop /></span>
                 </div>
@@ -55,7 +56,6 @@ export const CareModal = ({ tree, sender, hasVision, onOpenCare, onOpenVision, o
                         {busy ? t('watering_busy') : `${t('i_watered_today')} 💧`}
                     </button>
                 )}
-
                 <div className="flex items-center gap-4">
                     <button onClick={onOpenCare} className="inline-flex items-center gap-1 text-xs font-bold text-sky-600 transition-colors hover:text-sky-700">
                         {t('open_full_care')} <Icons.ArrowRight size={14} />

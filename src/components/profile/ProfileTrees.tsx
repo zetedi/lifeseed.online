@@ -12,6 +12,7 @@ import { isWateringOverdue } from '../../domain/watering';
 import { sustainingSeven, SUSTAINING_SEVEN, type GuardianEdge } from '../../domain/sustainingSeven';
 import { isExplicitlyValidatedTree, daysUntilLapse } from '../../utils/validation';
 
+import { Picture } from '../ui/Picture';
 // The caring/validation state lives in the shell — the hero badge derives from the same
 // `caredIds`, so re-caring a tree here must re-light the badge up there immediately.
 interface ProfileTreesProps {
@@ -172,7 +173,7 @@ export const ProfileTrees: React.FC<ProfileTreesProps> = ({
             [...myTrees].sort((a: Lifetree, b: Lifetree) => (b.id === defaultTreeId ? 1 : 0) - (a.id === defaultTreeId ? 1 : 0)).map((tree: Lifetree) => (
               <div key={tree.id} onClick={() => onViewTree(tree)} className={`border rounded-lg p-4 hover:shadow-md cursor-pointer transition-all flex items-center justify-between group bg-white ${defaultTreeId === tree.id ? 'border-amber-300 ring-1 ring-amber-100' : 'border-emerald-100'}`}>
                 <div className="flex items-center space-x-4">
-                  <img src={tree.latestGrowthUrl || tree.imageUrl || '/seed.webp'} className="w-16 h-16 rounded object-cover bg-slate-100" />
+                  <Picture size={480} src={tree.latestGrowthUrl || tree.imageUrl || '/seed.webp'} className="w-16 h-16 rounded object-cover bg-slate-100" />
                   <div>
                     <h3 className="font-bold text-slate-800 flex items-center gap-1.5">
                       {tree.name}
@@ -231,7 +232,7 @@ export const ProfileTrees: React.FC<ProfileTreesProps> = ({
             {tendedTrees.map(({ tree, role }) => (
               <div key={tree.id} onClick={() => onViewTree(tree)} className="border border-emerald-100 rounded-lg p-4 hover:shadow-md cursor-pointer transition-all flex items-center justify-between group bg-emerald-50/30">
                 <div className="flex items-center space-x-4">
-                  <img src={tree.latestGrowthUrl || tree.imageUrl || '/seed.webp'} className="w-16 h-16 rounded object-cover bg-slate-100" />
+                  <Picture size={480} src={tree.latestGrowthUrl || tree.imageUrl || '/seed.webp'} className="w-16 h-16 rounded object-cover bg-slate-100" />
                   <div>
                     <h3 className="font-bold text-slate-800">{tree.name}</h3>
                     <p className="text-xs text-slate-500">Block Height: {tree.blockHeight}</p>
@@ -264,7 +265,7 @@ export const ProfileTrees: React.FC<ProfileTreesProps> = ({
             {guardedOnly.map((tree: Lifetree) => (
               <div key={tree.id} onClick={() => onViewTree(tree)} className="border border-sky-100 rounded-lg p-4 hover:shadow-md cursor-pointer transition-all flex items-center justify-between group bg-sky-50/40">
                 <div className="flex items-center space-x-4">
-                  <img src={tree.latestGrowthUrl || tree.imageUrl || '/seed.webp'} className="w-16 h-16 rounded object-cover bg-slate-100" />
+                  <Picture size={480} src={tree.latestGrowthUrl || tree.imageUrl || '/seed.webp'} className="w-16 h-16 rounded object-cover bg-slate-100" />
                   <div>
                     <h3 className="font-bold text-slate-800">{tree.name}</h3>
                     <p className="text-xs text-slate-500">Block Height: {tree.blockHeight}</p>
@@ -296,7 +297,7 @@ export const ProfileTrees: React.FC<ProfileTreesProps> = ({
             aria-label="Open Mahameru: The Original Tree"
             className="group flex cursor-pointer items-center gap-4 overflow-hidden rounded-2xl border border-amber-200/60 bg-[#04070f] p-4 shadow-lg transition-shadow hover:shadow-xl"
           >
-            <img src={originalTree.latestGrowthUrl || originalTree.imageUrl || '/mahameru.svg'} alt="Mahameru"
+            <Picture size={480} src={originalTree.latestGrowthUrl || originalTree.imageUrl || '/mahameru.svg'} alt="Mahameru"
                  className="h-16 w-16 shrink-0 rounded-full border-2 border-amber-300/70 object-cover transition-transform duration-700 group-hover:scale-105" />
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-lg font-light tracking-wide text-amber-100">{originalTree.name || 'Mahameru'}</h3>

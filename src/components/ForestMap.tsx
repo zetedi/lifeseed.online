@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { type Lifetree } from '../types';
 import { isExplicitlyValidatedTree } from '../utils/validation';
 import { escapeHtml, safeImageUrl, DARK_IMAGE_FALLBACK } from '../utils/sanitize';
+import { imageVariantUrlOf } from '../domain/imageVariant';
 import { isWateringOverdue } from '../domain/watering';
 import { Loading } from './ui/Loading';
 import { Icons } from './ui/Icons';
@@ -11,6 +12,15 @@ import { firestoreStore } from '../adapters/firestore';
 import { loadLeaflet } from '../services/leaflet';
 import type { LightHouse } from '../domain/lightHouse';
 import { useVisibleLightHouses } from '../hooks/useVisibleLightHouses';
+
+// A seat in marker HTML: the 480 variant in src, the primary a step behind it in data-primary.
+// The map container's capture-phase error listener (below) swaps the primary in when the
+// variant is not (yet) there. Both pass safeImageUrl — attribute-safe, http(s) or / only.
+const seatAttrs = (url: string | null | undefined, fallback = ''): string => {
+    const primary = safeImageUrl(url, fallback);
+    const variant = safeImageUrl(imageVariantUrlOf(url, 480), fallback);
+    return `src="${variant}" data-primary="${primary}"`;
+};
 
 interface Cluster {
     id: string;
@@ -39,6 +49,21 @@ export const ForestMap = ({ trees, onView, onReach, onViewLightHouse, loading = 
     // The filters overlay lives INSIDE the map container's stacking context, below the popup
     // pane (700) — so an opening marker popup paints ABOVE the filters, not under them.
     const overlayRef = useRef<HTMLDivElement>(null);
+
+    // Marker and popup pictures are HTML strings asking for their 480 variant; when one is not
+    // (yet) there, the primary in data-primary takes its seat. Image errors do not bubble, so
+    // this listens in the capture phase on the map's own container (popups live inside it).
+    useEffect(() => {
+        const el = mapContainer.current;
+        if (!el) return;
+        const fallBack = (e: Event) => {
+            const t = e.target;
+            if (t instanceof HTMLImageElement && t.dataset.primary && t.getAttribute('src') !== t.dataset.primary) t.src = t.dataset.primary;
+            else if (t instanceof SVGImageElement && t.dataset.primary && t.getAttribute('href') !== t.dataset.primary) t.setAttribute('href', t.dataset.primary);
+        };
+        el.addEventListener('error', fallBack, true);
+        return () => el.removeEventListener('error', fallBack, true);
+    }, []);
     const markersLayer = useRef<any>(null);
     const updateMarkersRef = useRef<(L: any, force?: boolean) => void>(() => {});
     const expansionStackRef = useRef<StackLevel[]>([]);
@@ -275,13 +300,13 @@ export const ForestMap = ({ trees, onView, onReach, onViewLightHouse, loading = 
         const sanct = (tree as MapBeing).__lightHouse;
         if (sanct) {
             const size = isSmall ? 'w-10 h-10' : 'w-12 h-12';
-            const img = safeImageUrl(sanct.imageUrl || '/lighthouse.webp', DARK_IMAGE_FALLBACK);
+            const img = seatAttrs(sanct.imageUrl || '/lighthouse.webp', DARK_IMAGE_FALLBACK);
             return `
             <div class="marker-pop relative ${size} hover:scale-110 transition-transform duration-300" style="animation-delay: ${delay}ms;" role="button" aria-label="${escapeHtml(sanct.name)}, Light House">
                 <div class="lightHouse-glow absolute -inset-4 rounded-full"></div>
                 <div class="absolute -inset-1 rounded-full border-2 border-yellow-300/90"></div>
                 <div class="relative ${size} rounded-full border-2 border-amber-400 overflow-hidden bg-[#04070f] shadow-xl z-10">
-                    <img src="${img}" style="width:100%;height:100%;object-fit:cover;display:block;" />
+                    <img ${img} style="width:100%;height:100%;object-fit:cover;display:block;" />
                 </div>
             </div>`;
         }
@@ -291,7 +316,7 @@ export const ForestMap = ({ trees, onView, onReach, onViewLightHouse, loading = 
         const sizeClass = isSmall ? 'w-10 h-10' : 'w-12 h-12';
         const borderClass = isSmall ? 'border' : 'border-2';
         // A tree with no face yet shows as a seed — planted, waiting to grow.
-        const displayImage = safeImageUrl(tree.latestGrowthUrl || tree.imageUrl || (tree.id === 'GENESIS_TREE' ? '/mahameru.svg' : '/seed.webp'), DARK_IMAGE_FALLBACK);
+        const displayImage = seatAttrs(tree.latestGrowthUrl || tree.imageUrl || (tree.id === 'GENESIS_TREE' ? '/mahameru.svg' : '/seed.webp'), DARK_IMAGE_FALLBACK);
         const imgStyle = "width: 100%; height: 100%; object-fit: cover; display: block;";
         const animStyle = `animation-delay: ${delay}ms;`;
 
@@ -303,7 +328,7 @@ export const ForestMap = ({ trees, onView, onReach, onViewLightHouse, loading = 
                 ${isWateringOverdue(tree) ? '<div class="absolute -inset-1 rounded-full border-2 border-sky-400 animate-pulse z-20"></div>' : ''}
                 <div class="absolute inset-0 bg-sky-500 rounded-full animate-pulse opacity-20"></div>
                 <div class="relative ${sizeClass} rounded-full ${borderClass} border-white shadow-xl overflow-hidden bg-white z-10">
-                    <img src="${displayImage}" style="${imgStyle}" class="w-full h-full object-cover" />
+                    <img ${displayImage} style="${imgStyle}" class="w-full h-full object-cover" />
                 </div>
                 <div class="absolute -top-1 -right-1 z-20 w-4 h-4 bg-sky-500 border border-white rounded-full flex items-center justify-center text-[8px] text-white font-bold shadow-md">
                     ${guardianCount}
@@ -317,14 +342,16 @@ export const ForestMap = ({ trees, onView, onReach, onViewLightHouse, loading = 
             ${isWateringOverdue(tree) ? '<div class="absolute -inset-1 rounded-full border-2 border-sky-400 animate-pulse z-20"></div>' : ''}
             <div class="absolute inset-0 bg-emerald-500 rounded-full animate-ping opacity-20"></div>
             <div class="relative ${sizeClass} rounded-full ${borderClass} border-white shadow-xl overflow-hidden bg-white">
-                <img src="${displayImage}" style="${imgStyle}" class="w-full h-full object-cover" />
+                <img ${displayImage} style="${imgStyle}" class="w-full h-full object-cover" />
             </div>
             ${isExplicitlyValidatedTree(tree) ? '<div class="absolute -top-2 -right-2 rounded-full border border-emerald-200 bg-white/95 px-1.5 py-0.5 text-[8px] font-black tracking-[0.2em] text-yellow-400 shadow-sm">V<span class="ml-0.5 text-[6px] font-bold tracking-[0.12em] text-emerald-700">validated</span></div>' : ''}
             ${isDanger ? `<div class="absolute -top-1 -left-1 z-20 w-3 h-3 bg-red-500 border border-white rounded-full animate-bounce"></div>` : ''}
         </div>`;
     }
 
-    const clusterImage = (tree: Lifetree) => safeImageUrl(tree.latestGrowthUrl || tree.imageUrl || (tree.id === 'GENESIS_TREE' ? '/mahameru.svg' : '/seed.webp'), DARK_IMAGE_FALLBACK);
+    const clusterPrimaryOf = (tree: Lifetree) => tree.latestGrowthUrl || tree.imageUrl || (tree.id === 'GENESIS_TREE' ? '/mahameru.svg' : '/seed.webp');
+    const clusterImage = (tree: Lifetree) => safeImageUrl(imageVariantUrlOf(clusterPrimaryOf(tree), 480), DARK_IMAGE_FALLBACK);
+    const clusterPrimary = (tree: Lifetree) => safeImageUrl(clusterPrimaryOf(tree), DARK_IMAGE_FALLBACK);
 
     // A cluster of nearby trees as a pie of their images (up to 4 slices, rest in the count badge).
     const getClusterPieHtml = (trees: Lifetree[], clusterId: string) => {
@@ -335,7 +362,7 @@ export const ForestMap = ({ trees, onView, onReach, onViewLightHouse, loading = 
         const safe = clusterId.replace(/[^a-zA-Z0-9]/g, '');
 
         if (k <= 1) {
-            return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><defs><clipPath id="cc${safe}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath></defs><circle cx="${cx}" cy="${cy}" r="${r}" fill="#e2e8f0"/><image href="${clusterImage(shown[0])}" x="0" y="0" width="${size}" height="${size}" preserveAspectRatio="xMidYMid slice" clip-path="url(#cc${safe})"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="white" stroke-width="2"/></svg>`;
+            return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><defs><clipPath id="cc${safe}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath></defs><circle cx="${cx}" cy="${cy}" r="${r}" fill="#e2e8f0"/><image href="${clusterImage(shown[0])}" data-primary="${clusterPrimary(shown[0])}" x="0" y="0" width="${size}" height="${size}" preserveAspectRatio="xMidYMid slice" clip-path="url(#cc${safe})"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="white" stroke-width="2"/></svg>`;
         }
 
         let defs = '';
@@ -349,7 +376,7 @@ export const ForestMap = ({ trees, onView, onReach, onViewLightHouse, loading = 
             const path = `M ${cx} ${cy} L ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1} Z`;
             const id = `s${safe}_${i}`;
             defs += `<clipPath id="${id}"><path d="${path}"/></clipPath>`;
-            body += `<image href="${clusterImage(shown[i])}" x="0" y="0" width="${size}" height="${size}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})"/><path d="${path}" fill="none" stroke="white" stroke-width="1.5"/>`;
+            body += `<image href="${clusterImage(shown[i])}" data-primary="${clusterPrimary(shown[i])}" x="0" y="0" width="${size}" height="${size}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})"/><path d="${path}" fill="none" stroke="white" stroke-width="1.5"/>`;
         }
         return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><defs>${defs}</defs><circle cx="${cx}" cy="${cy}" r="${r}" fill="#e2e8f0"/>${body}<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="white" stroke-width="2"/></svg>`;
     };
@@ -357,11 +384,12 @@ export const ForestMap = ({ trees, onView, onReach, onViewLightHouse, loading = 
     const createPopupContent = (tree: Lifetree) => {
         const sanct = (tree as MapBeing).__lightHouse;
         if (sanct) return createLightHousePopup(sanct);
-        const displayImage = safeImageUrl(tree.latestGrowthUrl || tree.imageUrl);
+        const primaryImage = tree.latestGrowthUrl || tree.imageUrl;
+        const displayImage = primaryImage ? seatAttrs(primaryImage) : '';
         const div = document.createElement('div');
         div.innerHTML = `
             <div class="text-center min-w-[160px]">
-                ${displayImage ? `<img src="${displayImage}" style="width:100%;height:120px;object-fit:cover;display:block;" class="rounded-t-lg" />` : ''}
+                ${displayImage ? `<img ${displayImage} style="width:100%;height:120px;object-fit:cover;display:block;" class="rounded-t-lg" />` : ''}
                 <div class="p-2">
                     <h3 class="font-bold text-sm text-slate-800 mb-1">${escapeHtml(tree.name)}</h3>
                     <p class="text-xs text-slate-500 line-clamp-2 italic mb-2">"${escapeHtml(tree.body)}"</p>
@@ -387,7 +415,7 @@ export const ForestMap = ({ trees, onView, onReach, onViewLightHouse, loading = 
         const div = document.createElement('div');
         div.innerHTML = `
             <div class="text-center min-w-[170px]">
-                ${s.imageUrl ? `<img src="${safeImageUrl(s.imageUrl)}" style="width:100%;height:110px;object-fit:cover;display:block;" class="rounded-t-lg" />` : ''}
+                ${s.imageUrl ? `<img ${seatAttrs(s.imageUrl)} style="width:100%;height:110px;object-fit:cover;display:block;" class="rounded-t-lg" />` : ''}
                 <div class="p-2.5">
                     <p class="text-[9px] font-bold uppercase tracking-[0.22em] text-amber-500">Light House</p>
                     <h3 class="font-bold text-sm text-slate-800 mt-0.5">${escapeHtml(s.name)}</h3>

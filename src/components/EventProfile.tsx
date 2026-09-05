@@ -22,6 +22,7 @@ import { TreeParticipants } from './TreeParticipants';
 import { useLanguage } from '../contexts/LanguageContext';
 import { spokenLine } from '../utils/translations';
 
+import { Picture } from './ui/Picture';
 // The event view, rendered through the shared profile scaffold (ProfileHero + ProfileLayout) so an
 // event reads like the community / lifetree / lightseed profiles rather than a generic pulse. Events
 // are pulses of type 'event'; this is the read view — editing still goes through EventModal (onEdit).
@@ -121,7 +122,7 @@ export const EventProfile = ({ pulse, activeTree, onClose, canEdit, onEdit, curr
                 <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
                     <div className="flex h-16 w-16 md:h-24 md:w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow-xl">
                         {images[0] ? (
-                            <img src={images[0]} className="h-full w-full object-cover" alt={pulse.title} referrerPolicy="no-referrer" />
+                            <Picture size={1200} src={images[0]} className="h-full w-full object-cover" alt={pulse.title} referrerPolicy="no-referrer" />
                         ) : (
                             <MahameruAvatar className="h-full w-full" />
                         )}

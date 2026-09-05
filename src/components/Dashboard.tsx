@@ -18,6 +18,7 @@ import { fetchMyRays } from '../services/firebase/light';
 import { formatLight } from '../domain/light';
 import { Community, Pulse } from '../types';
 
+import { Picture } from './ui/Picture';
 export interface DashboardProps {
     stats: {
         trees: number;
@@ -201,7 +202,7 @@ export const Dashboard = ({ stats, hostCommunity, events, onViewEvent, onViewCom
             {lightseed && (
             <div onClick={() => lightseed ? onSetTab('profile') : onLogin()} className="relative h-56 md:h-72 lg:h-80 rounded-2xl overflow-hidden shadow-xl cursor-pointer group">
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-purple-600"></div>
-                {lightseed && firstTreeImage && <img src={firstTreeImage} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-[5s]" />}
+                {lightseed && firstTreeImage && <Picture size={1200} src={firstTreeImage} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-[5s]" />}
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div>
                 
                 <div className="relative h-full p-4 flex flex-col justify-between text-white">

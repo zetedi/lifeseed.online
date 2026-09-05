@@ -23,6 +23,7 @@ import type { Community, Lifetree } from '../types';
 import { spokenLine } from '../utils/translations';
 import { useLanguage } from '../contexts/LanguageContext';
 
+import { Picture } from './ui/Picture';
 // The Light House's own page — the shared profile anatomy (ProfileHero + ProfileLayout), so a
 // sacred place opens like every other being: from its map marker, or from a community's
 // LightHouses tab. Two sections: About (the story, the 3D door, the visibility chips) and
@@ -186,7 +187,7 @@ export const LightHouseProfile = ({ lightHouse, onClose, backLabel = 'Back', can
                 </div>
                 <div className="flex items-center gap-4 sm:gap-5">
                     <div className="flex h-16 w-16 md:h-20 md:w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-amber-200 bg-[#04070f] shadow-xl">
-                        <img src={lightHouse.imageUrl || '/lighthouse.webp'} className="h-full w-full object-cover" alt={lightHouse.name} referrerPolicy="no-referrer" />
+                        <Picture size={1200} src={lightHouse.imageUrl || '/lighthouse.webp'} className="h-full w-full object-cover" alt={lightHouse.name} referrerPolicy="no-referrer" />
                     </div>
                     <div className="min-w-0 flex-1">
                         <h1 dir="auto" className="min-w-0 break-words text-2xl font-light tracking-wide">{lightHouse.name}</h1>
@@ -270,7 +271,7 @@ export const LightHouseProfile = ({ lightHouse, onClose, backLabel = 'Back', can
                                 role={onViewTree ? 'button' : undefined}
                                 className={`flex items-center gap-4 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-white p-4 shadow-sm ${onViewTree ? 'cursor-pointer transition-shadow hover:shadow-md' : ''}`}
                             >
-                                <img src={rootTree.latestGrowthUrl || rootTree.imageUrl || '/mahameru.svg'} alt="" className="h-16 w-16 shrink-0 rounded-full border-4 border-amber-300 object-cover bg-[#04070f] shadow" />
+                                <Picture size={480} src={rootTree.latestGrowthUrl || rootTree.imageUrl || '/mahameru.svg'} alt="" className="h-16 w-16 shrink-0 rounded-full border-4 border-amber-300 object-cover bg-[#04070f] shadow" />
                                 <div className="min-w-0 flex-1">
                                     <p className="truncate text-lg font-light tracking-wide text-slate-800">{rootTree.name}</p>
                                     <p className="text-[10px] font-black uppercase tracking-wide text-amber-600">☀ Mother tree: this Light House is rooted here</p>
@@ -290,7 +291,7 @@ export const LightHouseProfile = ({ lightHouse, onClose, backLabel = 'Back', can
                                 <div className="space-y-2">
                                     {rootCandidates.filter(t => t.id !== rootTree?.id).map(t => (
                                         <div key={t.id} className="flex items-center gap-3 rounded-xl border border-amber-100 bg-white p-2.5">
-                                            <img src={t.latestGrowthUrl || t.imageUrl || '/mahameru.svg'} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover bg-[#04070f]" />
+                                            <Picture size={480} src={t.latestGrowthUrl || t.imageUrl || '/mahameru.svg'} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover bg-[#04070f]" />
                                             <p className="min-w-0 flex-1 truncate text-sm font-medium text-slate-700">{t.name}</p>
                                             <button onClick={() => rootIn(t)} disabled={isRooting}
                                                 className="shrink-0 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-amber-600 disabled:opacity-50">
@@ -316,7 +317,7 @@ export const LightHouseProfile = ({ lightHouse, onClose, backLabel = 'Back', can
                                         <button key={bed.id} type="button" onClick={() => onViewTree?.(bed)}
                                             className="group flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 text-left shadow-sm transition-colors hover:border-slate-200 hover:bg-slate-50">
                                             {img
-                                                ? <img src={img} alt={bed.name} className="h-14 w-14 flex-none rounded-xl object-cover" />
+                                                ? <Picture size={480} src={img} alt={bed.name} className="h-14 w-14 flex-none rounded-xl object-cover" />
                                                 : <span className="flex h-14 w-14 flex-none items-center justify-center rounded-xl bg-gradient-to-br from-indigo-400 to-violet-500 text-white [&>svg]:h-6 [&>svg]:w-6"><Icons.Moon /></span>}
                                             <div className="min-w-0 flex-1">
                                                 <p className="truncate text-sm font-bold text-slate-800">{bed.name}</p>
@@ -365,14 +366,14 @@ export const LightHouseProfile = ({ lightHouse, onClose, backLabel = 'Back', can
                                         className={`group relative h-36 overflow-hidden rounded-2xl shadow-md ring-1 ring-slate-100 ${onViewCommunity ? 'cursor-pointer transition-shadow hover:shadow-lg' : ''}`}
                                     >
                                         {c.heroImageUrl ? (
-                                            <img src={c.heroImageUrl} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" alt={c.name} />
+                                            <Picture size={1200} src={c.heroImageUrl} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" alt={c.name} />
                                         ) : (
                                             <div className="absolute inset-0" style={{ backgroundColor: c.theme?.primary || '#0f766e' }} />
                                         )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/5" />
                                         <div className="absolute bottom-3 left-4 right-4 flex items-center gap-3 text-white">
                                             <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/30 bg-white/20 backdrop-blur">
-                                                {c.logoUrl ? <img src={c.logoUrl} className="h-full w-full object-cover" alt="" /> : <Icons.Globe />}
+                                                {c.logoUrl ? <Picture size={480} src={c.logoUrl} className="h-full w-full object-cover" alt="" /> : <Icons.Globe />}
                                             </span>
                                             <span className="min-w-0">
                                                 <span className="block truncate text-base font-light tracking-wide">{c.name}</span>

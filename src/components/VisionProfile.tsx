@@ -23,6 +23,7 @@ import { ChainTree } from './sections/ChainTree';
 import { TreeParticipants } from './TreeParticipants';
 import { Lifetree } from '../types';
 
+import { Picture } from './ui/Picture';
 // The vision's genesis is a sealed block, not a pulse (like a bed) — so the chain view draws its
 // root from the vision itself; any pulse whose previousHash is the sentinel is treated as a root.
 const isGenesisPulse = (p: Pulse) => p.previousHash === '0' || p.title === 'Genesis Pulse';
@@ -232,7 +233,7 @@ export const VisionProfile = ({ vision, onClose, currentUserId, onDelete, myTree
                 {/* Avatar + title + meta */}
                 <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
                     <div className="flex h-16 w-16 md:h-20 md:w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-amber-50 shadow-xl">
-                        <img src={vision.imageUrl || '/mahameru.svg'} className="h-full w-full object-cover" alt={vision.title} referrerPolicy="no-referrer" />
+                        <Picture size={1200} src={vision.imageUrl || '/mahameru.svg'} className="h-full w-full object-cover" alt={vision.title} referrerPolicy="no-referrer" />
                     </div>
                     <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 justify-center sm:justify-start">
@@ -257,7 +258,7 @@ export const VisionProfile = ({ vision, onClose, currentUserId, onDelete, myTree
                                     className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/40 bg-emerald-400/15 px-2.5 py-0.5 text-xs font-medium text-emerald-100 transition-colors hover:bg-emerald-400/30"
                                 >
                                     {rootTree.imageUrl
-                                        ? <img src={rootTree.imageUrl} alt="" referrerPolicy="no-referrer" className="h-4 w-4 rounded-full object-cover" />
+                                        ? <Picture size={480} src={rootTree.imageUrl} alt="" referrerPolicy="no-referrer" className="h-4 w-4 rounded-full object-cover" />
                                         : <Icons.Tree />}
                                     <span className="max-w-[10rem] truncate">{t('rooted_in')} {rootTree.name}</span>
                                 </button>
@@ -284,7 +285,7 @@ export const VisionProfile = ({ vision, onClose, currentUserId, onDelete, myTree
                             >
                                 <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-white bg-emerald-100 shadow">
                                     {rootTree.latestGrowthUrl || rootTree.imageUrl
-                                        ? <img src={rootTree.latestGrowthUrl || rootTree.imageUrl} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover" />
+                                        ? <Picture size={480} src={rootTree.latestGrowthUrl || rootTree.imageUrl} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover" />
                                         : <span className="flex h-full w-full items-center justify-center text-emerald-500"><Icons.Tree /></span>}
                                 </div>
                                 <div className="min-w-0 flex-1">
@@ -297,7 +298,7 @@ export const VisionProfile = ({ vision, onClose, currentUserId, onDelete, myTree
                         )}
                         {vision.imageUrl && (
                             <div className="mb-6 h-64 w-full overflow-hidden rounded-2xl border border-slate-100 bg-amber-50 shadow-sm">
-                                <img src={vision.imageUrl} alt={vision.title} className="h-full w-full object-cover" />
+                                <Picture size={1200} src={vision.imageUrl} alt={vision.title} className="h-full w-full object-cover" />
                             </div>
                         )}
                         <p dir="auto" className="whitespace-pre-wrap font-serif text-xl leading-relaxed text-slate-700">

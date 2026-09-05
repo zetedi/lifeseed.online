@@ -16,6 +16,7 @@ import { BeingQr } from './ui/BeingQr';
 import { mintBeingQr } from '../services/firebase/beings';
 import { useLanguage } from '../contexts/LanguageContext';
 
+import { Picture } from './ui/Picture';
 // The generic pulse view — a PROFILE, not a modal: the same ProfileHero + full-page scaffold as
 // VisionProfile / EventProfile / AlignmentView, so every entity (tree, vision, event, alignment,
 // pulse) opens into one profile anatomy (Indra's net). It still renders inside App's
@@ -155,7 +156,7 @@ export const PulseDetail = ({ pulse, activeTree, onClose, backLabel, canEdit, on
                 <div className="flex items-center gap-4 sm:gap-5">
                     <div className="flex h-16 w-16 md:h-20 md:w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-emerald-50 text-emerald-500 shadow-xl">
                         {images[0]
-                            ? <img src={images[0]} className="h-full w-full object-cover" alt={pulse.title} referrerPolicy="no-referrer" />
+                            ? <Picture size={1200} src={images[0]} className="h-full w-full object-cover" alt={pulse.title} referrerPolicy="no-referrer" />
                             : <Icons.Lightning />}
                     </div>
                     <div className="min-w-0 flex-1">

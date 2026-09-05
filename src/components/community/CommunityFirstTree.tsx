@@ -7,6 +7,7 @@ import { firestoreStore } from '../../adapters/firestore';
 import { GuardianButton } from './GuardianButton';
 import { useLanguage } from '../../contexts/LanguageContext';
 
+import { Picture } from '../ui/Picture';
 interface CommunityFirstTreeProps {
   community: Community;
   // The first lifetree rooted in this community's domain (earliest planted), if any.
@@ -56,7 +57,7 @@ export const CommunityFirstTree: React.FC<CommunityFirstTreeProps> = ({
             onClick={() => onViewTree?.(firstTree)}
           >
             {firstTree.latestGrowthUrl || firstTree.imageUrl ? (
-              <img src={firstTree.latestGrowthUrl || firstTree.imageUrl} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" alt={firstTree.name} />
+              <Picture size={1200} src={firstTree.latestGrowthUrl || firstTree.imageUrl} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" alt={firstTree.name} />
             ) : (
               <div className="h-full w-full" style={{ backgroundColor: community.theme?.primary || tabTone('communities') }} />
             )}

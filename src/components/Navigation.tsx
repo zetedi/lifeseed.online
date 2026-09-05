@@ -10,6 +10,7 @@ import { tabTone, tabFg } from '../utils/tabTheme';
 import { crownName, type CrownRole } from '../domain/dataAuthority';
 
 
+import { Picture } from './ui/Picture';
 interface NavigationProps {
   activeTab: string;
   setTab: (tab: string) => void;
@@ -337,7 +338,7 @@ export const Navigation = ({
                     })()}
                     <div className="flex items-center gap-3 cursor-pointer group shrink-0" onClick={() => setTab('dashboard')}>
                         <div className={`p-1 rounded-full group-hover:scale-110 transition-transform ${navIsDark ? 'bg-white' : 'bg-slate-50 border border-slate-200'}`} style={{ borderColor: navBorder }}>
-                             {logoUrl ? <img src={logoUrl} className="w-8 h-8 rounded-full object-cover" alt="Logo" /> : <Logo width={32} height={32} />}
+                             {logoUrl ? <Picture size={480} src={logoUrl} className="w-8 h-8 rounded-full object-cover" alt="Logo" /> : <Logo width={32} height={32} />}
                         </div>
                         {/* The name renders EXACTLY as the keeper wrote it (the appearance hint promises it) —
                         no forced case: '.seed' is lowercase because it is WRITTEN lowercase. */}
@@ -440,7 +441,7 @@ export const Navigation = ({
                                 {/* Avatar with profile link beneath it */}
                                 <button onClick={onProfile} className="group flex flex-col items-center leading-none">
                                     <span className="relative">
-                                        <img
+                                        <Picture size={480}
                                             src={lightseed.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(lightseed.displayName || 'Visitor')}&background=random&color=fff`}
                                             className="w-9 h-9 rounded-full border-2 border-white/20 shadow-md group-hover:border-white transition-all object-cover"
                                             alt={lightseed.displayName || 'Profile'}
@@ -560,7 +561,7 @@ export const Navigation = ({
                                 <button onClick={() => { onProfile(); setIsMenuOpen(false); }} className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-white/95 px-3 py-2.5 text-sm font-bold text-slate-700 transition-all hover:bg-white">
                                     <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-emerald-200 bg-white">
                                         {activeTreeImage
-                                            ? <img src={activeTreeImage} className="h-full w-full object-cover" alt="" referrerPolicy="no-referrer" />
+                                            ? <Picture size={480} src={activeTreeImage} className="h-full w-full object-cover" alt="" referrerPolicy="no-referrer" />
                                             : <span className="text-emerald-500 [&>svg]:h-4 [&>svg]:w-4"><Icons.Tree /></span>}
                                     </span>
                                     <span>{t('profile_page')}</span>

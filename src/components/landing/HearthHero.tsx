@@ -5,6 +5,7 @@ import { eventFeedScope, eventsOnView } from '../../domain/pulseVisibility';
 import { sanitizeRichText } from '../../utils/sanitize';
 import { useLanguage } from '../../contexts/LanguageContext';
 
+import { Picture } from '../ui/Picture';
 // THE HEARTH HERO — the section registry's first citizen (ring 2026-08-16), designed with
 // Zoltán for The O House: the fireplace that will stand at the centre of the dome, held in
 // a circle (the dome's eye), the community's VISION breathing live from its own property
@@ -54,7 +55,7 @@ export const HearthHero: React.FC<HearthHeroProps> = ({ community, props, lights
       {imageUrl && (
         <div className="relative mx-auto mb-8 h-56 w-56 md:h-72 md:w-72">
           <div className="absolute inset-0 rounded-full" style={{ boxShadow: `0 0 90px 18px ${accent}55` }} />
-          <img
+          <Picture size={1200}
             src={imageUrl}
             alt={headline}
             referrerPolicy="no-referrer"
@@ -88,7 +89,7 @@ export const HearthHero: React.FC<HearthHeroProps> = ({ community, props, lights
                 className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/80 p-3 text-left shadow-sm backdrop-blur transition-all hover:shadow-md"
               >
                 {ev.imageUrl && (
-                  <img src={ev.imageUrl} alt="" referrerPolicy="no-referrer" className="h-14 w-14 shrink-0 rounded-xl object-cover" />
+                  <Picture size={480} src={ev.imageUrl} alt="" referrerPolicy="no-referrer" className="h-14 w-14 shrink-0 rounded-xl object-cover" />
                 )}
                 <span className="min-w-0">
                   <span dir="auto" className="block truncate text-sm font-bold text-slate-800 group-hover:text-slate-900">{ev.title}</span>

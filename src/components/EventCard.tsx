@@ -5,6 +5,7 @@ import { LoveButton } from './ui/LoveButton';
 import { firestoreStore } from '../adapters/firestore';
 import type { Community, Pulse } from '../types';
 
+import { Picture } from './ui/Picture';
 // ONE event card, shared by the home hero banner and the Events section (DRY). A solid card, so
 // it reads the same on a coloured banner or a white page. The image carries four corners:
 //   top-left  — the countdown (In / N / days; Today in one word)
@@ -86,7 +87,7 @@ export const EventCard = ({ event, onOpen, community, onOpenCommunity, participa
                         className={`absolute bottom-1.5 left-1.5 flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-emerald-600 text-[11px] font-bold text-white shadow-md ${onOpenCommunity ? 'transition-transform hover:scale-110' : ''}`}
                     >
                         {community?.logoUrl
-                            ? <img src={community.logoUrl} className="h-full w-full object-cover" alt={faceName} referrerPolicy="no-referrer" />
+                            ? <Picture size={480} src={community.logoUrl} className="h-full w-full object-cover" alt={faceName} referrerPolicy="no-referrer" />
                             : faceName.charAt(0).toUpperCase()}
                     </span>
                 )}

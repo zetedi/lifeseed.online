@@ -6,6 +6,7 @@ import { witnessWatering } from '../../services/firebase';
 import { spokenLine } from '../../utils/translations';
 import type { Pulse } from '../../types';
 
+import { Picture } from '../ui/Picture';
 // The waterings of a tree no human has witnessed yet, and the circle's hand to witness them —
 // the sun ring's mint, judged on server ground (witnessWatering). One face, shown wherever
 // care is read: the Care tab beside "last watered", and the Circle. Who may witness is the
@@ -55,7 +56,7 @@ export const WitnessWaterings: React.FC<WitnessWateringsProps> = ({ treeName, pu
                     return (
                         <div key={p.id} className="flex items-center gap-3 rounded-xl border border-sky-100 bg-white p-2 shadow-sm">
                             {p.imageUrl
-                                ? <img src={p.imageUrl} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                                ? <Picture size={480} src={p.imageUrl} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
                                 : <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-500 [&>svg]:h-5 [&>svg]:w-5"><Icons.Droplet /></span>}
                             <span className="min-w-0 flex-1 text-xs text-slate-600">
                                 <span className="block truncate">{when}{p.authorPersonName ? ` · ${p.authorPersonName}` : ''}{p.wateringConfirmation?.note ? ` · ${p.wateringConfirmation.note}` : ''}</span>

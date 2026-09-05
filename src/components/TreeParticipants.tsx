@@ -6,6 +6,7 @@ import { firestoreStore } from '../adapters/firestore';
 import { getParticipatingTrees } from '../services/firebase';
 import { useLanguage } from '../contexts/LanguageContext';
 
+import { Picture } from './ui/Picture';
 // The trees gathered around an event or vision, plus (for signed-in owners) a picker to enlist their
 // own trees. Participation is a 'participant' link from the TREE to the entity — created/removed here
 // through the same Store port the rest of the LIN uses. Shared by EventProfile and VisionProfile.
@@ -61,7 +62,7 @@ export const TreeParticipants = ({ entityId, currentUserId, myTrees = [], maxPar
                     {trees.map(t => (
                         <div key={t.id} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
                             {treeImg(t) ? (
-                                <img src={treeImg(t)} className="h-10 w-10 shrink-0 rounded-full object-cover" alt="" referrerPolicy="no-referrer" />
+                                <Picture size={480} src={treeImg(t)} className="h-10 w-10 shrink-0 rounded-full object-cover" alt="" referrerPolicy="no-referrer" />
                             ) : (
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-500"><Icons.Tree /></div>
                             )}

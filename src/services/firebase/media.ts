@@ -1,14 +1,16 @@
-import { ref, uploadBytesResumable, getDownloadURL, uploadString } from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { storage } from './core';
 import { beginNetwork, endNetwork, setUploadProgress } from '../network';
 import { IMAGE_MIME, imageKindOfMime, withImageExtension, type ImageKind } from '../../domain/imageBytes';
+import { IMAGE_PRIMARY_MAX_EDGE, IMAGE_PRIMARY_QUALITY } from '../../domain/imageVariant';
 
 // Resize (cap the longest edge) and re-encode — WebP where the browser can encode it, JPEG
 // where it cannot (Safari and iOS answer a WebP request with PNG bytes, silently; those
 // uploads then wore `image/webp` over a 3-4 MB PNG and no share-card crawler could decode
 // the face — ring 2026-09-05). The blob's REAL kind rides with it, so the upload labels
 // what it holds. Keeps uploads small either way.
-const encodePhoto = (file: File, quality = 0.82, maxDim = 1600): Promise<{ blob: Blob; kind: ImageKind }> =>
+// The edge and quality are the primary's one truth (domain/imageVariant), shared with the recode.
+const encodePhoto = (file: Blob, quality = IMAGE_PRIMARY_QUALITY / 100, maxDim = IMAGE_PRIMARY_MAX_EDGE): Promise<{ blob: Blob; kind: ImageKind }> =>
     new Promise((resolve, reject) => {
         const img = new Image();
         const url = URL.createObjectURL(file);
@@ -49,7 +51,7 @@ const encodePhoto = (file: File, quality = 0.82, maxDim = 1600): Promise<{ blob:
 // Every photo upload in the app rides through here, so ONE integration point gives the whole
 // app live transfer status: the resumable task reports 0..100 to the network store, and the
 // global NetworkStatus badge shows "Uploading: N%" under the loader wherever the user is.
-export const uploadImage = async (file: File, path: string, onProgress?: (pct: number) => void): Promise<string> => {
+export const uploadImage = async (file: Blob, path: string, onProgress?: (pct: number) => void): Promise<string> => {
     const { blob, kind } = await encodePhoto(file);
     // The stored name and label follow the bytes (a/b/1.webp or a/b/1.jpg), never a wish.
     const storageRef = ref(storage, withImageExtension(path, kind));
@@ -74,11 +76,13 @@ export const uploadImage = async (file: File, path: string, onProgress?: (pct: n
     }
 };
 
-export const uploadBase64Image = async (base64String: string, path: string): Promise<string> => {
-    const storageRef = ref(storage, path);
-    await uploadString(storageRef, base64String, 'data_url');
-    return await getDownloadURL(storageRef);
-}
+// An AI-made picture arrives as a data URL. It takes the same road as a picked photo — fitted
+// and encoded like every primary — instead of landing raw (a 1280² PNG weighs 2–3 MB; ring
+// 2026-09-06 found the AI road the one upload path the encoder never saw).
+export const uploadBase64Image = async (dataUrl: string, path: string): Promise<string> => {
+    const blob = await (await fetch(dataUrl)).blob();
+    return uploadImage(blob, path);
+};
 
 // Re-encode a picked image as a small WebP and return its base64 payload (no data: prefix) —
 // the compact form vision models want for analysis. Reuses the same resize/encode as uploads.

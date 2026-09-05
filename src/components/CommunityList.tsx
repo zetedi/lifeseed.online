@@ -24,6 +24,7 @@ import { useListDensity, type ListDensity } from '../hooks/useListDensity';
 import { ViewDensityToggle } from './ui/ViewDensityToggle';
 import { speak, spokenLine } from '../utils/translations';
 
+import { Picture } from './ui/Picture';
 interface CommunityListProps {
   onSelect: (community: Community) => void;
   myTrees: Lifetree[];
@@ -66,7 +67,7 @@ const CommunityCard = ({ community, isGenesis = false, onSelect, standing = 'joi
       <div onClick={() => onSelect(community)}
         className={`flex cursor-pointer items-center gap-3 rounded-xl border bg-white p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${isGenesis ? 'border-amber-300 ring-2 ring-amber-300/30' : 'border-slate-100'}`}>
         <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-100 bg-slate-50 text-slate-400">
-          {community.logoUrl ? <img src={community.logoUrl} className="h-full w-full object-cover" alt="" /> : <Icons.Globe />}
+          {community.logoUrl ? <Picture size={480} src={community.logoUrl} className="h-full w-full object-cover" alt="" /> : <Icons.Globe />}
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-bold text-slate-800">{community.name}{isGenesis && <span className="ml-2 text-[9px] font-black uppercase tracking-wide text-amber-600">Community 0</span>}</p>
@@ -85,7 +86,7 @@ const CommunityCard = ({ community, isGenesis = false, onSelect, standing = 'joi
       <div onClick={() => onSelect(community)}
         className={`group relative flex min-h-[8.5rem] cursor-pointer flex-col justify-end overflow-hidden rounded-xl border shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl ${isGenesis ? 'border-amber-400 ring-2 ring-amber-400/25' : 'border-slate-100'}`}
         style={!hero ? { backgroundColor: (community as any).theme?.primary || tabTone('communities') } : undefined}>
-        {hero && (<><img src={hero} className="absolute inset-0 h-full w-full object-cover" alt={community.name} /><div className="absolute inset-0 bg-gradient-to-t from-black/75 to-black/10" /></>)}
+        {hero && (<><Picture size={1200} src={hero} className="absolute inset-0 h-full w-full object-cover" alt={community.name} /><div className="absolute inset-0 bg-gradient-to-t from-black/75 to-black/10" /></>)}
         {!hero && <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />}
         <div className="relative z-10 flex items-end justify-between gap-2 p-3">
           <div className="min-w-0">
@@ -108,7 +109,7 @@ const CommunityCard = ({ community, isGenesis = false, onSelect, standing = 'joi
   >
       {hero && (
           <>
-              <img src={hero} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" alt={community.name} />
+              <Picture size={1200} src={hero} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" alt={community.name} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
           </>
       )}
@@ -122,7 +123,7 @@ const CommunityCard = ({ community, isGenesis = false, onSelect, standing = 'joi
           <div className="mb-2.5 flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/30 bg-white/20 backdrop-blur-md text-white">
                   {community.logoUrl ? (
-                      <img src={community.logoUrl} className="h-full w-full object-cover" alt={`${community.name} logo`} />
+                      <Picture size={480} src={community.logoUrl} className="h-full w-full object-cover" alt={`${community.name} logo`} />
                   ) : (
                       <Icons.Globe />
                   )}

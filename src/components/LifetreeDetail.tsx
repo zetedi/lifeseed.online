@@ -27,6 +27,7 @@ import { TreeGardens } from './lifetree/TreeGardens';
 import { TreeConnections } from './lifetree/TreeConnections';
 import { TreeDetails, type TreeDetailsUpdates } from './lifetree/TreeDetails';
 
+import { Picture } from './ui/Picture';
 interface LifetreeDetailProps {
     tree: Lifetree;
     onClose: () => void;
@@ -508,7 +509,7 @@ export const LifetreeDetail = ({ tree, onClose, onPlayGrowth, onValidate, onUpda
                     {/* Avatar — the latest growth image. */}
                     <div className="relative shrink-0">
                         {heroImg
-                            ? <img src={heroImg} alt={tree.name} className="h-16 w-16 rounded-full border-4 border-white bg-white object-cover shadow-xl md:h-24 md:w-24" />
+                            ? <Picture size={480} src={heroImg} alt={tree.name} className="h-16 w-16 rounded-full border-4 border-white bg-white object-cover shadow-xl md:h-24 md:w-24" />
                             /* Mahameru wears the starry sky (Orion); every other imageless tree
                                a plain tree glyph. */
                             : tree.id === 'GENESIS_TREE'

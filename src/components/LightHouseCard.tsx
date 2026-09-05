@@ -2,6 +2,7 @@ import { Icons } from './ui/Icons';
 import { lightHouseVisibility, isLightHouseKind, lightHouseKindKey, type LightHouse } from '../domain/lightHouse';
 import { useLanguage } from '../contexts/LanguageContext';
 
+import { Picture } from './ui/Picture';
 // The Light House's card — the same face in every garden: the community's LightHouses tab
 // and the forest's card view. Golden glow (its map warmth), lighthouse fallback, badges
 // for the 3D door and visibility, name and place over the night.
@@ -22,7 +23,7 @@ export const LightHouseCard = ({ lightHouse, onOpen, placeholderColor, className
         className={`group relative overflow-hidden rounded-2xl shadow-lg ring-1 ring-amber-200/60 ${onOpen ? 'cursor-pointer transition-shadow hover:shadow-xl' : ''} ${className}`}
     >
         {lightHouse.imageUrl ? (
-            <img src={lightHouse.imageUrl} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" alt={lightHouse.name} />
+            <Picture size={1200} src={lightHouse.imageUrl} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" alt={lightHouse.name} />
         ) : (
             <div className="absolute inset-0" style={{ backgroundColor: placeholderColor || '#04070f' }}>
                 <img src="/lighthouse.webp" className="h-full w-full object-cover" alt="" />

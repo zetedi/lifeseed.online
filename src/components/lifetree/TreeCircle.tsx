@@ -15,6 +15,7 @@ import { translations, spokenLine, speak } from '../../utils/translations';
 import { WitnessWaterings } from './WitnessWaterings';
 import type { Lifetree, Pulse } from '../../types';
 
+import { Picture } from '../ui/Picture';
 // THE CIRCLE — the whole circle of care around a Lifetree, one view (the two old tabs merged). It
 // is a prism over the tree's incoming links (domain/views/circle), which already groups owner +
 // co_owner + guardian + steward + observer. Two layers of belonging live here, kept legible, never
@@ -62,7 +63,7 @@ const faceFromForest = (uid: string, forest: Lifetree[]): Face => {
 
 const Avatar: React.FC<{ imageUrl?: string; seed: string; ring?: string }> = ({ imageUrl, seed, ring = 'ring-slate-100' }) => (
     imageUrl
-        ? <img src={imageUrl} alt="" className={`h-11 w-11 shrink-0 rounded-full object-cover ring-2 ${ring}`} />
+        ? <Picture size={480} src={imageUrl} alt="" className={`h-11 w-11 shrink-0 rounded-full object-cover ring-2 ${ring}`} />
         : <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-emerald-500 text-sm font-bold text-white ring-2 ${ring}`}>
             {(seed || '?').slice(0, 1).toUpperCase()}
           </span>
