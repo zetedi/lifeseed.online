@@ -20,6 +20,21 @@ has the rest); returning the raw field unchecked (the feed is the last gate, on 
 
 ---
 
+**2026-09-05 · The label follows the bytes** — the shared tree's card still wore the site's
+image. Hosting was innocent: fetched as a crawler, /b/<lid> answered with the tree's name and
+its latest watering photo. The photo itself was the lie — 3.7 MB of PNG bytes served as
+`image/webp`: the browser's canvas, asked for WebP on Safari / iOS where it cannot encode it,
+silently answers with PNG, and the upload labelled the wish, not the bytes; a crawler trusting
+the label could not decode the face and fell back. Now `domain/imageBytes` names a picture's
+kind from its magic bytes (tested); the encoder asks for WebP and, when the browser answers
+with something else, re-encodes as JPEG — encodable everywhere — and the upload's name and
+content-type follow the blob's real kind. `scripts/repair-image-types.mjs` walked the bucket
+(45 user uploads, 26 mislabelled PNGs, 2–28 MB) and relabelled them, metadata only: no byte
+rewritten, no URL or token changed. Named, not fixed: the stored originals stay large (a
+28 MB logo among them); some previewers cap image size lower than Facebook's 8 MB, so a bounded
+re-encode of stored photos (bytes, not labels — an irreversible step with a backup first) or a
+resizing preview endpoint is the next rung if a platform still refuses the face.
+
 **2026-09-03 · Three more, the same evening** — (1) *The hero waits for its ground*: on Per
 Auset (strict, no custom landing) the dashboard hero fetched before the host community had
 answered, so its strictness was unknown and the creator-never-lost merge folded the keeper's

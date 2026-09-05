@@ -1,9 +1,14 @@
 import { ref, uploadBytesResumable, getDownloadURL, uploadString } from 'firebase/storage';
 import { storage } from './core';
 import { beginNetwork, endNetwork, setUploadProgress } from '../network';
+import { IMAGE_MIME, imageKindOfMime, withImageExtension, type ImageKind } from '../../domain/imageBytes';
 
-// Resize (cap the longest edge) and re-encode as WebP — keeps uploads small.
-const toWebP = (file: File, quality = 0.82, maxDim = 1600): Promise<Blob> =>
+// Resize (cap the longest edge) and re-encode — WebP where the browser can encode it, JPEG
+// where it cannot (Safari and iOS answer a WebP request with PNG bytes, silently; those
+// uploads then wore `image/webp` over a 3-4 MB PNG and no share-card crawler could decode
+// the face — ring 2026-09-05). The blob's REAL kind rides with it, so the upload labels
+// what it holds. Keeps uploads small either way.
+const encodePhoto = (file: File, quality = 0.82, maxDim = 1600): Promise<{ blob: Blob; kind: ImageKind }> =>
     new Promise((resolve, reject) => {
         const img = new Image();
         const url = URL.createObjectURL(file);
@@ -24,11 +29,18 @@ const toWebP = (file: File, quality = 0.82, maxDim = 1600): Promise<Blob> =>
             ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, w, h);
             URL.revokeObjectURL(url);
-            canvas.toBlob(
-                blob => blob ? resolve(blob) : reject(new Error('WebP conversion failed')),
-                'image/webp',
-                quality
-            );
+            const settle = (blob: Blob | null, wanted: ImageKind) => {
+                if (!blob) { reject(new Error('Image conversion failed')); return; }
+                // The kind the canvas actually produced — a browser that cannot encode the
+                // asked-for type answers with another (PNG), and the label must follow the bytes.
+                const kind = imageKindOfMime(blob.type) || wanted;
+                resolve({ blob, kind });
+            };
+            canvas.toBlob(blob => {
+                if (blob && imageKindOfMime(blob.type) === 'webp') { settle(blob, 'webp'); return; }
+                // No WebP encoder here: JPEG is encodable everywhere and small enough.
+                canvas.toBlob(jpeg => settle(jpeg, 'jpeg'), 'image/jpeg', quality);
+            }, 'image/webp', quality);
         };
         img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image load failed')); };
         img.src = url;
@@ -38,14 +50,14 @@ const toWebP = (file: File, quality = 0.82, maxDim = 1600): Promise<Blob> =>
 // app live transfer status: the resumable task reports 0..100 to the network store, and the
 // global NetworkStatus badge shows "Uploading: N%" under the loader wherever the user is.
 export const uploadImage = async (file: File, path: string, onProgress?: (pct: number) => void): Promise<string> => {
-    const webpPath = path.replace(/\.[^.]+$/, '') + '.webp';
-    const blob = await toWebP(file);
-    const storageRef = ref(storage, webpPath);
+    const { blob, kind } = await encodePhoto(file);
+    // The stored name and label follow the bytes (a/b/1.webp or a/b/1.jpg), never a wish.
+    const storageRef = ref(storage, withImageExtension(path, kind));
     beginNetwork();
     setUploadProgress(0);
     try {
         await new Promise<void>((resolve, reject) => {
-            const task = uploadBytesResumable(storageRef, blob, { contentType: 'image/webp' });
+            const task = uploadBytesResumable(storageRef, blob, { contentType: IMAGE_MIME[kind] });
             task.on('state_changed',
                 snap => {
                     const pct = snap.totalBytes > 0 ? Math.round((snap.bytesTransferred / snap.totalBytes) * 100) : 0;
@@ -70,8 +82,10 @@ export const uploadBase64Image = async (base64String: string, path: string): Pro
 
 // Re-encode a picked image as a small WebP and return its base64 payload (no data: prefix) —
 // the compact form vision models want for analysis. Reuses the same resize/encode as uploads.
+// A photo as base64 for the AI's eye (the watering witness) — WebP or JPEG, and the mimeType
+// names what the bytes really are.
 export const fileToWebpBase64 = async (file: File, maxDim = 1024): Promise<{ data: string; mimeType: string }> => {
-    const blob = await toWebP(file, 0.8, maxDim);
+    const { blob, kind } = await encodePhoto(file, 0.8, maxDim);
     const dataUrl: string = await new Promise((resolve, reject) => {
         const r = new FileReader();
         r.onload = () => resolve(r.result as string);
@@ -79,6 +93,6 @@ export const fileToWebpBase64 = async (file: File, maxDim = 1024): Promise<{ dat
         r.readAsDataURL(blob);
     });
     const comma = dataUrl.indexOf(',');
-    return { data: comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl, mimeType: 'image/webp' };
+    return { data: comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl, mimeType: IMAGE_MIME[kind] };
 };
 
