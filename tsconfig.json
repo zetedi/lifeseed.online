@@ -25,6 +25,7 @@
       ]
     },
     "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
     "noEmit": true,
 
     // FULL strict + no dead code, and it must stay that way. (The old "~4700 errors to

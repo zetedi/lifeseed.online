@@ -16,21 +16,15 @@ import { applicationDefault, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
 // Face → the community domain whose card it wears (mirror of the hosting targets).
-const FACE_DOMAINS = {
-  perauset: 'perauset.web.app',
-  // The hybrid shape (ring 2026-08-19): theohouse.org stays the mother site's own; the
-  // portal's canonical door is the seed subdomain, and shares bake its URL.
-  theohouse: 'seed.theohouse.org',
-  enlightenednations: 'enlightenednations.web.app',
-  // First portal reaching for Peru (2026-08-27) — a community will wear its name.
-  mamaway: 'mamaway.web.app',
-};
+const charter = JSON.parse(readFileSync(new URL('../node.json', import.meta.url), 'utf8'));
+// Face → the door it wears: the charter's faces (node.json), never a list by heart.
+const FACE_DOMAINS = Object.fromEntries(charter.faces.filter((f) => f.target !== 'app').map((f) => [f.target, f.door]));
 
 const face = process.argv[2];
 const domain = FACE_DOMAINS[face];
 if (!domain) { console.error(`face-og: unknown face '${face}' — add it to FACE_DOMAINS.`); process.exit(1); }
 
-initializeApp({ credential: applicationDefault(), projectId: 'lifeseed-75dfe' });
+initializeApp({ credential: applicationDefault(), projectId: charter.firebase.projectId });
 const db = getFirestore();
 let snap = await db.collection('communities').where('domain', '==', domain).limit(1).get();
 // A face may answer at a DOOR (domainAliases) rather than the place's name — the seed

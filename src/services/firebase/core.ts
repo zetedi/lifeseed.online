@@ -2,6 +2,7 @@
 // helpers shared across every aggregate module. Everything under services/firebase/ imports from
 // here; services/firebase.ts re-exports the aggregates as one barrel so call sites stay unchanged.
 import '../../utils/polyfill';
+import { charter, nodeDomains } from '../../config/charter';
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator, onAuthStateChanged, GoogleAuthProvider, type User as FirebaseUser } from 'firebase/auth';
 import { initializeFirestore, connectFirestoreEmulator, collection, doc } from 'firebase/firestore';
@@ -25,7 +26,7 @@ export const mapPulse = (d: any): Pulse => {
     return { id: d.id, ...data, type: normalizePulseType(data.type) } as Pulse;
 };
 
-export const SYSTEM_EMAIL_FROM = "lightseed <admin@lightseed.online>";
+export const SYSTEM_EMAIL_FROM = charter.mail.from;
 
 export const getEnv = (key: string) => {
     return (window as any).process?.env?.[key] || (import.meta as any).env?.[key] || "";
@@ -39,17 +40,20 @@ export const getEnv = (key: string) => {
 // consoles: Firebase Auth → Authorized domains, AND the Google OAuth client's JS origins +
 // redirect URI (https://<domain>/__/auth/handler). Everywhere else (localhost, previews) we
 // fall back to the env authDomain.
-const HOSTED_AUTH_DOMAINS = ['lightseed.online', 'lifeseed.online'];
+const HOSTED_AUTH_DOMAINS = nodeDomains;
 const currentHost = window.location.hostname.replace(/^www\./, '');
 
+// The charter is the node (config/charter → node.json); an env var still overrides it, so a
+// local run may point at an emulator or a preview project without touching the charter.
+const web = charter.firebase.web;
 const firebaseConfig = {
-  apiKey: getEnv('VITE_FIREBASE_API_KEY'),
-  authDomain: HOSTED_AUTH_DOMAINS.includes(currentHost) ? currentHost : getEnv('VITE_FIREBASE_AUTH_DOMAIN'),
-  projectId: getEnv('VITE_FIREBASE_PROJECT_ID'),
-  storageBucket: getEnv('VITE_FIREBASE_STORAGE_BUCKET'),
-  messagingSenderId: getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID'),
-  appId: getEnv('VITE_FIREBASE_APP_ID'),
-  measurementId: getEnv('VITE_FIREBASE_MEASUREMENT_ID')
+  apiKey: getEnv('VITE_FIREBASE_API_KEY') || web.apiKey,
+  authDomain: HOSTED_AUTH_DOMAINS.includes(currentHost) ? currentHost : (getEnv('VITE_FIREBASE_AUTH_DOMAIN') || web.authDomain),
+  projectId: getEnv('VITE_FIREBASE_PROJECT_ID') || charter.firebase.projectId,
+  storageBucket: getEnv('VITE_FIREBASE_STORAGE_BUCKET') || charter.firebase.bucket,
+  messagingSenderId: getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID') || web.messagingSenderId,
+  appId: getEnv('VITE_FIREBASE_APP_ID') || web.appId,
+  measurementId: getEnv('VITE_FIREBASE_MEASUREMENT_ID') || web.measurementId,
 };
 
 console.log("Firebase Init - Project:", firebaseConfig.projectId, "Has Key:", !!firebaseConfig.apiKey);

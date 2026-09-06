@@ -14,6 +14,7 @@ import { resolveTxt } from "node:dns/promises";
 import { judgeWitness, kindleDayKeyFromMs, uuidv7, releaseRay } from "./mint";
 import { entryFor, COLLECTION_FOR_KIND } from "./beingIndex";
 import { faceFeedOf, feedDomainOf } from "./faceEvents";
+import { charter, charterHosts, NODE_ORIGIN } from "./charter";
 import { notificationOf } from "./push";
 import { defineSecret } from "firebase-functions/params";
 import webpush from "web-push";
@@ -529,7 +530,7 @@ export const activateSigningKeyRecovery = onCall({ cors: true }, async request =
 // All outbound email stays in-house: writing a doc to `mail` queues it through the installed
 // firestore-send-email extension (Nodemailer under the hood, so `message.headers` are forwarded —
 // that's how the newsletter's List-Unsubscribe headers reach the recipient).
-const EMAIL_FROM = "lightseed <admin@lightseed.online>";
+const EMAIL_FROM = charter.mail.from;
 
 const writeMail = async (params: { to: string | string[]; subject: string; html: string; text?: string; headers?: Record<string, string>; uid?: string }) => {
     // Firestore rejects any document containing `undefined` (the extension doc write would fail
@@ -556,7 +557,7 @@ const composeSystemEmailHtml = (text: string, ctaUrl: string, ctaLabel: string):
     const cta = ctaUrl
         ? `<div style="margin:24px 0;"><a href="${ctaUrl}" style="display:inline-block;background:#059669;color:#fff;text-decoration:none;font-weight:bold;padding:12px 26px;border-radius:9999px;font-size:15px;">${escapeHtml(ctaLabel)}</a></div><p style="font-size:12px;color:#9ca3af;">Or paste this link:<br/><a href="${ctaUrl}" style="color:#059669;word-break:break-all;">${escapeHtml(ctaUrl)}</a></p>`
         : "";
-    return `<div style="font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;"><h2 style="color: #059669; font-weight: 300; letter-spacing: 1px; margin-bottom: 20px;">.seed</h2><div style="font-size: 16px; margin-bottom: 8px;">${body}</div>${cta}<hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" /><p style="font-size: 12px; color: #9ca3af; text-align: center;">Sent from the <a href="https://lightseed.online" style="color: #059669; text-decoration: none;">Lifetree Network</a><br/>The O House, Bigeh Island, Aswan, Egypt</p></div>`;
+    return `<div style="font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;"><h2 style="color: #059669; font-weight: 300; letter-spacing: 1px; margin-bottom: 20px;">.seed</h2><div style="font-size: 16px; margin-bottom: 8px;">${body}</div>${cta}<hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" /><p style="font-size: 12px; color: #9ca3af; text-align: center;">Sent from the <a href=NODE_ORIGIN style="color: #059669; text-decoration: none;">Lifetree Network</a><br/>The O House, Bigeh Island, Aswan, Egypt</p></div>`;
 };
 
 // --- Staff check + server-authoritative daily quotas -----------------------------------------
@@ -778,8 +779,8 @@ export const sendSystemEmail = onCall({ cors: true }, async (request) => {
 // PUSH (ring 2026-09-06): the private half of the VAPID pair is a secret; the public half is
 // the client's (services/push.ts). The subject is the node keeper's contact, as the spec asks.
 const VAPID_PRIVATE_KEY = defineSecret("VAPID_PRIVATE_KEY");
-const VAPID_PUBLIC_KEY = "BHHrMXnTTVSfakF1_z8O4ghj6l8wChMQlYnSiihaVG77KbXZbeJeuU_JygukoRtv2nTKcoBw3_QdhFpznS7JvDU";
-const VAPID_SUBJECT = "mailto:zetedi@gmail.com";
+const VAPID_PUBLIC_KEY = charter.push.publicKey;
+const VAPID_SUBJECT = charter.push.subject;
 
 export const onReachCreated = onDocumentCreated({ document: "pulses/{pulseId}", secrets: [VAPID_PRIVATE_KEY] }, async (event) => {
     const snap = event.data;
@@ -798,7 +799,7 @@ export const onReachCreated = onDocumentCreated({ document: "pulses/{pulseId}", 
     // PUSH: every recipient's devices are knocked with the notice the push law shapes (./push,
     // mirrored from domain/push) — the offering of care's notice to a keeper among them. A dead
     // subscription (404 / 410) is dropped; nothing here throttles, a knock is one line.
-    const origin = typeof pulse.domain === "string" && pulse.domain ? `https://${pulse.domain}` : "https://lightseed.online";
+    const origin = typeof pulse.domain === "string" && pulse.domain ? `https://${pulse.domain}` : NODE_ORIGIN;
     const notice = notificationOf(pulse, origin);
     if (notice && VAPID_PRIVATE_KEY.value()) {
         webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY.value());
@@ -859,15 +860,15 @@ export const onReachCreated = onDocumentCreated({ document: "pulses/{pulseId}", 
             const subject = isGroup
                 ? `${fromName} messaged ${toName} on lightseed`
                 : `${fromName} sent ${toName} a direct message on lightseed`;
-            const text = `${lead}\n\n"${message}"\n\nOpen your messages: https://lightseed.online`;
+            const text = `${lead}\n\n"${message}"\n\nOpen your messages: ${NODE_ORIGIN}`;
             const html = `<div style="font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">` +
                 `<h2 style="color: #059669; font-weight: 300; letter-spacing: 1px; margin-bottom: 6px;">.seed</h2>` +
                 `<p style="font-size: 13px; color: #9ca3af; margin: 0 0 24px;">A new ${isGroup ? 'group message' : 'direct message'} for <strong style="color:#059669;">${toName}</strong></p>` +
                 `<p style="font-size: 15px; margin: 0 0 10px; color:#6b7280;">${lead}</p>` +
                 `<blockquote style="font-size: 16px; margin: 0 0 28px; padding: 16px 20px; background:#f0fdf4; border-left: 4px solid #059669; border-radius: 8px; color:#1f2937;">${message.replace(/\n/g, '<br>')}</blockquote>` +
-                `<a href="https://lightseed.online" style="display:inline-block; background:#059669; color:#fff; text-decoration:none; font-weight:bold; padding:10px 22px; border-radius:9999px; font-size:14px;">Open your messages</a>` +
+                `<a href=NODE_ORIGIN style="display:inline-block; background:#059669; color:#fff; text-decoration:none; font-weight:bold; padding:10px 22px; border-radius:9999px; font-size:14px;">Open your messages</a>` +
                 `<hr style="border: 0; border-top: 1px solid #eee; margin: 24px 0;" />` +
-                `<p style="font-size: 12px; color: #9ca3af;">You receive this because direct-message email notifications are on in your <a href="https://lightseed.online" style="color: #059669; text-decoration: none;">lightseed profile</a>. You can turn this off anytime.</p>` +
+                `<p style="font-size: 12px; color: #9ca3af;">You receive this because direct-message email notifications are on in your <a href=NODE_ORIGIN style="color: #059669; text-decoration: none;">lightseed profile</a>. You can turn this off anytime.</p>` +
                 `</div>`;
 
             await writeMail({ to: [email], subject, html, text, uid: recipientUid });
@@ -1305,7 +1306,7 @@ export const onJoinRequestCreated = onDocumentCreated("links/{linkId}", async (e
         const requester = (personSnap.exists && (personSnap.data() as any)?.displayName) || "Someone";
         const communityName = community.name || "your community";
         const text = `${requester} asked to join ${communityName}.\n\nYou can accept or decline on the community's Members tab.`;
-        const html = composeSystemEmailHtml(text, "https://lightseed.online", "Open lightseed");
+        const html = composeSystemEmailHtml(text, NODE_ORIGIN, `Open ${charter.name}`);
         await Promise.all(keeperIds.map(async (uid) => {
             const keeper = await db.collection("users").doc(uid).get();
             const email = keeper.exists ? (keeper.data() as any)?.email : null;
@@ -1314,7 +1315,7 @@ export const onJoinRequestCreated = onDocumentCreated("links/{linkId}", async (e
                 to: [email],
                 subject: `${requester} asked to join ${communityName}`,
                 html,
-                text: `${text}\n\nhttps://lightseed.online`,
+                text: `${text}\n\n${NODE_ORIGIN}`,
                 uid,
             });
         }));
@@ -2135,7 +2136,7 @@ export const sendNewsletterEmails = onCall({ timeoutSeconds: 300, memory: "512Mi
             let token = data.unsubToken as string | undefined;
             if (!token) { token = randomUUID(); batch.set(doc.ref, { unsubToken: token }, { merge: true }); }
 
-            const unsub = `https://lightseed.online/u/${token}`;
+            const unsub = `${NODE_ORIGIN}/u/${token}`;
             const footer = `<hr style="border:0;border-top:1px solid #eee;margin:28px 0;"/>`
                 + `<p style="font-size:12px;color:#9ca3af;line-height:1.6;">You're receiving this because you subscribed to the lightseed newsletter.<br/>`
                 + `<a href="${unsub}" style="color:#059669;">Unsubscribe</a> · ${NEWSLETTER_POSTAL_ADDRESS}</p>`;
@@ -2387,7 +2388,7 @@ export const deleteMyAccount = onCall({ cors: true }, async (request) => {
         const record = await getAuth().getUser(uid).catch(() => null);
         if (record?.email) {
             const text = "It was wonderful to have you. See you!";
-            await writeMail({ to: [record.email], subject: "Goodbye from lightseed", html: composeSystemEmailHtml(text, "https://lightseed.online", "lightseed"), text, uid });
+            await writeMail({ to: [record.email], subject: `Goodbye from ${charter.name}`, html: composeSystemEmailHtml(text, NODE_ORIGIN, "lightseed"), text, uid });
         }
     } catch (e) { console.warn("Goodbye email skipped:", e); }
     const counts = await purgeUserData(uid, heirUid);
@@ -2455,7 +2456,7 @@ const truncate160 = (s: string): string => (s.length <= 160 ? s : `${s.slice(0, 
 const requestHost = (req: { hostname?: string; headers: Record<string, unknown> }): string => {
     const fwd = String(req.headers["x-forwarded-host"] || "").split(",")[0].trim();
     const host = fwd || String(req.hostname || "");
-    return /^[a-z0-9][a-z0-9.-]*$/i.test(host) ? host : "lightseed.online";
+    return /^[a-z0-9][a-z0-9.-]*$/i.test(host) ? host : charter.domain;
 };
 
 // THE MIRROR GUARD (the 22M-invocation lesson, 2026-07-27). These functions are also reachable
@@ -2465,18 +2466,12 @@ const requestHost = (req: { hostname?: string; headers: Record<string, unknown> 
 // resolves the request to a CANONICAL host it actually serves; anything else (run.app included)
 // collapses to the primary domain. The shell fetch also announces itself and is answered with an
 // empty 204 if it ever reaches this function again, so recursion is impossible twice over.
-const CANONICAL_HOSTS = new Set([
-    "lightseed.online", "lifeseed.online",
-    "lifeseed-75dfe.web.app", "lifeseed-75dfe.firebaseapp.com",
-    "perauset.web.app", "perauset.com",
-    "theohouse.web.app", "theohouse.org", "seed.theohouse.org",
-    "enlightenednations.web.app",
-    "mamaway.web.app",
-]);
+// Every host a face of this node answers at — the charter's, never a list by heart.
+const CANONICAL_HOSTS = new Set(charterHosts(charter));
 const SHELL_FETCH_UA = "lightseed-shell-fetch";
 const canonicalHost = (req: { hostname?: string; headers: Record<string, unknown> }): string => {
     const host = requestHost(req).toLowerCase().replace(/^www\./, "");
-    return CANONICAL_HOSTS.has(host) ? host : "lightseed.online";
+    return CANONICAL_HOSTS.has(host) ? host : charter.domain;
 };
 
 interface PublicBeingCard {
@@ -2668,7 +2663,7 @@ export const beingPreview = onRequest(async (req, res) => {
 // uses, fetch its photo (bounded), walk the ladder with sharp, keep the result in the
 // bucket under a key that changes with the source, answer with JPEG bytes. Cached long at
 // the CDN: the URL itself carries ?v=<digest>, so a new photo is a new URL, not a stale hit.
-const FACE_BUCKET = "lifeseed-75dfe.firebasestorage.app";
+const FACE_BUCKET = charter.firebase.bucket;
 const FACE_SOURCE_MAX_BYTES = 40 * 1024 * 1024;
 const FACE_FETCH_TIMEOUT_MS = 20_000;
 const FACE_GROUND = "#04070f"; // the night the app stands on — under any transparency

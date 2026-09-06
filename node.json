@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "nodeLid": "019ea86e-74ae-7cc2-a320-c0cfadc3bf17",
+  "name": "Lightseed",
+  "shortName": ".seed",
+  "tagline": "life recognising life",
+  "description": "A living commons where trees, people and intelligences meet. Plant a lifetree, find your resonance, and help grow a New Earth.",
+  "domain": "lightseed.online",
+  "aliases": [
+    "lifeseed.online"
+  ],
+  "repo": "https://github.com/zetedi/lightseed.online",
+  "keeper": {
+    "email": "zetedi@gmail.com"
+  },
+  "mail": {
+    "from": "lightseed <admin@lightseed.online>"
+  },
+  "push": {
+    "subject": "mailto:zetedi@gmail.com",
+    "publicKey": "BHHrMXnTTVSfakF1_z8O4ghj6l8wChMQlYnSiihaVG77KbXZbeJeuU_JygukoRtv2nTKcoBw3_QdhFpznS7JvDU"
+  },
+  "theme": {
+    "color": "#065f46",
+    "background": "#ffffff"
+  },
+  "firebase": {
+    "projectId": "lifeseed-75dfe",
+    "region": "us-central1",
+    "bucket": "lifeseed-75dfe.firebasestorage.app",
+    "web": {
+      "apiKey": "AIzaSyCDcg27BljgJsVGuzNgS0NQWOgFIuDMlYI",
+      "authDomain": "lifeseed-75dfe.firebaseapp.com",
+      "messagingSenderId": "110675956366",
+      "appId": "1:110675956366:web:3cbc94aff415a800e6efdf",
+      "measurementId": "G-L95JY61SWQ"
+    }
+  },
+  "faces": [
+    {
+      "target": "app",
+      "site": "lifeseed-75dfe",
+      "door": "lightseed.online",
+      "domains": [
+        "lightseed.online",
+        "lifeseed.online"
+      ]
+    },
+    {
+      "target": "perauset",
+      "site": "perauset",
+      "door": "perauset.web.app",
+      "domains": [
+        "perauset.com"
+      ]
+    },
+    {
+      "target": "theohouse",
+      "site": "theohouse",
+      "door": "seed.theohouse.org",
+      "domains": [
+        "theohouse.org",
+        "seed.theohouse.org"
+      ]
+    },
+    {
+      "target": "enlightenednations",
+      "site": "enlightenednations",
+      "door": "enlightenednations.web.app",
+      "domains": []
+    },
+    {
+      "target": "mamaway",
+      "site": "mamaway",
+      "door": "mamaway.web.app",
+      "domains": []
+    }
+  ]
+}

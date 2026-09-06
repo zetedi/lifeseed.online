@@ -147,3 +147,6 @@ public/commits.json
 # The seed's soil and body backups stay out of history (seed/README.md)
 seed/data/
 seed/backups/
+
+# A node's secrets beside its charter (scripts/create-node.mjs) — never committed.
+*.secrets.json

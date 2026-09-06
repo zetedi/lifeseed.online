@@ -1,7 +1,8 @@
 import { AppConfig } from './types';
+import { charter } from './charter';
 
 export const defaultConfig: AppConfig = {
-  name: '.seed',
+  name: charter.shortName,
   logo: {
     backgroundFill: 'white',
     strokeColor: '#334155',
@@ -17,7 +18,7 @@ export const defaultConfig: AppConfig = {
     surface: '#ffffff',
     text: '#0f172a',
   },
-  domain: 'lightseed.online',
+  domain: charter.domain,
   model: 'gemini-3.5-flash',
   githubActionsEnabled: false,
   // Identity is open (root: "Identity is open"): anyone may create an account. A node closes its

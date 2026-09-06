@@ -3,6 +3,15 @@ import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import charter from './node.json';
+
+// THE NODE (ring 2026-09-06): the shell's name, colours and Open Graph card come from the
+// charter — index.html reads them as %VITE_NODE_*% at build time.
+process.env.VITE_NODE_NAME = charter.name;
+process.env.VITE_NODE_SHORT = charter.shortName;
+process.env.VITE_NODE_TAGLINE = charter.tagline;
+process.env.VITE_NODE_DESCRIPTION = charter.description;
+process.env.VITE_NODE_ORIGIN = `https://${charter.domain}`;
 
 export default defineConfig(({ mode }) => {
     const cwd = (process as any).cwd();
@@ -50,13 +59,13 @@ export default defineConfig(({ mode }) => {
           registerType: 'prompt',
           includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
           manifest: {
-            name: 'Lightseed — life recognising life',
-            short_name: '.seed',
-            description: 'A living commons where trees, people and intelligences meet. Plant a lifetree, find your resonance, and help grow a New Earth.',
+            name: `${charter.name} — ${charter.tagline}`,
+            short_name: charter.shortName,
+            description: charter.description,
             start_url: '/',
             display: 'standalone',
-            background_color: '#ffffff',
-            theme_color: '#065f46',
+            background_color: charter.theme.background,
+            theme_color: charter.theme.color,
             icons: [
               { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
               { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },

@@ -1,12 +1,13 @@
 import { doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase/core';
 import { pushSubscriptionIdOf } from '../domain/push';
+import { charter } from '../config/charter';
 
 // PUSH on the device (ring 2026-09-06) — the seed is a PWA; when a being allows it, the browser
 // hands the node a subscription (endpoint + keys), kept under users/{uid}/pushSubscriptions by
 // its endpoint's id (domain/push), and functions/onReachCreated knocks there when a reach comes.
 // The public VAPID key is public by nature; the private half is a functions secret.
-export const VAPID_PUBLIC_KEY = 'BHHrMXnTTVSfakF1_z8O4ghj6l8wChMQlYnSiihaVG77KbXZbeJeuU_JygukoRtv2nTKcoBw3_QdhFpznS7JvDU';
+export const VAPID_PUBLIC_KEY = charter.push.publicKey;
 
 export type PushState = 'unsupported' | 'denied' | 'off' | 'on';
 

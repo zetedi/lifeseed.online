@@ -102,6 +102,7 @@ import { isExplicitlyValidatedTree } from './utils/validation';
 import { speak, spokenLine } from './utils/translations';
 
 import type { OfferedTo } from './domain/offering';
+import { charter } from './config/charter';
 // Route pages, detail overlays, and modals are code-split: each becomes its own chunk that loads
 // only when first shown, so the initial bundle (and Quill, which only the modals use) no longer
 // ships on first paint. Named exports are adapted to lazy()'s default-export contract.
@@ -355,7 +356,7 @@ const AppContent = () => {
 
     // Load the lightseed community once as the default About page fallback.
     useEffect(() => {
-        getCommunityByDomain('lightseed.online').then(setDefaultCommunity).catch(() => {});
+        getCommunityByDomain(charter.domain).then(setDefaultCommunity).catch(() => {});
     }, []);
 
     // Pending Tree Circle invites — surfaced (separately) on the DM button.

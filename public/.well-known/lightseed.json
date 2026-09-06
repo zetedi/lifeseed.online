@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "nodeLid": "019ea86e-74ae-7cc2-a320-c0cfadc3bf17",
+  "name": "Lightseed",
+  "shortName": ".seed",
+  "tagline": "life recognising life",
+  "domain": "lightseed.online",
+  "aliases": [
+    "lifeseed.online"
+  ],
+  "repo": "https://github.com/zetedi/lightseed.online",
+  "faces": [
+    {
+      "door": "lightseed.online",
+      "domains": [
+        "lightseed.online",
+        "lifeseed.online"
+      ]
+    },
+    {
+      "door": "perauset.web.app",
+      "domains": [
+        "perauset.com"
+      ]
+    },
+    {
+      "door": "seed.theohouse.org",
+      "domains": [
+        "theohouse.org",
+        "seed.theohouse.org"
+      ]
+    },
+    {
+      "door": "enlightenednations.web.app",
+      "domains": []
+    },
+    {
+      "door": "mamaway.web.app",
+      "domains": []
+    }
+  ],
+  "push": {
+    "publicKey": "BHHrMXnTTVSfakF1_z8O4ghj6l8wChMQlYnSiihaVG77KbXZbeJeuU_JygukoRtv2nTKcoBw3_QdhFpznS7JvDU"
+  }
+}

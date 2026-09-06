@@ -5,9 +5,11 @@ import { db } from '../services/firebase/core';
 import { uuidv7 } from '../utils/id';
 import { onAuthChange, getMyLifetrees, getGuardedTrees, getTendedTrees, checkIsAdmin, checkIsSuperAdmin, getSuperAdminUid, claimSuperAdmin, listenToUserProfile, updateUserProfile, ensurePersonEntity, type TendedTree } from '../services/firebase';
 import { getInitiateByUid, type Initiate } from '../domain/initiation';
+import { charter } from '../config/charter';
 import { type Lightseed, type Lifetree } from '../types';
 
-const SUPERADMIN_EMAIL = 'zetedi@gmail.com';
+// The keeper's seat is the charter's (node.json), never a name by heart.
+const SUPERADMIN_EMAIL = charter.keeper.email;
 
 
 // Owned trees split into what a being WEARS (personal lifetrees) and what it GUARDS

@@ -4,7 +4,8 @@ service firebase.storage {
     // Helper to check if user is a staff member
     function isStaff() {
       return request.auth != null && 
-        (request.auth.token.email == 'zetedi@gmail.com' || 
+        ((firestore.exists(/databases/(default)/documents/config/superadmin) &&
+          firestore.get(/databases/(default)/documents/config/superadmin).data.uid == request.auth.uid) || 
          firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid)));
     }
 

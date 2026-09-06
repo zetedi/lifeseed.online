@@ -1,4 +1,5 @@
 import { collection, query, orderBy, getDocs, addDoc, setDoc, serverTimestamp, doc, getDoc, where, updateDoc, deleteDoc, limit, startAfter, QueryDocumentSnapshot, getCountFromServer, Timestamp } from 'firebase/firestore';
+import { charter } from '../../config/charter';
 import { announce } from '../refreshBus';
 import { LIGHT_HOUSE_ROOT, type LightHouseCareAct } from '../../domain/lightHouse';
 import { firestoreStore } from '../../adapters/firestore';
@@ -244,7 +245,7 @@ export const plantLifetree = async (data: Partial<Lifetree> & { ownerId: string;
     let domain = data.domain;
     if (!domain) {
         const isDevHost = /localhost|127\.0\.0\.1|^192\.168\.|\.local$/.test(currentHost);
-        domain = (await getCommunityByDomain(currentHost))?.domain || (isDevHost ? 'lightseed.online' : currentHost);
+        domain = (await getCommunityByDomain(currentHost))?.domain || (isDevHost ? charter.domain : currentHost);
     }
 
     // New trees inherit the owner's contact-privacy preference so the mirror stays consistent.

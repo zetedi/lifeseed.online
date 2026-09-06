@@ -5,12 +5,13 @@ import { defaultConfig } from '../config/default';
 import { signupRequiresInvite } from '../domain/communityDoor';
 import { normalizeTheme, oldEmeraldEarthTheme } from '../utils/theme';
 
+import { nodeDomains } from '../config/charter';
 // Branding/shell identity only. This helper MUST NOT decide data scope or nodehood:
 // those come from community.reflectsPublic and config/dataAuthority respectively.
 export const isSeedShellHost = (domain?: string) => {
     if (!domain) return true;
     const d = domain.toLowerCase().replace(/^www\./, '');
-    return d === 'lightseed.online' || d === 'lifeseed.online' || d === 'localhost' || d === '127.0.0.1' || d.startsWith('192.168.') || d.endsWith('.local');
+    return nodeDomains.includes(d) || d === 'localhost' || d === '127.0.0.1' || d.startsWith('192.168.') || d.endsWith('.local');
 };
 
 const isPreviousLifeseedDefaultTheme = (theme: Community['theme']) =>

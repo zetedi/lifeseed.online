@@ -23,6 +23,9 @@ export const DOMAIN_KEYS = [
   'offering_appreciation_whole', 'offering_link_http', 'offering_link_long',
   // the offering of care (ring 2026-09-06)
   'offering_code_link', 'offering_to_being', 'offering_from_tree',
+  // charter — what a node is (ring 2026-09-06)
+  'charter_version', 'charter_node_lid', 'charter_name', 'charter_domain', 'charter_faces',
+  'charter_face', 'charter_project', 'charter_keeper', 'charter_push_key',
   // appearance — landing sections composed in the database (domain/appearance)
   'appearance_unknown_kind', 'appearance_bad_props',
   // lightHouse — the kinds a Light House may be consecrated as (domain/lightHouse)

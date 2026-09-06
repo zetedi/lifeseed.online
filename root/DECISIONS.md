@@ -6,6 +6,39 @@ with new ones (this file is itself append-only in spirit).
 
 ---
 
+**2026-09-06 · The charter: a node says what it is, and a second node is an afternoon** —
+the keeper asked what the code needs to live on thousands of nodes, and the first answer was
+that it could not yet live on TWO: eleven canonical hosts, a bucket, a push key, a keeper's
+address and its own origin were written by heart in a dozen places across src/ and functions/.
+Now `node.json` is the charter — lid, name, domain and aliases, keeper, mail, push (public
+half), Firebase project / bucket / region / web config, and the faces (target, site, the door
+each wears, custom domains). The law is domain/charter (charterProblem: version, true-name
+lid, name, domains, faces each sound and each its own, project, keeper, push key; and every
+derivation: charterHosts — the exact eleven the seed answered at by heart, proven by test —
+charterOrigin, charterOwnDomains, charterFaceDoor, charterPublicOf, firebasercOf, hostingOf),
+mirrored in functions/src/charter.ts which reads its own copy, held by tests/charter.test.ts.
+scripts/charter-sync.mjs derives the four files that must agree (the server's copy, the public
+envelope at /.well-known/lightseed.json — the first sentence of nodes speaking to nodes —,
+.firebaserc, the hosting entries), runs before every build, and `npm run check` refuses a tree
+out of step. The consumers read the charter: canonicalHost, the bucket, VAPID, the mail voice,
+every origin in every letter, the web config (an env var still overrides, for emulators and
+previews), the keeper's seat (storage.rules now asks config/superadmin, as firestore.rules
+always did, instead of an email literal), the widget's links, the shell's manifest and static
+card (index.html reads %VITE_NODE_*%), face-og's faces. And scripts/create-node.mjs walks a
+charter to a living node — project, web app and its config written back, database, a site per
+face, secrets (a VAPID pair minted when absent), sync, three deploys each within the
+ten-minute reach, custody — and prints, honestly, what only a console can do: the Blaze plan,
+Storage's first enabling, the Auth provider and domains, DNS, the keeper's first sign-in.
+Named, not done: the genesis (Mahameru) stays the network's origin on every node, not a
+per-node constant — a second node inherits it through the bundle head; and the initiation
+ledger in git is still this repo's, not a node's. REJECTED: env files as the charter (a
+charter must be readable by tests, by the server and by strangers — env is none of those);
+templating firestore.rules per node (rules stay one text, reading the keeper's seat from the
+database); a predeploy build on every face (face-og dresses the other faces between deploys;
+the sync keeps the build on the first face alone).
+
+---
+
 **2026-09-06 · The offering knocks: a notice to the keeper, and push on the device** — an
 offering of care waited on its leaf for a keeper who had no way to know. Two doors, one ring.
 (1) *The notice*: createOffering now posts a private reach to the receiver's keeper, in the

@@ -7,6 +7,7 @@ import { speak } from '../utils/translations';
 import { useLanguage } from '../contexts/LanguageContext';
 
 import { Picture } from './ui/Picture';
+import { charter, nodeOrigin } from '../config/charter';
 interface Props {
     domain: string;
     onClose?: () => void;
@@ -84,12 +85,12 @@ export const LifeseedWidget: React.FC<Props> = ({ domain, onClose }) => {
                         <Logo width={40} height={40} />
                         <p>{t('no_trees_domain')}</p>
                         <a
-                            href="https://lightseed.online"
+                            href={nodeOrigin}
                             target="_blank"
                             rel="noreferrer"
                             className="text-emerald-600 hover:underline text-xs font-medium"
                         >
-                            Plant one on lightseed.online →
+                            Plant one on {charter.domain} →
                         </a>
                     </div>
                 ) : (
@@ -97,7 +98,7 @@ export const LifeseedWidget: React.FC<Props> = ({ domain, onClose }) => {
                         {trees.map(tree => (
                             <li key={tree.id}>
                                 <a
-                                    href={`https://lightseed.online?tree=${tree.id}`}
+                                    href={`${nodeOrigin}?tree=${tree.id}`}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="flex gap-3 p-3 hover:bg-slate-50 transition-colors"
@@ -133,16 +134,16 @@ export const LifeseedWidget: React.FC<Props> = ({ domain, onClose }) => {
             {/* Footer */}
             <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 flex-shrink-0">
                 <a
-                    href="https://lightseed.online"
+                    href={nodeOrigin}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
                 >
                     <Logo width={14} height={14} />
-                    <span className="text-xs">lightseed.online</span>
+                    <span className="text-xs">{charter.domain}</span>
                 </a>
                 <a
-                    href="https://lightseed.online"
+                    href={nodeOrigin}
                     target="_blank"
                     rel="noreferrer"
                     className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-full transition-colors font-medium"

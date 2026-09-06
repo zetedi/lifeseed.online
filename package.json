@@ -10,7 +10,7 @@
     "devui:seed": "node scripts/seed-emulator.mjs",
     "dev:clean": "vite --mode clean",
     "prod": "vite build --mode production",
-    "prebuild": "node scripts/build-initiates.mjs && node scripts/build-commits.mjs",
+    "prebuild": "node scripts/charter-sync.mjs && node scripts/build-initiates.mjs && node scripts/build-commits.mjs",
     "build": "vite build",
     "initiates:build": "node scripts/build-initiates.mjs",
     "commits:build": "node scripts/build-commits.mjs",
@@ -26,14 +26,17 @@
     "test:rules": "firebase emulators:exec --only firestore \"vitest run --config vitest.rules.config.ts\"",
     "test:living": "npm --prefix functions run build && firebase emulators:exec --only auth,firestore,functions --project demo-lifeseed \"vitest run --config vitest.living.config.ts\"",
     "typecheck:functions": "tsc --noEmit -p functions/tsconfig.json",
-    "check": "npm run typecheck && npm run lint && npm test",
+    "check": "npm run charter:check && npm run typecheck && npm run lint && npm test",
     "seed:lightseed": "node scripts/seed-lightseed.mjs",
     "migrate:reach-privacy": "node scripts/backfill-reach-privacy.mjs",
     "context": "bash scripts/state.sh",
     "flatten": "bash scripts/flat.sh",
     "test:gemini": "node scripts/test-gemini.mjs",
     "lint": "eslint .",
-    "deploy:faces": "npm run build && firebase deploy --only hosting:app && node scripts/face-og.mjs perauset && firebase deploy --only hosting:perauset && node scripts/face-og.mjs theohouse && firebase deploy --only hosting:theohouse && node scripts/face-og.mjs enlightenednations && firebase deploy --only hosting:enlightenednations && node scripts/face-og.mjs mamaway && firebase deploy --only hosting:mamaway"
+    "deploy:faces": "npm run build && firebase deploy --only hosting:app && node scripts/face-og.mjs perauset && firebase deploy --only hosting:perauset && node scripts/face-og.mjs theohouse && firebase deploy --only hosting:theohouse && node scripts/face-og.mjs enlightenednations && firebase deploy --only hosting:enlightenednations && node scripts/face-og.mjs mamaway && firebase deploy --only hosting:mamaway",
+    "charter": "node scripts/charter-sync.mjs",
+    "charter:check": "node scripts/charter-sync.mjs --check",
+    "node:create": "node scripts/create-node.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

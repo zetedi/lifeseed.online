@@ -5,6 +5,7 @@ import { ChainTree, ChainRoot, ChainStats } from '../sections/ChainTree';
 import { SectionTitle } from '../ui/SectionTitle';
 import { useLanguage } from '../../contexts/LanguageContext';
 
+import { charter } from '../../config/charter';
 // The node's BODY — its code chain. For the network hub, the repository's git history is the
 // growth chain: code changes are its growth, and every deploy carries its own history (Indra's
 // net — the artifact contains the record of its own becoming). The commits are mirrored at
@@ -41,7 +42,7 @@ const commitToPulse = (c: CommitEntry, previousSha: string): Pulse => ({
 const noop = (): void => {};
 
 // The repo the code chain mirrors — each growth leaf links straight to its commit.
-const REPO_URL = 'https://github.com/zetedi/lightseed.online';
+const REPO_URL = charter.repo;
 
 export const CommunityCodeChain: React.FC = () => {
     const { t } = useLanguage();

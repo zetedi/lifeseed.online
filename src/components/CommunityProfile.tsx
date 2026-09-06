@@ -42,6 +42,7 @@ import { canCareForTree } from '../domain/policy';
 import { speak, spokenLine } from '../utils/translations';
 
 import { Picture } from './ui/Picture';
+import { nodeDomains } from '../config/charter';
 interface CommunityProfileProps {
   community: Community;
   // An invitation the viewer arrived holding (/i/<id>) — the door greets them by it.
@@ -521,7 +522,7 @@ export const CommunityProfile: React.FC<CommunityProfileProps> = ({
 
   // The Yantra, code lineage and seed lore belong to the two historical seed communities.
   // This is content identity only — not a claim about Hub role, custody or data scope.
-  const isSeedLoreCommunity = ['lightseed.online', 'lifeseed.online'].includes(bareDomain(community.domain));
+  const isSeedLoreCommunity = nodeDomains.includes(bareDomain(community.domain));
 
   // The community's sections — each `render` closes over this shell's state and handlers.
   const sections: BeingSection[] = [

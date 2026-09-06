@@ -116,6 +116,9 @@ Tend this file when seasons turn; don't let it promise what the roots can't hold
      pulses/trees gain a nodeId, and `canView` mirrors the `community` branch.
      Nothing vanishes on day one (everyone is an origin-node member from phase 2).
   Precursor to Federation (below): one node truly whole before lids travel
+  — and, since ring 2026-09-06, a node MAKEABLE: the charter (node.json) and
+  scripts/create-node.mjs turn a described node into a living one; the second node is
+  a charter and an afternoon, not a second first.
   between many. Open questions recorded in QUESTIONS.md (2026-07-15).
 - **A self-describing backend export**: one portable package containing a
   versioned manifest and authority LID, collection data, Storage objects and

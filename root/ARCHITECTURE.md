@@ -16,6 +16,19 @@ React 19 + TypeScript (full strict) + Vite + Tailwind, as a PWA
 (`vite-plugin-pwa`, prompt-style updates via `UpdateToast`). Firebase: Firestore
 (`ignoreUndefinedProperties: true`), Auth (dynamic authDomain per hosted domain),
 Storage, Functions, multi-site Hosting (`app` → lifeseed-75dfe, `perauset`).
+
+**The charter (ring 2026-09-06).** `node.json` at the repo root says what THIS node is: its
+lid, name, domain and aliases, keeper, mail, push public key, Firebase project / bucket /
+region / web config, and its faces (hosting target, site, the door each wears, custom
+domains). The law is `src/domain/charter.ts` (validation and every derivation: the hosts a
+face answers at, the origin, the public envelope, the hosting targets); `functions/src/
+charter.ts` mirrors it and reads `functions/src/charter.json`; `scripts/charter-sync.mjs`
+writes that copy, `public/.well-known/lightseed.json`, `.firebaserc` and the hosting entries
+of `firebase.json`; `tests/charter.test.ts` holds mirror and copies true, and `npm run check`
+refuses a tree out of step. Nothing in `src/` or `functions/` names the node by heart any
+more. `scripts/create-node.mjs <charter> [--apply]` walks a charter to a living node — project,
+web app, database, sites, secrets, sync, three deploys, custody — and says out loud the steps
+only a console can take.
 Leaflet is bundled from npm, lazy-loaded on first map render (`services/leaflet.ts`).
 
 ## Layers: the dependency direction
